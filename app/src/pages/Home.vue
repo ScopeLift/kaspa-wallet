@@ -1,11 +1,14 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <example-component
-      title="Example component"
-      active
-      :todos="todos"
-      :meta="meta"
-    ></example-component>
+  <q-page padding>
+    <h1 class="text-center">Kaspa Wallet</h1>
+    <div class="row items-center justify-evenly">
+      <example-component
+        title="Example component"
+        active
+        :todos="todos"
+        :meta="meta"
+      />
+    </div>
   </q-page>
 </template>
 
