@@ -1,26 +1,22 @@
-# Kaspa Wallet (kaspa-wallet)
+# Kaspa Wallet
 
 A web wallet for the Kaspa blockchain network
 
-## Install the dependencies
+## Setup
+
 ```bash
+# Navigate to the app folder
+cd app
+
+# Install dependencies
 npm install
-```
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
-```bash
-quasar dev
-```
+# Run for development
+npm run dev
 
-### Lint the files
-```bash
+# Build for production
+npm run build
+
+# Lint files
 npm run lint
 ```
-
-### Build the app for production
-```bash
-quasar build
-```
-
-### Customize the configuration
-See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
