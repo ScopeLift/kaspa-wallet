@@ -1,3 +1,8 @@
+# Cypress outputs
+test/cypress/screenshots/*
+test/cypress/videos/*
+
+# Default Quasar contants below
 .DS_Store
 .thumbs.db
 node_modules

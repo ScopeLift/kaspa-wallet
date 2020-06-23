@@ -1,7 +1,13 @@
 <template>
   <q-page padding>
-    <h1 class="text-center q-mb-md">Kaspa Wallet</h1>
-    <h4 class="text-center">TestNet v0.8</h4>
+    <h1
+      class="text-center q-mb-md"
+      data-cy="home-header"
+    >Kaspa Wallet</h1>
+    <h4
+      class="text-center"
+      data-cy="home-subheader"
+    >TestNet v0.8</h4>
     <div class="row items-center justify-evenly">
       <example-component
         title="Example component"
