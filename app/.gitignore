@@ -1,3 +1,6 @@
+# Jest coverage outputs
+test/jest/coverage/*
+
 # Cypress outputs
 test/cypress/screenshots/*
 test/cypress/videos/*
