@@ -3,16 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     // this enables stricter inference for data properties on `this`
-    "strict": true,
-    "noImplicitAny": false,
+    "strict": true
   },
-  "include": [ 
-    "src/**/*",
-    "src-pwa/**/*",
-    "./*"
-  ],
-  "exclude": [
-    "node_modules",
-    "test/**/*",
-  ]
+  "include": ["src/**/*", "src-pwa/**/*", "./*"],
+  "exclude": ["node_modules", "test/**/*"]
 }
