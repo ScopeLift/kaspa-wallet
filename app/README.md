@@ -5,6 +5,7 @@ A web wallet for the Kaspa blockchain network
 - [Kaspa Wallet](#kaspa-wallet)
   - [Development](#development)
     - [Setup](#setup)
+    - [Git Hooks](#git-hooks)
     - [Testing Considerations](#testing-considerations)
       - [Cypress](#cypress)
       - [Jest](#jest)
@@ -38,6 +39,17 @@ npm run test:e2e
 # Run e2e tests from the terminal with Cypress
 npm run test:e2e:CI
 ```
+
+### Git Hooks
+
+Pre-commit and pre-push hooks are configured using [Husky](https://github.com/typicode/husky).
+
+The pre-commit hook checks for lint errors and runs prettier on the code, and
+the pre-push does the same but also runs the configured e2e tests and unit tests.
+Hooks can be skipped by adding the `--no-verify` flag to the git command.
+
+If you need to ignore a file or a section of a file, use the special comment format
+documented [here](https://prettier.io/docs/en/ignore.html).
 
 ### Testing Considerations
 
