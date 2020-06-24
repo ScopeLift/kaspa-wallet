@@ -24,7 +24,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged",
-      "pre-push": "npm run test:unit && n  test:e2e:CI"
+      "pre-push": "npm run lint && npm run test:unit && n  test:e2e:CI"
     }
   },
   "dependencies": {
