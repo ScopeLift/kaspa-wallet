@@ -16,7 +16,7 @@ let kaspaNetwork = bitcore.Networks.add({
   dnsSeeds: [],
 });
 
-test("generates a random HDPrivateKey and can encode in and out of cashaddr format", () => {
+test("prototype: generate random HDPrivateKey, derive child, encode/decode to cashaddr format", () => {
   let parent = new bitcore.HDPrivateKey(networkAlias);
   // TODO: verify that deriveChild() should be used over derive()
   let child_0_1_2h = parent.deriveChild("m/0'");
