@@ -9,7 +9,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/bitcore-lib": "^0.15.2",
     "@types/jest": "^26.0.0",
     "jest": "^26.1.0",
     "jsdoc": "^3.6.4",
@@ -17,8 +16,6 @@
     "typescript": "^3.9.5"
   },
   "dependencies": {
-    "bitcoinjs-lib": "^5.1.10",
-    "bitcore-lib": "^8.20.4",
     "bitcore-lib-cash": "^8.20.4"
   }
 }
