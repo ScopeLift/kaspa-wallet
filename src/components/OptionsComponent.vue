@@ -29,7 +29,7 @@ export default Vue.extend({
     },
     todos: {
       type: (Array as unknown) as PropType<Todo[]>,
-      default: () => [],
+      default: [],
     },
     meta: {
       type: (Object as unknown) as PropType<Meta>,
