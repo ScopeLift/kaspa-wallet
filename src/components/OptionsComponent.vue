@@ -2,11 +2,7 @@
   <div>
     <p>{{ title }}</p>
     <ul>
-      <li
-        v-for="todo in todos"
-        :key="todo.id"
-        @click="increment"
-      >
+      <li v-for="todo in todos" :key="todo.id" @click="increment">
         {{ todo.id }} - {{ todo.content }}
       </li>
     </ul>
@@ -29,7 +25,7 @@ export default Vue.extend({
     },
     todos: {
       type: (Array as unknown) as PropType<Todo[]>,
-      default: [],
+      default: (): [] => [],
     },
     meta: {
       type: (Object as unknown) as PropType<Meta>,
