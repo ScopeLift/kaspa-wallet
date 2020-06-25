@@ -5,6 +5,8 @@ A web wallet for the Kaspa blockchain network
 - [Kaspa Wallet](#kaspa-wallet)
   - [Development](#development)
     - [Setup](#setup)
+    - [Development considerations](#development-considerations)
+      - [Creating Components and Pages](#creating-components-and-pages)
     - [Git Hooks](#git-hooks)
     - [Testing Considerations](#testing-considerations)
       - [Cypress](#cypress)
@@ -43,6 +45,38 @@ npm run test:e2e:CI
 While running the app, you may occasionally notice some caching issues (i.e. a page
 displaying outdated content). Until more robust cache-busting is implemented, simply
 do a hard refresh to fix this.
+
+### Development considerations
+
+#### Creating Components and Pages
+
+Create a new component with `quasar new component ComponentName` and a new page
+with `quasar new page ComponentName`. By default, the component or page will not
+be configured for Typescript. After updating the `name` property, make the
+following changes to the default component content shown below:
+
+```diff
+<template>
+  <div>My component</div>
+</template>
+
+- <script>
++ <script lang="ts">
++ import Vue from 'vue';
+
+- export default {
++ export default Vue.extend({
+  name: 'MyComponentName',
+  data () {
+    return {}
+  }
+- }
++ })
+</script>
+```
+
+This change is necessary so Typescript can infer the component type when imported by
+other components or pages.
 
 ### Git Hooks
 

@@ -1,8 +1,33 @@
 <template>
   <q-page padding>
+    <!-- Headings -->
     <h1 class="text-center q-mb-none" data-cy="home-header">Kaspa Wallet</h1>
-    <h3 class="text-center secondary q-mt-none" data-cy="home-subheader">TestNet v0.8</h3>
-    <div class="row items-center justify-evenly">
+    <h3 class="text-center secondary q-mt-none q-mb-xl" data-cy="home-subheader">TestNet v0.8</h3>
+
+    <!-- Content -->
+    <div class="row items-center justify-center text-center">
+      <q-card
+        class="col-auto card-border q-pa-lg q-mx-lg q-my-md"
+        @click="$router.push({ name: 'createWallet' })"
+      >
+        <q-card-section>
+          <div class="text-grey">I'm new</div>
+          <h6>Make me a wallet</h6>
+        </q-card-section>
+      </q-card>
+
+      <q-card
+        class="col-auto card-border q-pa-lg q-mx-lg q-my-md"
+        @click="$router.push({ name: 'openWallet' })"
+      >
+        <q-card-section>
+          <div class="text-grey">I have a wallet</div>
+          <h6>Access my wallet</h6>
+        </q-card-section>
+      </q-card>
+    </div>
+
+    <div class="row items-center justify-evenly q-mt-xl">
       <example-component title="Example component" active :todos="todos" :meta="meta" />
     </div>
   </q-page>
