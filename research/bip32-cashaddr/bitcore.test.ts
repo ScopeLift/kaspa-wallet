@@ -1,5 +1,5 @@
 const bitcore = require("bitcore-lib-cash");
-const bech = require("bitcore-lib/lib/encoding/bech32");
+// const bech = require("bitcore-lib/lib/encoding/bech32");
 
 let networkAlias = "kaspatest";
 
