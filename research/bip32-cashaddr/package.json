@@ -16,6 +16,7 @@
     "typescript": "^3.9.5"
   },
   "dependencies": {
+    "bitcore-lib": "^8.20.4",
     "bitcore-lib-cash": "^8.20.4"
   }
 }
