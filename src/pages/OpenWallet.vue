@@ -1,12 +1,12 @@
 <template>
-  <q-page padding>
+  <q-page padding class="page-margin">
     <p class="primary">Unlock the wallet with your password</p>
     <base-input
       v-model="password"
-      :type="isPasswordVisible ? 'text' : 'password'"
       hint="Enter your password"
-      label="Password"
       :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
+      label="Password"
+      :type="isPasswordVisible ? 'text' : 'password'"
       @iconClicked="isPasswordVisible = !isPasswordVisible"
     />
     <div class="column content-center text-center q-mt-lg">

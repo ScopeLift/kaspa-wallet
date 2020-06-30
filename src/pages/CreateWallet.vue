@@ -1,5 +1,5 @@
 <template>
-  <q-page padding>
+  <q-page padding class="page-margin">
     <p class="primary">Create a password for your new wallet</p>
     <!-- Password -->
     <base-input
@@ -13,10 +13,11 @@
     <!-- Confirm password -->
     <base-input
       v-model="password2"
-      :type="isPasswordVisible ? 'text' : 'password'"
+      class="q-mt-lg"
       hint="Re-enter your password"
-      label="Confirm Password"
       :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
+      label="Confirm Password"
+      :type="isPasswordVisible ? 'text' : 'password'"
       @iconClicked="isPasswordVisible = !isPasswordVisible"
     />
     <!-- Continue buttons -->
