@@ -25,7 +25,7 @@ module.exports = configure((ctx) => ({
   // app boot file (/src/boot)
   // --> boot files are part of "main.js"
   // https://quasar.dev/quasar-cli/boot-files
-  boot: ['components'],
+  boot: ['components', 'wallet'],
 
   // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
   css: ['app.sass'],
@@ -97,7 +97,7 @@ module.exports = configure((ctx) => ({
     importStrategy: 'auto',
 
     // Quasar plugins
-    plugins: [],
+    plugins: ['LocalStorage'],
   },
 
   // animations: 'all', // --- includes all animations

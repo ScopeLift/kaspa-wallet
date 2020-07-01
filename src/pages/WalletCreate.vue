@@ -54,6 +54,7 @@ export default Vue.extend({
 
   methods: {
     handleCreate() {
+      this.$q.localStorage.set('kaspa-wallet-data', true);
       console.log('Create');
     },
   },
