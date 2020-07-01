@@ -28,8 +28,11 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "bitcore-lib-cash": "^8.20.5",
     "core-js": "^3.6.5",
-    "quasar": "^1.0.0"
+    "jsdoc": "^3.6.4",
+    "quasar": "^1.0.0",
+    "tsd-jsdoc": "^2.5.0"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",

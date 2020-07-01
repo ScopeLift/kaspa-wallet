@@ -6,3 +6,4 @@
 /node_modules
 babel.config.js
 /test
+/types
