@@ -62,7 +62,7 @@ export default Vue.extend({
       await this.$router.push({ name: 'walletBalance' });
 
       const myWallet = new Wallet();
-      console.log(`your key is ${myWallet.publicKey().toString()}`);
+      console.log(`your key is ${myWallet.publicKey}`);
     },
   },
 });

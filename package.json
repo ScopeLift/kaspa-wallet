@@ -29,12 +29,14 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "bitcore-lib-cash": "^8.20.5",
+    "browser-passworder": "^2.0.3",
     "core-js": "^3.6.5",
     "jsdoc": "^3.6.4",
     "quasar": "^1.0.0",
     "tsd-jsdoc": "^2.5.0"
   },
   "devDependencies": {
+    "@machinomy/types-browser-passworder": "0.0.7",
     "@quasar/app": "^2.0.0",
     "@quasar/quasar-app-extension-testing": "^1.0.0",
     "@quasar/quasar-app-extension-testing-e2e-cypress": "^1.0.0-beta.11",
