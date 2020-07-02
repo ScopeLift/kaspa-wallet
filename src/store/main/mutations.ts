@@ -1,4 +1,5 @@
 import { MutationTree } from 'vuex';
+import Wallet from 'wallet/Wallet';
 import { MainStateInterface } from './state';
 
 const mutation: MutationTree<MainStateInterface> = {
@@ -6,12 +7,8 @@ const mutation: MutationTree<MainStateInterface> = {
     state.hasWallet = hasWallet;
   },
 
-  setWalletInfo(state: MainStateInterface, walletInfo: MainStateInterface) {
-    state.hasWallet = walletInfo.hasWallet;
-    state.mnemonic = walletInfo.mnemonic;
-    state.address = walletInfo.address;
-    state.balance = walletInfo.balance;
-    state.transactions = walletInfo.transactions;
+  setWalletInfo(state: MainStateInterface, wallet: Wallet) {
+    state.wallet = wallet;
   },
 };
 

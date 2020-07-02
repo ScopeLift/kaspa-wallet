@@ -30,7 +30,7 @@ export default Vue.extend({
   computed: {
     ...mapState({
       balance(state: StoreInterface) {
-        return state.main.balance;
+        return state.main.wallet.balance || '0';
       },
     }),
   },

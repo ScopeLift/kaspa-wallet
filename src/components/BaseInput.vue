@@ -102,7 +102,7 @@ export default Vue.extend({
      * @notice This is required for two-way binding when programtically updating the input
      * in the parent component using BaseInput
      */
-    value(val: any) {
+    value(val) {
       // TODO update TS support so the eslint-disable is no longer needed
       this.content = val; // eslint-disable-line @typescript-eslint/no-unsafe-assignment
     },

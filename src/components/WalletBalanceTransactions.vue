@@ -104,10 +104,10 @@ export default Vue.extend({
   computed: {
     ...mapState({
       balance(state: StoreInterface) {
-        return state.main.balance;
+        return state.main.wallet.balance;
       },
       transactions(state: StoreInterface) {
-        return state.main.transactions;
+        return state.main.wallet.transactions;
       },
     }),
   },

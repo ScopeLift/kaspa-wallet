@@ -22,7 +22,12 @@
     />
     <!-- Continue buttons -->
     <div class="column content-center text-center q-mt-lg">
-      <base-button :disable="!isPasswordValid" label="Create Wallet" @click="handleCreate" />
+      <base-button
+        :disable="!isPasswordValid"
+        label="Create Wallet"
+        :loading="isLoading"
+        @click="handleCreate"
+      />
       <base-button
         :flat="true"
         :dense="true"
@@ -35,34 +40,48 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Wallet from 'components/Wallet';
+import Wallet from 'src/wallet/Wallet';
+import helpers from 'src/utils/mixin-helpers';
 
 export default Vue.extend({
   name: 'CreateWallet',
+
+  mixins: [helpers],
 
   data() {
     return {
       password1: '',
       password2: '',
+      isLoading: false,
       isPasswordVisible: false,
     };
   },
 
   computed: {
+    /**
+     * @notice Returns true if all requirements for a valid password are met
+     */
     isPasswordValid(): boolean {
       return this.password1.length > 0 && this.password1 === this.password2;
     },
   },
 
   methods: {
+    /**
+     * @notice Creates a new wallet, sets the state, and saves the encrypted data to local storage
+     */
     async handleCreate() {
-      this.$q.localStorage.set('kaspa-wallet-data', true);
-      const mnemonic = 'hello from kaspa wallet';
-      await this.$store.dispatch('main/getWalletInfo', mnemonic);
-      await this.$router.push({ name: 'walletBalance' });
-
-      const myWallet = new Wallet();
-      console.log(`your key is ${myWallet.publicKey}`);
+      try {
+        this.isLoading = true;
+        const wallet = new Wallet();
+        const encryptedMnemonic = await wallet.export(this.password1);
+        this.$q.localStorage.set('kaspa-wallet-data', encryptedMnemonic);
+        await this.$store.dispatch('main/getWalletInfo', wallet);
+        await this.$router.push({ name: 'walletBalance' });
+      } catch (err) {
+        this.isLoading = false;
+        this.showError(err);
+      }
     },
   },
 });

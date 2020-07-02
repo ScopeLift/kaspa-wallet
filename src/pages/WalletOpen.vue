@@ -10,7 +10,12 @@
       @iconClicked="isPasswordVisible = !isPasswordVisible"
     />
     <div class="column content-center text-center q-mt-lg">
-      <base-button :disable="!isPasswordValid" label="Open Wallet" @click="handleOpen" />
+      <base-button
+        :disable="!isPasswordValid"
+        label="Open Wallet"
+        :loading="isLoading"
+        @click="handleOpen"
+      />
       <base-button
         :flat="true"
         :dense="true"
@@ -23,13 +28,18 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import Wallet from 'src/wallet/Wallet';
+import helpers from 'src/utils/mixin-helpers';
 
 export default Vue.extend({
   name: 'OpenWallet',
 
+  mixins: [helpers],
+
   data() {
     return {
       password: '',
+      isLoading: false,
       isPasswordVisible: false,
     };
   },
@@ -41,10 +51,20 @@ export default Vue.extend({
   },
 
   methods: {
+    /**
+     * @notice Decrypts local storage data and sets state. Throws on invalid password
+     */
     async handleOpen() {
-      const mnemonic = 'hello from kaspa wallet';
-      await this.$store.dispatch('main/getWalletInfo', mnemonic);
-      await this.$router.push({ name: 'walletBalance' }); // eslint-disable-line
+      try {
+        this.isLoading = true;
+        const encryptedMnemonic = this.$q.localStorage.getItem('kaspa-wallet-data');
+        const wallet = await Wallet.import(this.password, encryptedMnemonic);
+        await this.$store.dispatch('main/getWalletInfo', wallet);
+        await this.$router.push({ name: 'walletBalance' });
+      } catch (err) {
+        this.isLoading = false;
+        this.showError(err);
+      }
     },
   },
 });

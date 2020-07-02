@@ -25,5 +25,20 @@ export default Vue.extend({
         actions: [{ label: 'Dismiss', color: 'white' }],
       });
     },
+
+    /**
+     * Show error message to user
+     * @param {Any} err Error object thrown
+     * @param {Any} msg Optional, fallback error message if one is not provided by the err object
+     */
+    showError(err: unknown, msg = 'An unknown error occurred') {
+      /* eslint-disable */
+      console.error(err);
+      if (!err) this.notifyUser('negative', msg);
+      else if (err.message) this.notifyUser('negative', err.message);
+      else if (err.msg) this.notifyUser('negative', err.msg);
+      else if (typeof err === 'string') this.notifyUser('negative', err);
+      else this.notifyUser('negative', msg);
+    },
   },
 });

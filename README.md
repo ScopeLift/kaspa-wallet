@@ -36,6 +36,7 @@ npm run lint
 npm run test:unit
 
 # Run e2e tests visually and interactively with Cypress
+# For Cypress tests, make sure the app is running on port 8080 with `npm run dev`
 npm run test:e2e
 
 # Run e2e tests from the terminal with Cypress
