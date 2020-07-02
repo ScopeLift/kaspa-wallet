@@ -8,7 +8,7 @@ test(`Import/Export: correct password`, async () => {
   let walletFile2 = await importedWallet.export('!@)#!(% !#okありがとう');
   let importedWallet2 = await Wallet.import('!@)#!(% !#okありがとう', walletFile2);
   expect(importedWallet.publicKey).toEqual(importedWallet2.publicKey);
-  expect(importedWallet.deriveNew()).toEqual(importedWallet2.deriveNew());
+  expect(importedWallet.deriveChild()).toEqual(importedWallet2.deriveChild());
 });
 
 test(`Import/Export: incorrect password`, async () => {
