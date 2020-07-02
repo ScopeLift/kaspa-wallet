@@ -4,11 +4,11 @@
     "baseUrl": ".",
     // this enables stricter inference for data properties on `this`
     "strict": true,
-    "typeRoots": ["./types", "./node_modules/@types", "./node_modules/@machinomy"],
+    "typeRoots": ["types", "node_modules/@types"],
     "paths": {
-      "*": ["./types", "src/*"]
+      "*": ["./types/*", "src/*"]
     }
   },
   "include": ["src/**/*", "src-pwa/**/*"],
-  "exclude": ["./node_modules", "test/**/*", "./types"]
+  "exclude": ["./node_modules", "test/**/*", "types"]
 }
