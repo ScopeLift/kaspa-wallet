@@ -3,8 +3,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     // this enables stricter inference for data properties on `this`
-    "strict": true
+    "strict": true,
+    "typeRoots": ["types", "node_modules/@types"],
+    "paths": {
+      "*": ["./types/*", "src/*"]
+    }
   },
-  "include": ["src/**/*", "src/pages/*", "src-pwa/**/*", "./*"],
-  "exclude": ["node_modules", "test/**/*"]
+  "include": ["src/**/*", "src-pwa/**/*"],
+  "exclude": ["./node_modules", "test/**/*", "types"]
 }

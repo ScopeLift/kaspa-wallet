@@ -28,10 +28,15 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "bitcore-lib-cash": "^8.20.5",
+    "bitcore-mnemonic": "^8.20.5",
+    "browser-passworder": "^2.0.3",
     "core-js": "^3.6.5",
-    "quasar": "^1.0.0"
+    "quasar": "^1.0.0",
+    "safe-buffer": "^5.2.1"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.10.4",
     "@quasar/app": "^2.0.0",
     "@quasar/quasar-app-extension-testing": "^1.0.0",
     "@quasar/quasar-app-extension-testing-e2e-cypress": "^1.0.0-beta.11",
@@ -40,6 +45,7 @@
     "@typescript-eslint/eslint-plugin": "^3.3.0",
     "@typescript-eslint/parser": "^3.3.0",
     "babel-eslint": "^10.0.1",
+    "babel-jest": "^26.1.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.11.0",
@@ -50,6 +56,7 @@
     "eslint-plugin-vue": "^6.1.2",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
+    "node-webcrypto-ossl": "^2.1.0",
     "prettier": "2.0.5",
     "workbox-webpack-plugin": "^5.1.3"
   },

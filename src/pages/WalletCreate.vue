@@ -35,6 +35,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import Wallet from 'components/Wallet';
 
 export default Vue.extend({
   name: 'CreateWallet',
@@ -59,6 +60,9 @@ export default Vue.extend({
       const mnemonic = 'hello from kaspa wallet';
       await this.$store.dispatch('main/getWalletInfo', mnemonic);
       await this.$router.push({ name: 'walletBalance' });
+
+      const myWallet = new Wallet();
+      console.log(`your key is ${myWallet.publicKey}`);
     },
   },
 });

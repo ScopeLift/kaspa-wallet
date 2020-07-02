@@ -37,10 +37,11 @@ module.exports = {
     '^~/(.*)$': '<rootDir>/$1',
     '^src/(.*)$': '<rootDir>/src/$1',
     '.*css$': '<rootDir>/test/jest/utils/stub.css',
+    '^custom-types$': '<rootDir>/types/custom-types.d.ts',
   },
   transform: {
     '.*\\.vue$': 'vue-jest',
-    '.*\\.js$': 'babel-jest',
+    '.*\\.(ts|js)$': 'babel-jest',
     '.+\\.(css|styl|less|sass|scss|svg|png|jpg|ttf|woff|woff2)$': 'jest-transform-stub',
     // use these if NPM is being flaky
     // '.*\\.vue$': '<rootDir>/node_modules/@quasar/quasar-app-extension-testing-unit-jest/node_modules/vue-jest',
