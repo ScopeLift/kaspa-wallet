@@ -42,6 +42,8 @@ export default Vue.extend({
 
   methods: {
     async handleOpen() {
+      const mnemonic = 'hello from kaspa wallet';
+      await this.$store.dispatch('main/getWalletInfo', mnemonic);
       await this.$router.push({ name: 'walletBalance' }); // eslint-disable-line
     },
   },

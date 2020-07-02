@@ -3,8 +3,14 @@ import { StoreInterface } from '../index';
 import { MainStateInterface } from './state';
 
 const actions: ActionTree<MainStateInterface, StoreInterface> = {
-  someAction(/* context */) {
-    // your code
+  getWalletInfo({ commit }, mnemonic: string) {
+    const walletInfo: MainStateInterface = {
+      hasWallet: true,
+      mnemonic,
+      balance: '123456.78901237',
+      transactions: [],
+    };
+    commit('setWalletInfo', walletInfo);
   },
 };
 

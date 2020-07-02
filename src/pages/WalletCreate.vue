@@ -56,6 +56,8 @@ export default Vue.extend({
   methods: {
     async handleCreate() {
       this.$q.localStorage.set('kaspa-wallet-data', true);
+      const mnemonic = 'hello from kaspa wallet';
+      await this.$store.dispatch('main/getWalletInfo', mnemonic);
       await this.$router.push({ name: 'walletBalance' });
     },
   },
