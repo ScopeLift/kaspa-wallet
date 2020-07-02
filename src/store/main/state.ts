@@ -33,6 +33,7 @@ export interface Transaction {
 export interface MainStateInterface {
   hasWallet: boolean;
   mnemonic: string;
+  address: string;
   balance: string;
   transactions: Array<Transaction>;
 }
@@ -40,6 +41,7 @@ export interface MainStateInterface {
 const state: MainStateInterface = {
   hasWallet: true,
   mnemonic: '',
+  address: 'kaspatest:qpc3hr2kmnu6j0crw42cmryptzqmyqm9gstqp5r863',
   balance: '0',
   transactions: [],
 };

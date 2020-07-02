@@ -7,7 +7,9 @@ const mutation: MutationTree<MainStateInterface> = {
   },
 
   setWalletInfo(state: MainStateInterface, walletInfo: MainStateInterface) {
+    state.hasWallet = walletInfo.hasWallet;
     state.mnemonic = walletInfo.mnemonic;
+    state.address = walletInfo.address;
     state.balance = walletInfo.balance;
     state.transactions = walletInfo.transactions;
   },
