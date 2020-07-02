@@ -31,8 +31,8 @@ export default {
     };
   },
   methods: {
-    handleOpen() {
-      console.log('Open');
+    async handleOpen() {
+      await this.$router.push({ name: 'walletHome' }); // eslint-disable-line
     },
   },
 };

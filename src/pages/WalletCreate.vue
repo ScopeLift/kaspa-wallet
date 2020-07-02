@@ -53,9 +53,9 @@ export default Vue.extend({
   },
 
   methods: {
-    handleCreate() {
+    async handleCreate() {
       this.$q.localStorage.set('kaspa-wallet-data', true);
-      console.log('Create');
+      await this.$router.push({ name: 'walletHome' });
     },
   },
 });

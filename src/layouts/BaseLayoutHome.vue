@@ -1,4 +1,8 @@
 <template>
+  <!--
+  This layout is used when the user first visits the site and has not yet created
+  a wallet nor opened an existing one
+  -->
   <q-layout view="hHh Lpr fFf">
     <q-header> </q-header>
 
@@ -12,7 +16,7 @@
 
 <script>
 export default {
-  name: 'BaseLayout',
+  name: 'BaseLayoutHome',
 
   data() {
     return {};
