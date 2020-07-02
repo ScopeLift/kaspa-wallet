@@ -2,6 +2,7 @@
   <div>
     <q-input
       v-model="content"
+      color="primary"
       class="q-my-sm"
       :dense="dense"
       :hide-bottom-space="hideBottomSpace"

@@ -1,6 +1,8 @@
 <template>
   <q-page padding class="page-margin">
-    Welcome to your wallet!
+    <div class="text-primary text-center">
+      Welcome to your wallet!
+    </div>
   </q-page>
 </template>
 

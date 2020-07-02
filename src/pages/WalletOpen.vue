@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="page-margin">
+  <q-page padding class="text-primary page-margin">
     <p class="primary">Unlock the wallet with your password</p>
     <base-input
       v-model="password"
