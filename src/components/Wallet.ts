@@ -38,7 +38,7 @@ class Wallet {
       /* eslint-enable */
     }
     this.childIndex = 0;
-    this.currentChild = this.HDWallet.deriveChild("m/44'/972/0'/0'/0");
+    this.currentChild = this.HDWallet.deriveChild("m/44'/972/0'/0'/0'");
     this.publicKey = this.currentChild.privateKey.toAddress(this.network).toString();
     // this.discoverAccounts();
   }
