@@ -1,4 +1,6 @@
+// /* eslint-disable */
 import bitcore from 'bitcore-lib-cash';
+import Mnemonic from 'bitcore-mnemonic';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
 
@@ -13,19 +15,27 @@ class Wallet {
 
   childIndex: number;
 
-  // mnemonic: string;
+  mnemonic: string | undefined = undefined;
 
-  // static fromMnemonic(seedPhrase: string): Wallet {
-  //   return new this();
-  // }
+  static fromMnemonic(seedPhrase: string): Wallet {
+    /* eslint-disable */
+    let mne = new Mnemonic(seedPhrase);
+    return new this(mne.toHDPrivateKey().toString());
+    /* eslint-enable */
+  }
 
   constructor(privKey?: string) {
     // TODO: default network in global config
+
     this.network = 'kaspadev';
     if (privKey) {
       this.HDWallet = new bitcore.HDPrivateKey(privKey);
     } else {
-      this.HDWallet = new bitcore.HDPrivateKey();
+      /* eslint-disable */
+      const temp = new Mnemonic(Mnemonic.Words.ENGLISH);
+      this.mnemonic = temp.toString();
+      this.HDWallet = new bitcore.HDPrivateKey(temp.toHDPrivateKey().toString());
+      /* eslint-enable */
     }
     this.childIndex = 0;
     this.currentChild = this.HDWallet.deriveChild("m/44'/972/0'/0'/0");

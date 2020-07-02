@@ -17,3 +17,15 @@ test(`Import/Export: incorrect password`, async () => {
   let throws = async () => await Wallet.import('wrongpassword', walletFile);
   await expect(throws()).rejects.toThrowError('Incorrect password');
 });
+
+test(`Seed phrase: provides a seed phrase`, () => {
+  let myWallet = new Wallet();
+  expect(typeof myWallet.mnemonic).toBe('string');
+  expect(myWallet.mnemonic.split(' ').length).toBe(12);
+});
+
+test(`Seed phrase: can be used to recover wallet`, () => {
+  let myWallet = new Wallet();
+  let recoveredWallet = Wallet.fromMnemonic(myWallet.mnemonic);
+  expect(myWallet.publicKey).toEqual(recoveredWallet.publicKey);
+});
