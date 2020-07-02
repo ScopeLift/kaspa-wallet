@@ -18,7 +18,17 @@ const routes: RouteConfig[] = [
     path: '/wallet',
     component: () => import('layouts/BaseLayoutWallet.vue'),
     children: [
-      { name: 'walletHome', path: '/wallet', component: () => import('pages/WalletHome.vue') },
+      { name: 'walletSend', path: '/send', component: () => import('pages/WalletSend.vue') },
+      {
+        name: 'walletReceive',
+        path: '/receive',
+        component: () => import('pages/WalletReceive.vue'),
+      },
+      {
+        name: 'walletBalance',
+        path: '/balance',
+        component: () => import('pages/WalletBalance.vue'),
+      },
     ],
   },
 

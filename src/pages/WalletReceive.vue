@@ -1,7 +1,7 @@
 <template>
   <q-page padding class="page-margin">
     <div class="text-primary text-center">
-      Welcome to your wallet!
+      Wallet Receive
     </div>
   </q-page>
 </template>
@@ -10,9 +10,6 @@
 import Vue from 'vue';
 
 export default Vue.extend({
-  name: 'WalletHome',
-  data() {
-    return {};
-  },
+  name: 'WalletReceive',
 });
 </script>

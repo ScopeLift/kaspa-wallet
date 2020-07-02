@@ -14,9 +14,9 @@
         as child of QToolbar
       -->
       <q-tabs v-model="tab" shrink stretch>
-        <q-tab class="text-white" name="tab1" label="Tab 1" />
-        <q-tab name="tab2" label="Tab 2" />
-        <q-tab name="tab3" label="Tab 3" />
+        <q-route-tab exact label="Send" name="walletSend" :to="{ name: 'walletSend' }" />
+        <q-route-tab exact label="Balance" name="walletBalance" :to="{ name: 'walletBalance' }" />
+        <q-route-tab exact label="Receive" name="walletReceive" :to="{ name: 'walletReceive' }" />
       </q-tabs>
     </q-toolbar>
     <!-- </q-header> -->

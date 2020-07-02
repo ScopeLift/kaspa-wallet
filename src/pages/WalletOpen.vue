@@ -10,7 +10,7 @@
       @iconClicked="isPasswordVisible = !isPasswordVisible"
     />
     <div class="column content-center text-center q-mt-lg">
-      <base-button label="Open Wallet" @click="handleOpen" />
+      <base-button :disable="!isPasswordValid" label="Open Wallet" @click="handleOpen" />
       <base-button
         :flat="true"
         :dense="true"
@@ -21,19 +21,29 @@
   </q-page>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue';
+
+export default Vue.extend({
   name: 'OpenWallet',
+
   data() {
     return {
       password: '',
       isPasswordVisible: false,
     };
   },
-  methods: {
-    async handleOpen() {
-      await this.$router.push({ name: 'walletHome' }); // eslint-disable-line
+
+  computed: {
+    isPasswordValid(): boolean {
+      return this.password.length > 0;
     },
   },
-};
+
+  methods: {
+    async handleOpen() {
+      await this.$router.push({ name: 'walletBalance' }); // eslint-disable-line
+    },
+  },
+});
 </script>

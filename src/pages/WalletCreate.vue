@@ -1,6 +1,6 @@
 <template>
   <q-page padding class="page-margin">
-    <p class="primary">Create a password for your new wallet</p>
+    <p class="text-primary">Create a password for your new wallet</p>
     <!-- Password -->
     <base-input
       v-model="password1"
@@ -38,6 +38,7 @@ import Vue from 'vue';
 
 export default Vue.extend({
   name: 'CreateWallet',
+
   data() {
     return {
       password1: '',
@@ -55,7 +56,7 @@ export default Vue.extend({
   methods: {
     async handleCreate() {
       this.$q.localStorage.set('kaspa-wallet-data', true);
-      await this.$router.push({ name: 'walletHome' });
+      await this.$router.push({ name: 'walletBalance' });
     },
   },
 });
