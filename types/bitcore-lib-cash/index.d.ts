@@ -1,3 +1,6 @@
+// These types taken from https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/bitcore-lib
+// Modified for bitcore-lib-cash
+
 declare module 'bitcore-lib-cash' {
   //   export namespace crypto {
   //     class BN {}

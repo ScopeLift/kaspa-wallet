@@ -1,5 +1,13 @@
 import Wallet from '../../../src/components/Wallet';
 
+test(`Networks: prefix changes`, () => {
+  let myWallet = new Wallet();
+  expect(myWallet.publicKey).toContain(myWallet.network);
+  myWallet.network = 'kaspa';
+  expect(myWallet.network).toEqual('kaspa');
+  expect(myWallet.publicKey).toContain('kaspa');
+});
+
 test(`Import/Export: correct password`, async () => {
   let myWallet = new Wallet();
   let walletFile = await myWallet.export('dumbpassword');
@@ -28,4 +36,6 @@ test(`Seed phrase: can be used to recover wallet`, () => {
   let myWallet = new Wallet();
   let recoveredWallet = Wallet.fromMnemonic(myWallet.mnemonic);
   expect(myWallet.publicKey).toEqual(recoveredWallet.publicKey);
+  // Trim test!
+  let recoveredWallet2 = Wallet.fromMnemonic(`  ${myWallet.mnemonic}  `);
 });

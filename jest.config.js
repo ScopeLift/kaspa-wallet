@@ -37,6 +37,7 @@ module.exports = {
     '^~/(.*)$': '<rootDir>/$1',
     '^src/(.*)$': '<rootDir>/src/$1',
     '.*css$': '<rootDir>/test/jest/utils/stub.css',
+    '^custom-types$': '<rootDir>/types/custom-types.d.ts',
   },
   transform: {
     '.*\\.vue$': 'vue-jest',

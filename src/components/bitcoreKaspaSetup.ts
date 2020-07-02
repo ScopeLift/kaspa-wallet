@@ -1,9 +1,10 @@
 import bitcore from 'bitcore-lib-cash';
+import { Network } from 'custom-types';
 
 export default () => {
-  const networkPrefixes = ['kaspa', 'kaspadev', 'kaspareg', 'kaspatest', 'kaspasim'];
+  const networkPrefixes: Network[] = ['kaspa', 'kaspadev', 'kaspareg', 'kaspatest', 'kaspasim'];
 
-  networkPrefixes.map((str) => {
+  networkPrefixes.map((str: Network) => {
     return bitcore.Networks.add({
       name: str,
       prefix: str,

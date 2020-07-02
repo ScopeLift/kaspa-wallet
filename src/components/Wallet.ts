@@ -1,7 +1,8 @@
-import bitcore from 'bitcore-lib-cash';
 import Mnemonic from 'bitcore-mnemonic';
+import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
+import { Network } from 'custom-types';
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
@@ -13,9 +14,9 @@ class Wallet {
   balance: number | undefined = undefined;
 
   /**
-   * Current network string. Set with useNetwork()
+   * Current network. Set with useNetwork()
    */
-  private network = 'kaspadev'; // TODO: default network in global config
+  network: Network = 'kaspadev'; // TODO: default network in global config
 
   /**
    * The derived keypair that will be used as this Wallet's receive address.
@@ -73,21 +74,13 @@ class Wallet {
   // }
 
   /**
-   * Change the network. This will effect the public key prefix.
-   * @param network Should be one of the 5 kaspa netowrks.
-   */
-  useNetwork(network: string): void {
-    this.network = network;
-  }
-
-  /**
    *  Converts a mnemonic to a new wallet.
    * @param seedPhrase The 12 word seed phrase.
    * @returns new Wallet
    */
   static fromMnemonic(seedPhrase: string): Wallet {
     /* eslint-disable */
-    let mne = new Mnemonic(seedPhrase);
+    let mne = new Mnemonic(seedPhrase.trim());
     return new this(mne.toHDPrivateKey().toString());
     /* eslint-enable */
   }
