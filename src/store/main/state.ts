@@ -27,6 +27,7 @@ export interface Transaction {
   inputs: Array<TransactionInput>;
   outputs: Array<TransactionOutput>;
   mass: number;
+  confirmations: number;
 }
 
 export interface MainStateInterface {
