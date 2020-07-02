@@ -2,7 +2,7 @@
   <q-page padding class="page-margin">
     <!-- Wallet balance -->
     <div class="text-primary text-center">
-      <wallet-balance-value />
+      <transaction-amount :amount="balance" :is-balance="true" />
     </div>
     <!-- Transaction history -->
     <div class="text-primary text-left">
@@ -14,15 +14,25 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import WalletBalanceValue from 'components/WalletBalanceValue.vue';
+import { mapState } from 'vuex';
+import { StoreInterface } from 'src/store/index';
+import TransactionAmount from 'components/TransactionAmount.vue';
 import WalletBalanceTransactions from 'components/WalletBalanceTransactions.vue';
 
 export default Vue.extend({
   name: 'WalletBalance',
 
   components: {
-    WalletBalanceValue,
+    TransactionAmount,
     WalletBalanceTransactions,
+  },
+
+  computed: {
+    ...mapState({
+      balance(state: StoreInterface) {
+        return state.main.balance;
+      },
+    }),
   },
 });
 </script>

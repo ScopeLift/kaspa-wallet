@@ -1,5 +1,8 @@
 {
-  "cSpell.words": ["Kaspa"],
+  "cSpell.words": [
+    "Kaspa",
+    "cashaddr"
+  ],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },

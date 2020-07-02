@@ -38,7 +38,7 @@ const transactions: Array<Transaction> = [
       },
     ],
     mass: 433,
-    confirmations: 14,
+    confirmations: 200,
   },
 ];
 
