@@ -1,5 +1,7 @@
 <template>
   <q-page padding class="page-margin">
+    <!-- Wallet backup prompt -->
+    <wallet-backup-prompt v-if="!isBackedUp" />
     <!-- Wallet balance -->
     <div class="text-primary text-center">
       <transaction-amount :amount="balance" :is-balance="true" />
@@ -18,6 +20,7 @@ import { mapState } from 'vuex';
 import { StoreInterface } from 'src/store/index';
 import TransactionAmount from 'components/TransactionAmount.vue';
 import WalletBalanceTransactions from 'components/WalletBalanceTransactions.vue';
+import { Notify } from 'quasar';
 
 export default Vue.extend({
   name: 'WalletBalance',
@@ -27,12 +30,22 @@ export default Vue.extend({
     WalletBalanceTransactions,
   },
 
+  data() {
+    return {
+      isBackedUp: true,
+    };
+  },
+
   computed: {
     ...mapState({
       balance(state: StoreInterface) {
         return state.main.wallet.balance || '0';
       },
     }),
+  },
+
+  mounted() {
+    this.isBackedUp = Boolean(this.$q.localStorage.getItem('isBackedUp'));
   },
 });
 </script>
