@@ -1,14 +1,14 @@
 <template>
   <q-page padding class="page-margin">
     <!-- Wallet backup prompt -->
-    <wallet-backup-prompt v-if="!isBackedUp" />
+    <wallet-backup-prompt @backupComplete="getBackupStatus" v-if="!isBackedUp" />
     <!-- Wallet balance -->
     <div class="text-primary text-center">
       <transaction-amount :amount="balance" :is-balance="true" />
     </div>
     <!-- Transaction history -->
     <div class="text-primary text-left">
-      <h4 class="text-left">Transaction History</h4>
+      <h4 class="text-left q-mb-none">Transaction History</h4>
       <wallet-balance-transactions />
     </div>
   </q-page>
@@ -20,7 +20,6 @@ import { mapState } from 'vuex';
 import { StoreInterface } from 'src/store/index';
 import TransactionAmount from 'components/TransactionAmount.vue';
 import WalletBalanceTransactions from 'components/WalletBalanceTransactions.vue';
-import { Notify } from 'quasar';
 
 export default Vue.extend({
   name: 'WalletBalance',
@@ -45,7 +44,13 @@ export default Vue.extend({
   },
 
   mounted() {
-    this.isBackedUp = Boolean(this.$q.localStorage.getItem('isBackedUp'));
+    this.getBackupStatus();
+  },
+
+  methods: {
+    getBackupStatus() {
+      this.isBackedUp = Boolean(this.$q.localStorage.getItem('is-backed-up'));
+    },
   },
 });
 </script>
