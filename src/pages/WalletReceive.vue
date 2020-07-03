@@ -27,7 +27,7 @@ export default Vue.extend({
   computed: {
     ...mapState({
       address(state: StoreInterface): string {
-        return state.main.address;
+        return state.main.wallet.address;
       },
     }),
   },
