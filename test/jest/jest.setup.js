@@ -1,4 +1,4 @@
-import bitcoreKaspaSetup from '../../src/components/bitcoreKaspaSetup';
+import bitcoreKaspaSetup from '../../src/wallet/bitcoreKaspaSetup';
 import { Crypto } from '../../node_modules/node-webcrypto-ossl';
 
 bitcoreKaspaSetup();

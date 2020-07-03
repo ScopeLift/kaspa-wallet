@@ -1,21 +1,21 @@
-import Wallet from '../../../src/components/Wallet';
+import Wallet from '../../../src/wallet/Wallet';
 
 test(`Networks: prefix changes`, () => {
   let myWallet = new Wallet();
-  expect(myWallet.publicKey).toContain(myWallet.network);
+  expect(myWallet.address).toContain(myWallet.network);
   myWallet.network = 'kaspa';
   expect(myWallet.network).toEqual('kaspa');
-  expect(myWallet.publicKey).toContain('kaspa');
+  expect(myWallet.address).toContain('kaspa');
 });
 
 test(`Import/Export: correct password`, async () => {
   let myWallet = new Wallet();
   let walletFile = await myWallet.export('dumbpassword');
   let importedWallet = await Wallet.import('dumbpassword', walletFile);
-  expect(myWallet.publicKey).toEqual(importedWallet.publicKey);
+  expect(myWallet.address).toEqual(importedWallet.address);
   let walletFile2 = await importedWallet.export('!@)#!(% !#okありがとう');
   let importedWallet2 = await Wallet.import('!@)#!(% !#okありがとう', walletFile2);
-  expect(importedWallet.publicKey).toEqual(importedWallet2.publicKey);
+  expect(importedWallet.address).toEqual(importedWallet2.address);
   expect(importedWallet.deriveChild()).toEqual(importedWallet2.deriveChild());
 });
 
@@ -35,7 +35,7 @@ test(`Seed phrase: provides a seed phrase`, () => {
 test(`Seed phrase: can be used to recover wallet`, () => {
   let myWallet = new Wallet();
   let recoveredWallet = Wallet.fromMnemonic(myWallet.mnemonic);
-  expect(myWallet.publicKey).toEqual(recoveredWallet.publicKey);
+  expect(myWallet.address).toEqual(recoveredWallet.address);
   // Trim test!
   let recoveredWallet2 = Wallet.fromMnemonic(`  ${myWallet.mnemonic}  `);
 });

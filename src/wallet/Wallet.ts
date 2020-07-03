@@ -1,7 +1,7 @@
 import Mnemonic from 'bitcore-mnemonic';
 import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
-// import { Buffer } from 'safe-buffer';
+import { Buffer } from 'safe-buffer';
 import { Network, Transaction } from 'custom-types';
 
 /** Class representing an HDWallet with derivable child addresses */
@@ -29,7 +29,7 @@ class Wallet {
   address: string;
 
   /**
-   * The index of
+   * The index of the derivation path
    */
   childIndex = 0;
 
@@ -88,11 +88,9 @@ class Wallet {
     if (privKey) {
       this.HDWallet = new bitcore.HDPrivateKey(privKey);
     } else {
-      /* eslint-disable */
       const temp = new Mnemonic(Mnemonic.Words.ENGLISH);
       this.mnemonic = temp.toString();
       this.HDWallet = new bitcore.HDPrivateKey(temp.toHDPrivateKey().toString());
-      /* eslint-enable */
     }
     this.currentChild = this.HDWallet.deriveChild("m/44'/972/0'/0'/0'");
     this.address = this.currentChild.privateKey.toAddress(this.network).toString();
@@ -121,12 +119,10 @@ class Wallet {
    * @returns new Wallet
    */
   static fromMnemonic(seedPhrase: string): Wallet {
-    /* eslint-disable */
-    let mne = new Mnemonic(seedPhrase.trim());
+    const mne = new Mnemonic(seedPhrase.trim());
     const wallet = new this(mne.toHDPrivateKey().toString());
     wallet.mnemonic = seedPhrase;
     return wallet;
-    /* eslint-enable */
   }
 
   /**
@@ -136,8 +132,8 @@ class Wallet {
    * @throws Will throw "Incorrect password" if password is wrong
    */
   static async import(password: string, encryptedMnemonic: string): Promise<Wallet> {
-    const seedPhrase = await passworder.decrypt(password, encryptedMnemonic);
-    // const seedPhrase = Buffer.from(decrypted).toString();
+    const decrypted = await passworder.decrypt(password, encryptedMnemonic);
+    const seedPhrase = Buffer.from(decrypted, 'utf8').toString();
     return this.fromMnemonic(seedPhrase);
   }
 
@@ -147,7 +143,7 @@ class Wallet {
    * @returns Promise that resolves to object-like string. Suggested to store as string for .import().
    */
   async export(password: string): Promise<string> {
-    return passworder.encrypt(password, this.mnemonic);
+    return passworder.encrypt(password, Buffer.from(this.mnemonic, 'utf8'));
   }
 }
 
