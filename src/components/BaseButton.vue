@@ -10,6 +10,7 @@
       :label="label"
       :loading="loading"
       :outline="outline"
+      :type="type"
       @click="handleClick"
     />
   </div>
@@ -68,6 +69,12 @@ export default Vue.extend({
       type: Boolean,
       required: false,
       default: false,
+    },
+
+    type: {
+      type: String,
+      required: false,
+      default: 'button',
     },
   },
   data() {

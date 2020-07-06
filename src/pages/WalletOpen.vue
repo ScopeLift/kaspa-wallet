@@ -1,28 +1,30 @@
 <template>
   <q-page padding class="text-primary page-margin">
-    <p class="primary">Unlock the wallet with your password</p>
-    <base-input
-      v-model="password"
-      hint="Enter your password"
-      :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
-      label="Password"
-      :type="isPasswordVisible ? 'text' : 'password'"
-      @iconClicked="isPasswordVisible = !isPasswordVisible"
-    />
-    <div class="column content-center text-center q-mt-lg">
-      <base-button
-        :disable="!isPasswordValid"
-        label="Open Wallet"
-        :loading="isLoading"
-        @click="handleOpen"
+    <q-form @submit="handleOpen">
+      <p class="primary">Unlock the wallet with your password</p>
+      <base-input
+        v-model="password"
+        hint="Enter your password"
+        :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
+        label="Password"
+        :type="isPasswordVisible ? 'text' : 'password'"
+        @iconClicked="isPasswordVisible = !isPasswordVisible"
       />
-      <base-button
-        :flat="true"
-        :dense="true"
-        label="New wallet"
-        @click="$router.push({ name: 'createWallet' })"
-      />
-    </div>
+      <div class="column content-center text-center q-mt-lg">
+        <base-button
+          :disable="!isPasswordValid"
+          label="Open Wallet"
+          :loading="isLoading"
+          type="submit"
+        />
+        <base-button
+          :flat="true"
+          :dense="true"
+          label="New wallet"
+          @click="$router.push({ name: 'createWallet' })"
+        />
+      </div>
+    </q-form>
   </q-page>
 </template>
 

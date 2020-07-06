@@ -1,40 +1,42 @@
 <template>
   <q-page padding class="page-margin">
-    <p class="text-primary">Create a password for your new wallet</p>
-    <!-- Password -->
-    <base-input
-      v-model="password1"
-      :type="isPasswordVisible ? 'text' : 'password'"
-      hint="Enter your password"
-      label="Password"
-      :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
-      @iconClicked="isPasswordVisible = !isPasswordVisible"
-    />
-    <!-- Confirm password -->
-    <base-input
-      v-model="password2"
-      class="q-mt-lg"
-      hint="Re-enter your password"
-      :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
-      label="Confirm Password"
-      :type="isPasswordVisible ? 'text' : 'password'"
-      @iconClicked="isPasswordVisible = !isPasswordVisible"
-    />
-    <!-- Continue buttons -->
-    <div class="column content-center text-center q-mt-lg">
-      <base-button
-        :disable="!isPasswordValid"
-        label="Create Wallet"
-        :loading="isLoading"
-        @click="handleCreate"
+    <q-form @submit="handleCreate">
+      <p class="text-primary">Create a password for your new wallet</p>
+      <!-- Password -->
+      <base-input
+        v-model="password1"
+        :type="isPasswordVisible ? 'text' : 'password'"
+        hint="Enter your password"
+        label="Password"
+        :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
+        @iconClicked="isPasswordVisible = !isPasswordVisible"
       />
-      <base-button
-        :flat="true"
-        :dense="true"
-        label="I have a wallet"
-        @click="$router.push({ name: 'openWallet' })"
+      <!-- Confirm password -->
+      <base-input
+        v-model="password2"
+        class="q-mt-lg"
+        hint="Re-enter your password"
+        :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
+        label="Confirm Password"
+        :type="isPasswordVisible ? 'text' : 'password'"
+        @iconClicked="isPasswordVisible = !isPasswordVisible"
       />
-    </div>
+      <!-- Continue buttons -->
+      <div class="column content-center text-center q-mt-lg">
+        <base-button
+          :disable="!isPasswordValid"
+          label="Create Wallet"
+          :loading="isLoading"
+          type="submit"
+        />
+        <base-button
+          :flat="true"
+          :dense="true"
+          label="I have a wallet"
+          @click="$router.push({ name: 'openWallet' })"
+        />
+      </div>
+    </q-form>
   </q-page>
 </template>
 
