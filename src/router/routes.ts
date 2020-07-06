@@ -11,6 +11,11 @@ const routes: RouteConfig[] = [
       { name: 'home', path: '', component: () => import('pages/WalletHandler.vue') },
       { name: 'createWallet', path: '/create', component: () => import('pages/WalletCreate.vue') },
       { name: 'openWallet', path: '/open', component: () => import('pages/WalletOpen.vue') },
+      {
+        name: 'restoreWallet',
+        path: '/restore',
+        component: () => import('pages/WalletRestore.vue'),
+      },
     ],
   },
   {

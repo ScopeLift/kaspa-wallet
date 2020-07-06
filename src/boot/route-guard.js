@@ -2,13 +2,11 @@
 /* eslint-disable */
 export default ({ router, store }) => {
   router.beforeEach((to, from, next) => {
+    // Check if user has opened a wallet
     const isLoggedIn = store.state.main.wallet?.address;
-    if (
-      isLoggedIn ||
-      to.name === 'home' ||
-      to.name === 'createWallet' ||
-      to.name === 'openWallet'
-    ) {
+    // Define list of page names that don't require login to access
+    const publicPages = ['home', 'createWallet', 'openWallet', 'restoreWallet'];
+    if (isLoggedIn || publicPages.includes(to.name)) {
       next();
     } else {
       next({ name: 'home' });

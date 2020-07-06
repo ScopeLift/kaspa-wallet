@@ -1,7 +1,7 @@
 <template>
   <q-page padding class="text-primary page-margin">
     <q-form @submit="handleOpen">
-      <p class="primary">Unlock the wallet with your password</p>
+      <p class="text-primary">Unlock the wallet with your password</p>
       <base-input
         v-model="password"
         hint="Enter your password"
@@ -22,6 +22,12 @@
           :dense="true"
           label="New wallet"
           @click="$router.push({ name: 'createWallet' })"
+        />
+        <base-button
+          :flat="true"
+          :dense="true"
+          label="Restore wallet"
+          @click="$router.push({ name: 'restoreWallet' })"
         />
       </div>
     </q-form>
