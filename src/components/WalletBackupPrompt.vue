@@ -1,8 +1,13 @@
 <template>
   <div>
     <!-- BANNER TELLING USER THAT WALLET IS NOT BACKED UP -->
-    <q-banner class="bg-negative text-white column q-py-md q-mb-lg" :inline-actions="false">
-      Your wallet is only accessible from this device. Back it up, take it with you.
+    <q-banner class="bg-secondary text-white column q-py-md q-mb-lg" :inline-actions="false">
+      <div class="row justify-between items-center no-wrap">
+        <q-icon class="col-auto" color="white" name="warning" size="md" />
+        <div class="col q-ml-md">
+          Your wallet is only accessible from this device. Back it up, take it with you.
+        </div>
+      </div>
       <div class="row justify-start q-mt-md">
         <base-button
           :dense="true"
@@ -298,7 +303,7 @@ export default Vue.extend({
     },
 
     icons(): IconStatus[] {
-      let icons = [
+      const icons = [
         { name: 'brightness_1', color: 'grey' },
         { name: 'brightness_1', color: 'grey' },
         { name: 'brightness_1', color: 'grey' },

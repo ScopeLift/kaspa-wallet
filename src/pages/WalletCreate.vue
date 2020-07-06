@@ -76,6 +76,7 @@ export default Vue.extend({
         const wallet = new Wallet();
         const encryptedMnemonic = await wallet.export(this.password1);
         this.$q.localStorage.set('kaspa-wallet-data', encryptedMnemonic);
+        this.$q.localStorage.set('is-backed-up', false);
         await this.$store.dispatch('main/getWalletInfo', wallet);
         await this.$router.push({ name: 'walletBalance' });
       } catch (err) {
