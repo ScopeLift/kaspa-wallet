@@ -37,6 +37,7 @@
               v-model="seedFile"
               hint="File must have a .dag extension"
               label="Select File"
+              style="min-width: 275px;"
             >
               <template v-slot:prepend>
                 <q-icon name="attach_file" />
@@ -46,6 +47,7 @@
             <base-input
               v-if="seedFile"
               v-model="password"
+              class="q-mt-lg"
               hint="Enter the password for this file"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Password"
@@ -79,14 +81,38 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum repellendus sit voluptate
-          voluptas eveniet porro. Rerum blanditiis perferendis totam, ea at omnis vel numquam
-          exercitationem aut, natus minima, porro labore.
-        </q-card-section>
+          <q-form @submit="restoreFromSeed">
+            <base-input
+              v-model="seedPhrase"
+              :autogrow="true"
+              hint="Enter the your 12 word seed phrase"
+              label="Password"
+              style="min-width: 275px;"
+            />
 
-        <q-card-actions align="right">
-          <q-btn flat label="OK" color="primary" v-close-popup />
-        </q-card-actions>
+            <base-input
+              v-if="seedPhrase"
+              v-model="password"
+              class="q-mt-lg"
+              hint="Enter a password to protect this phrase"
+              :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
+              label="Password"
+              :type="isPasswordVisible ? 'text' : 'password'"
+              @iconClicked="isPasswordVisible = !isPasswordVisible"
+            />
+
+            <div class="row justify-end q-mt-lg">
+              <base-button
+                class="col-auto"
+                color="primary"
+                :disabled="!isReadyToRestoreFromSeed"
+                label="Restore Wallet"
+                :loading="isLoading"
+                type="submit"
+              />
+            </div>
+          </q-form>
+        </q-card-section>
       </q-card>
     </q-dialog>
   </q-page>
@@ -104,19 +130,27 @@ export default Vue.extend({
 
   data() {
     return {
+      // Generic
       showFileRestore: false,
       showSeedRestore: false,
-      seedFile: undefined,
       isPasswordVisible: false,
-      password: undefined,
-      seedFileText: undefined,
       isLoading: undefined,
+      password: undefined,
+      // For file upload
+      seedFile: undefined,
+      seedFileText: undefined,
+      // For seed phrase
+      seedPhrase: undefined,
     };
   },
 
   computed: {
     isReadyToDecrypt() {
       return this.seedFileText && this.password;
+    },
+
+    isReadyToRestoreFromSeed() {
+      return this.seedPhrase && this.password;
     },
   },
 
@@ -148,6 +182,23 @@ export default Vue.extend({
         // Save this info into local storage for later
         this.$q.localStorage.set('kaspa-wallet-data', this.seedFileText);
         // Since it was imported from a file, we know it's already backed up
+        this.$q.localStorage.set('is-backed-up', true);
+        await this.$store.dispatch('main/getWalletInfo', wallet);
+        await this.$router.push({ name: 'walletBalance' });
+      } catch (err) {
+        this.isLoading = false;
+        this.showError(err);
+      }
+    },
+
+    async restoreFromSeed() {
+      try {
+        this.isLoading = true;
+        const wallet = Wallet.fromMnemonic(this.seedPhrase);
+        const encryptedMnemonic = await wallet.export(this.password);
+        // Save this info into local storage for later
+        this.$q.localStorage.set('kaspa-wallet-data', encryptedMnemonic);
+        // Since the phrase already exists, we know it's already backed up
         this.$q.localStorage.set('is-backed-up', true);
         await this.$store.dispatch('main/getWalletInfo', wallet);
         await this.$router.push({ name: 'walletBalance' });

@@ -2,6 +2,7 @@
   <div>
     <q-input
       v-model="content"
+      :autogrow="autogrow"
       color="primary"
       class="q-my-sm"
       :dense="dense"
@@ -28,6 +29,12 @@ export default Vue.extend({
   name: 'BaseInput',
 
   props: {
+    autogrow: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+
     dense: {
       type: Boolean,
       required: false,
