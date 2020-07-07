@@ -32,9 +32,9 @@
         <q-card-section class="q-pt-none">
           <q-form @submit="decryptFile">
             <q-file
+              v-model="seedFile"
               accept=".dag"
               outlined
-              v-model="seedFile"
               hint="File must have a .dag extension"
               label="Select File"
               style="min-width: 275px;"
@@ -82,11 +82,15 @@
 
         <q-card-section class="q-pt-none">
           <q-form @submit="restoreFromSeed">
+            <p>
+              Enter your 12 word seed phrase, with a space between each word. Be sure you're doing
+              this in a private space. Anyone with these 12 words can steal your funds.
+            </p>
             <base-input
               v-model="seedPhrase"
               :autogrow="true"
               hint="Enter the your 12 word seed phrase"
-              label="Password"
+              label="Seed Phrase"
               style="min-width: 275px;"
             />
 
@@ -166,7 +170,7 @@ export default Vue.extend({
   methods: {
     readFile(file) {
       return new Promise((resolve, reject) => {
-        let reader = new FileReader();
+        const reader = new FileReader();
         reader.onload = () => {
           resolve(reader.result);
         };
