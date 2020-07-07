@@ -29,12 +29,7 @@
           :loading="isLoading"
           type="submit"
         />
-        <base-button
-          :flat="true"
-          :dense="true"
-          label="I have a wallet"
-          @click="$router.push({ name: 'openWallet' })"
-        />
+        <base-button :flat="true" :dense="true" label="I have a wallet" @click="navigate" />
       </div>
     </q-form>
   </q-page>
@@ -84,6 +79,19 @@ export default Vue.extend({
       } catch (err) {
         this.isLoading = false;
         this.showError(err);
+      }
+    },
+
+    /**
+     * @notice Takes user to the open page if data exists in local storage, and the
+     * restore page otherwise
+     */
+    async navigate() {
+      const hasWallet = Boolean(this.$q.localStorage.getItem('kaspa-wallet-data'));
+      if (hasWallet) {
+        await this.$router.push({ name: 'openWallet' });
+      } else {
+        await this.$router.push({ name: 'restoreWallet' });
       }
     },
   },
