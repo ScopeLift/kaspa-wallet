@@ -1,12 +1,31 @@
-import Vue from 'vue';
+import { store } from 'quasar/wrappers';
 import Vuex from 'vuex';
-import { IMainState } from './modules/main';
 
-Vue.use(Vuex);
+import main from './main';
+import { MainInterface } from './main/state';
 
-export interface IRootState {
-  main: IMainState;
+/*
+ * If not building with SSR mode, you can
+ * directly export the Store instantiation
+ */
+
+export interface StoreInterface {
+  // Define your own store structure, using submodules if needed
+  main: MainInterface;
 }
 
-// Declare empty store first, dynamically register all modules later.
-export default new Vuex.Store<IRootState>({});
+export default store(function ({ Vue }) {
+  Vue.use(Vuex);
+
+  const Store = new Vuex.Store<StoreInterface>({
+    modules: {
+      main,
+    },
+
+    // enable strict mode (adds overhead!)
+    // for dev mode only
+    // strict: !!process.env.DEV,
+  });
+
+  return Store;
+});

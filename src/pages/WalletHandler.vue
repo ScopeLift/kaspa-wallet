@@ -1,31 +1,32 @@
 <template>
-  <!-- <component :is="pageToShow" /> -->
-  <div>
-    {{ pageToShow }}
-  </div>
+  <component :is="pageToShow" />
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
+import { mapState } from 'vuex';
 import Component from 'vue-class-component';
-import { Module, VuexModule, getModule } from 'vuex-module-decorators';
-import state from 'src/store/modules/main';
 import WalletCreate from 'pages/WalletCreate.vue';
 import WalletOpen from 'pages/WalletOpen.vue';
 
 @Component({
-  // Specify `components` option.
-  // See Vue.js docs for all available options:
-  // https://vuejs.org/v2/api/#Options-Data
   components: {
     WalletCreate,
     WalletOpen,
   },
+
+  computed: {
+    // We use ts-ignore because state is of type unknown
+    ...mapState('main', {
+      // @ts-ignore
+      hasWallet: (state) => Boolean(state.hasWallet),
+    }),
+  },
 })
 export default class WalletHandler extends Vue {
-  get hasWallet() {
-    return state.hasWallet;
-  }
+  // See comment below for why the duplicate definition is needed
+  // https://github.com/vuejs/vue-class-component/issues/109#issuecomment-447201746
+  hasWallet!: boolean;
 
   get pageToShow() {
     return this.hasWallet ? 'WalletOpen' : 'WalletCreate';

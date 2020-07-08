@@ -39,6 +39,7 @@
 import Wallet from 'src/wallet/Wallet';
 import Component, { mixins } from 'vue-class-component';
 import { Helpers } from 'components/mixins';
+import { LocalStorage } from 'quasar';
 
 @Component
 export default class WalletCreate extends mixins(Helpers) {
@@ -52,6 +53,37 @@ export default class WalletCreate extends mixins(Helpers) {
    */
   get isPasswordValid() {
     return this.password1.length > 0 && this.password1 === this.password2;
+  }
+
+  /**
+   * @notice Creates a new wallet, sets the state, and saves the encrypted data to local storage
+   */
+  async handleCreate() {
+    try {
+      this.isLoading = true;
+      const wallet = new Wallet();
+      const encryptedMnemonic = await wallet.export(this.password1);
+      LocalStorage.set('kaspa-wallet-data', encryptedMnemonic);
+      LocalStorage.set('is-backed-up', false);
+      await this.$store.dispatch('main/getWalletInfo', wallet);
+      // await this.$router.push({ name: 'walletBalance' });
+    } catch (err) {
+      this.isLoading = false;
+      this.showError(err);
+    }
+  }
+
+  /**
+   * @notice Takes user to the open page if data exists in local storage, and the
+   * restore page otherwise
+   */
+  async navigate() {
+    const hasWallet = Boolean(LocalStorage.getItem('kaspa-wallet-data'));
+    if (hasWallet) {
+      await this.$router.push({ name: 'openWallet' });
+    } else {
+      await this.$router.push({ name: 'restoreWallet' });
+    }
   }
 }
 </script>
