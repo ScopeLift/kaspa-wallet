@@ -1,10 +1,10 @@
-import Wallet from 'src/wallet/Wallet';
 import { ActionTree } from 'vuex';
 import { StoreInterface } from '../index';
 import { MainStateInterface } from './state';
 
 const actions: ActionTree<MainStateInterface, StoreInterface> = {
-  getWalletInfo({ commit }, wallet: Wallet) {
+  // eslint-disable-next-line
+  getWalletInfo({ commit }, wallet: any) {
     commit('setWalletInfo', wallet);
   },
 };

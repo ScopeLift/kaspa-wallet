@@ -70,15 +70,16 @@ export default Vue.extend({
     async handleCreate() {
       try {
         this.isLoading = true;
-        const wallet = new Wallet();
-        const encryptedMnemonic = await wallet.export(this.password1);
+        const wallet = new Wallet(); // eslint-disable-line
+        const encryptedMnemonic = await wallet.export(this.password1); // eslint-disable-line
         this.$q.localStorage.set('kaspa-wallet-data', encryptedMnemonic);
         this.$q.localStorage.set('is-backed-up', false);
         await this.$store.dispatch('main/getWalletInfo', wallet);
         await this.$router.push({ name: 'walletBalance' });
       } catch (err) {
         this.isLoading = false;
-        this.showError(err);
+        // @ts-ignore
+        this.showError(err); // eslint-disable-line
       }
     },
 

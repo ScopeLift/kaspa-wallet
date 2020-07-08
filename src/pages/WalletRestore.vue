@@ -126,6 +126,7 @@
 import Vue from 'vue';
 import Wallet from 'src/wallet/Wallet';
 import helpers from 'src/utils/mixin-helpers';
+import { LocalStorage } from 'quasar';
 
 export default Vue.extend({
   name: 'RestoreWallet',
@@ -138,77 +139,71 @@ export default Vue.extend({
       showFileRestore: false,
       showSeedRestore: false,
       isPasswordVisible: false,
-      isLoading: undefined,
-      password: undefined,
+      isLoading: false,
+      password: '',
       // For file upload
       seedFile: undefined,
-      seedFileText: undefined,
       // For seed phrase
-      seedPhrase: undefined,
+      seedPhrase: '',
     };
   },
 
   computed: {
-    isReadyToDecrypt() {
-      return this.seedFileText && this.password;
+    isReadyToDecrypt(): boolean {
+      return Boolean(this.seedFile && this.password);
     },
 
-    isReadyToRestoreFromSeed() {
-      return this.seedPhrase && this.password;
-    },
-  },
-
-  watch: {
-    seedFile: {
-      async handler() {
-        const reader = new FileReader();
-        this.seedFileText = await this.readFile(this.seedFile);
-      },
+    isReadyToRestoreFromSeed(): boolean {
+      return Boolean(this.seedPhrase && this.password);
     },
   },
 
   methods: {
-    readFile(file) {
+    readFile() {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
           resolve(reader.result);
         };
         reader.onerror = reject;
-        reader.readAsText(file);
+        // @ts-ignore
+        reader.readAsText(this.seedFile);
       });
     },
 
     async decryptFile() {
       try {
         this.isLoading = true;
-        const wallet = await Wallet.import(this.password, this.seedFileText);
+        const seedFileText = await this.readFile();
+        const wallet = await Wallet.import(this.password, seedFileText); // eslint-disable-line
         // Save this info into local storage for later
-        this.$q.localStorage.set('kaspa-wallet-data', this.seedFileText);
+        LocalStorage.set('kaspa-wallet-data', String(seedFileText));
         // Since it was imported from a file, we know it's already backed up
-        this.$q.localStorage.set('is-backed-up', true);
+        LocalStorage.set('is-backed-up', true);
         await this.$store.dispatch('main/getWalletInfo', wallet);
         await this.$router.push({ name: 'walletBalance' });
       } catch (err) {
         this.isLoading = false;
-        this.showError(err);
+        // @ts-ignore
+        this.showError(err); // eslint-disable-line
       }
     },
 
     async restoreFromSeed() {
       try {
         this.isLoading = true;
-        const wallet = Wallet.fromMnemonic(this.seedPhrase);
-        const encryptedMnemonic = await wallet.export(this.password);
+        const wallet = Wallet.fromMnemonic(this.seedPhrase); // eslint-disable-line
+        const encryptedMnemonic = await wallet.export(this.password); // eslint-disable-line
         // Save this info into local storage for later
-        this.$q.localStorage.set('kaspa-wallet-data', encryptedMnemonic);
+        LocalStorage.set('kaspa-wallet-data', encryptedMnemonic);
         // Since the phrase already exists, we know it's already backed up
-        this.$q.localStorage.set('is-backed-up', true);
+        LocalStorage.set('is-backed-up', true);
         await this.$store.dispatch('main/getWalletInfo', wallet);
         await this.$router.push({ name: 'walletBalance' });
       } catch (err) {
         this.isLoading = false;
-        this.showError(err);
+        // @ts-ignore
+        this.showError(err); // eslint-disable-line
       }
     },
   },

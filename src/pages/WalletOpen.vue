@@ -66,12 +66,13 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         const encryptedMnemonic = this.$q.localStorage.getItem('kaspa-wallet-data');
-        const wallet = await Wallet.import(this.password, encryptedMnemonic);
+        const wallet = await Wallet.import(this.password, encryptedMnemonic); // eslint-disable-line
         await this.$store.dispatch('main/getWalletInfo', wallet);
         await this.$router.push({ name: 'walletBalance' });
       } catch (err) {
         this.isLoading = false;
-        this.showError(err);
+        // @ts-ignore
+        this.showError(err); // eslint-disable-line
       }
     },
   },

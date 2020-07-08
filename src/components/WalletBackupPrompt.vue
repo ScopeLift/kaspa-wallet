@@ -208,8 +208,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapState } from 'vuex';
-import { StoreInterface } from 'src/store/index';
-import { exportFile } from 'quasar';
+import { exportFile, LocalStorage } from 'quasar';
 import Wallet from 'src/wallet/Wallet';
 import helpers from 'src/utils/mixin-helpers';
 
@@ -273,8 +272,9 @@ export default Vue.extend({
 
   computed: {
     ...mapState({
-      seedPhrase(state: StoreInterface): string {
-        return state.main.wallet.mnemonic;
+      seedPhrase(state): string {
+        // @ts-ignore
+        return String(state.main.wallet.mnemonic); // eslint-disable-line
       },
     }),
 
@@ -351,11 +351,12 @@ export default Vue.extend({
 
     async checkPassword() {
       try {
-        const encryptedMnemonic = this.$q.localStorage.getItem('kaspa-wallet-data');
-        await Wallet.import(this.password, encryptedMnemonic);
+        const encryptedMnemonic = LocalStorage.getItem('kaspa-wallet-data');
+        await Wallet.import(this.password, encryptedMnemonic); // eslint-disable-line
         this.isPasswordVerified = true;
       } catch (err) {
-        this.showError(err);
+        // @ts-ignore
+        this.showError(err); // eslint-disable-line
       }
     },
 
@@ -377,11 +378,11 @@ export default Vue.extend({
 
     async saveWalletFile() {
       await this.checkPassword();
-      const encryptedMnemonic = this.$q.localStorage.getItem('kaspa-wallet-data');
+      const encryptedMnemonic = String(LocalStorage.getItem('kaspa-wallet-data'));
       const status = exportFile('kaspa-wallet-data.dag', encryptedMnemonic);
       if (!status) {
-        // browser denied it
-        this.showError('Browser denied file download');
+        // @ts-ignore
+        this.showError('Browser denied file download'); // eslint-disable-line
       } else {
         this.onVerificationComplete();
       }
@@ -389,7 +390,7 @@ export default Vue.extend({
 
     onVerificationComplete() {
       this.isBackupComplete = true;
-      this.$q.localStorage.set('is-backed-up', true);
+      LocalStorage.set('is-backed-up', true);
     },
   },
 });

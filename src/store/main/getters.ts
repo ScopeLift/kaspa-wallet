@@ -4,7 +4,7 @@ import { MainStateInterface } from './state';
 
 const getters: GetterTree<MainStateInterface, StoreInterface> = {
   isLoggedIn(state: MainStateInterface): boolean {
-    return state.wallet?.mnemonic.split(' ').length === 12;
+    return state.wallet?.mnemonic.split(' ').length === 12; // eslint-disable-line
   },
 };
 

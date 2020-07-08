@@ -15,7 +15,6 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapState } from 'vuex';
-import { StoreInterface } from 'src/store/index';
 import { copyToClipboard } from 'quasar';
 import helpers from 'src/utils/mixin-helpers';
 
@@ -25,11 +24,14 @@ export default Vue.extend({
   mixins: [helpers],
 
   computed: {
+    /* eslint-disable */
     ...mapState({
-      address(state: StoreInterface): string {
+      address(state): string {
+        // @ts-ignore
         return state.main.wallet.address;
       },
     }),
+    /* eslint-enable */
   },
 
   methods: {
@@ -37,6 +39,7 @@ export default Vue.extend({
 
     async copyAddressToClipboard() {
       await this.copyToClipboard(this.address);
+      // @ts-ignore
       this.notifyUser('positive', 'Address has been copied to the clipboard'); // eslint-disable-line
     },
   },

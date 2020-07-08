@@ -9,6 +9,7 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "vetur.experimental.templateInterpolationService": true,
   "vetur.validation.template": false,
+  "vetur.validation.script": false,
   "html.format.enable": true,
   "json.format.enable": true,
   "javascript.format.enable": true,

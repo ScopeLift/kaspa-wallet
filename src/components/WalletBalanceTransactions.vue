@@ -63,8 +63,8 @@
 import Vue from 'vue';
 import { mapState } from 'vuex';
 import TransactionAmount from 'components/TransactionAmount.vue';
-import { StoreInterface } from 'src/store/index';
 import { partialAddress } from 'src/utils/formatters';
+import { Transaction } from '../../types/custom-types';
 
 export default Vue.extend({
   name: 'WalletBalanceTransactions',
@@ -102,18 +102,22 @@ export default Vue.extend({
   },
 
   computed: {
+    /* eslint-disable */
     ...mapState({
-      balance(state: StoreInterface) {
+      balance(state): string {
+        // @ts-ignore
         return state.main.wallet.balance;
       },
-      transactions(state: StoreInterface) {
+      transactions(state): Array<Transaction> {
+        // @ts-ignore
         return state.main.wallet.transactions;
       },
     }),
+    /* eslint-enable */
   },
 
   methods: {
-    partialAddress,
+    partialAddress, // eslint-disable-line
   },
 });
 </script>

@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "@vue/composition-api": "^1.0.0-beta.2",
     "bitcore-lib-cash": "^8.20.5",
     "bitcore-mnemonic": "^8.20.5",
     "browser-passworder": "^2.0.3",

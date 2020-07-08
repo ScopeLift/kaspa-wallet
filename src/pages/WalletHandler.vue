@@ -4,7 +4,6 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { StoreInterface } from 'src/store/index';
 import { mapState } from 'vuex';
 import WalletCreate from 'pages/WalletCreate.vue';
 import WalletOpen from 'pages/WalletOpen.vue';
@@ -18,11 +17,14 @@ export default Vue.extend({
   },
 
   computed: {
+    /* eslint-disable */
     ...mapState({
-      hasWallet(state: StoreInterface) {
+      hasWallet(state) {
+        // @ts-ignore
         return state.main.hasWallet;
       },
     }),
+    /* eslint-enable */
 
     pageToShow() {
       return this.hasWallet ? 'WalletOpen' : 'WalletCreate';

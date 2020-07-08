@@ -1,7 +1,7 @@
 <template>
   <q-page padding class="page-margin">
     <!-- Wallet backup prompt -->
-    <wallet-backup-prompt @backupComplete="getBackupStatus" v-if="!isBackedUp" />
+    <wallet-backup-prompt v-if="!isBackedUp" @backupComplete="getBackupStatus" />
     <!-- Wallet balance -->
     <div class="text-primary text-center">
       <transaction-amount :amount="balance" :is-balance="true" />
@@ -17,7 +17,6 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapState } from 'vuex';
-import { StoreInterface } from 'src/store/index';
 import TransactionAmount from 'components/TransactionAmount.vue';
 import WalletBalanceTransactions from 'components/WalletBalanceTransactions.vue';
 
@@ -36,11 +35,14 @@ export default Vue.extend({
   },
 
   computed: {
+    /* eslint-disable */
     ...mapState({
-      balance(state: StoreInterface) {
+      balance(state) {
+        // @ts-ignore
         return state.main.wallet.balance || '0';
       },
     }),
+    /* eslint-enable */
   },
 
   mounted() {

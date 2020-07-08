@@ -26,13 +26,13 @@ export default Vue.extend({
       });
     },
 
+    /* eslint-disable */
     /**
      * Show error message to user
      * @param {Any} err Error object thrown
      * @param {Any} msg Optional, fallback error message if one is not provided by the err object
      */
-    showError(err: unknown, msg = 'An unknown error occurred') {
-      /* eslint-disable */
+    showError(err: any, msg = 'An unknown error occurred') {
       console.error(err);
       if (!err) this.notifyUser('negative', msg);
       else if (err.message) this.notifyUser('negative', err.message);

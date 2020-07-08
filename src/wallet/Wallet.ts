@@ -133,6 +133,7 @@ class Wallet {
    */
   static async import(password: string, encryptedMnemonic: string): Promise<Wallet> {
     const decrypted = await passworder.decrypt(password, encryptedMnemonic);
+    // @ts-ignore
     const seedPhrase = Buffer.from(decrypted, 'utf8').toString();
     return this.fromMnemonic(seedPhrase);
   }
@@ -143,6 +144,7 @@ class Wallet {
    * @returns Promise that resolves to object-like string. Suggested to store as string for .import().
    */
   async export(password: string): Promise<string> {
+    // @ts-ignore
     return passworder.encrypt(password, Buffer.from(this.mnemonic, 'utf8'));
   }
 }
