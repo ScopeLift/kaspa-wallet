@@ -1,5 +1,10 @@
 export type Network = 'kaspa' | 'kaspadev' | 'kaspareg' | 'kaspatest' | 'kaspasim';
 
+export type WalletSave = {
+  seedPhrase: string;
+  privKey: string;
+};
+
 export interface TransactionInput {
   previousTransactionId: string;
   previousTransactionOutputIndex: string;

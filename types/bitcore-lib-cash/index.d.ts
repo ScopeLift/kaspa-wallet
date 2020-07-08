@@ -41,91 +41,91 @@ declare module 'bitcore-lib-cash' {
   //     }
   //   }
 
-  //   export namespace Transaction {
-  //     class UnspentOutput {
-  //       static fromObject(o: object): UnspentOutput;
+  export namespace Transaction {
+    class UnspentOutput {
+      static fromObject(o: object): UnspentOutput;
 
-  //       readonly address: Address;
-  //       readonly txId: string;
-  //       readonly outputIndex: number;
-  //       readonly script: Script;
-  //       readonly satoshis: number;
+      readonly address: Address;
+      readonly txId: string;
+      readonly outputIndex: number;
+      readonly script: Script;
+      readonly satoshis: number;
 
-  //       constructor(data: object);
+      constructor(data: object);
 
-  //       inspect(): string;
-  //       toObject(): this;
-  //       toString(): string;
-  //     }
+      inspect(): string;
+      toObject(): this;
+      toString(): string;
+    }
 
-  //     class Output {
-  //       readonly script: Script;
-  //       readonly satoshis: number;
+    class Output {
+      readonly script: Script;
+      readonly satoshis: number;
 
-  //       constructor(data: object);
+      constructor(data: object);
 
-  //       setScript(script: Script | string | Buffer): this;
-  //       inspect(): string;
-  //       toObject(): object;
-  //     }
+      setScript(script: Script | string | Buffer): this;
+      inspect(): string;
+      toObject(): object;
+    }
 
-  //     class Input {
-  //       readonly prevTxId: Buffer;
-  //       readonly outputIndex: number;
-  //       readonly sequenceNumber: number;
-  //       readonly script: Script;
-  //       readonly output?: Output;
-  //     }
-  //   }
+    class Input {
+      readonly prevTxId: Buffer;
+      readonly outputIndex: number;
+      readonly sequenceNumber: number;
+      readonly script: Script;
+      readonly output?: Output;
+    }
+  }
 
-  //   export class Transaction {
-  //     inputs: Transaction.Input[];
-  //     outputs: Transaction.Output[];
-  //     readonly id: string;
-  //     readonly hash: string;
-  //     nid: string;
+  export class Transaction {
+    inputs: Transaction.Input[];
+    outputs: Transaction.Output[];
+    readonly id: string;
+    readonly hash: string;
+    nid: string;
 
-  //     constructor(serialized?: any);
+    constructor(serialized?: any);
 
-  //     from(utxos: Transaction.UnspentOutput[]): this;
-  //     to(address: Address[] | Address | string, amount: number): this;
-  //     change(address: Address | string): this;
-  //     fee(amount: number): this;
-  //     feePerKb(amount: number): this;
-  //     sign(privateKey: PrivateKey | string): this;
-  //     applySignature(sig: crypto.Signature): this;
-  //     addInput(input: Transaction.Input): this;
-  //     addOutput(output: Transaction.Output): this;
-  //     addData(value: Buffer): this;
-  //     lockUntilDate(time: Date | number): this;
-  //     lockUntilBlockHeight(height: number): this;
+    from(utxos: Transaction.UnspentOutput[]): this;
+    to(address: Address[] | Address | string, amount: number): this;
+    change(address: Address | string): this;
+    fee(amount: number): this;
+    feePerKb(amount: number): this;
+    sign(privateKey: PrivateKey | string): this;
+    applySignature(sig: crypto.Signature): this;
+    addInput(input: Transaction.Input): this;
+    addOutput(output: Transaction.Output): this;
+    addData(value: Buffer): this;
+    lockUntilDate(time: Date | number): this;
+    lockUntilBlockHeight(height: number): this;
 
-  //     hasWitnesses(): boolean;
-  //     getFee(): number;
-  //     getChangeOutput(): Transaction.Output | null;
-  //     getLockTime(): Date | number;
+    hasWitnesses(): boolean;
+    getFee(): number;
+    getChangeOutput(): Transaction.Output | null;
+    getLockTime(): Date | number;
 
-  //     verify(): string | boolean;
-  //     isCoinbase(): boolean;
+    verify(): string | boolean;
+    isCoinbase(): boolean;
 
-  //     enableRBF(): this;
-  //     isRBF(): boolean;
+    enableRBF(): this;
+    isRBF(): boolean;
 
-  //     inspect(): string;
-  //     serialize(): string;
-  //   }
+    inspect(): string;
+    serialize(): string;
+  }
 
-  //   export class Block {
-  //     hash: string;
-  //     height: number;
-  //     transactions: Transaction[];
-  //     header: {
-  //       time: number;
-  //       prevHash: string;
-  //     };
+  export class Block {
+    hash: string;
+    height: number;
+    transactions: Transaction[];
+    header: {
+      time: number;
+      prevHash: string;
+    };
 
-  //     constructor(data: Buffer | object);
-  //   }
+    constructor(data: Buffer | object);
+  }
 
   export class PrivateKey {
     readonly publicKey: PublicKey;
