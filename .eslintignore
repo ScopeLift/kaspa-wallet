@@ -1,0 +1,11 @@
+/dist
+/src-bex/www
+/src-capacitor
+/src-cordova
+/.quasar
+/node_modules
+babel.config.js
+jest.config.js
+/test
+/types
+quasar.conf.js
