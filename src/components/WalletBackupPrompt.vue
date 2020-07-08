@@ -41,21 +41,25 @@
         <!-- Prompt user for password to unlock wallet -->
         <q-card-section v-if="!isPasswordVerified" class="q-pt-none">
           <div class="text-center q-mt-md q-mb-lg">
-            Your wallet is accessible by a seed. The seed is an ordered 12-word secret phrase.
+            Your wallet is accessible by a seed phrase. The seed phrase is an ordered 12-word secret
+            phrase.
             <br /><br />
             To create a backup of this seed phrase, enter your password below. This will save a file
             containting the encrypted contents to your device, and it can be decrypted using the
             same password.
           </div>
-          <base-input
-            v-model="password"
-            hint="Enter your password to continue"
-            :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
-            label="Password"
-            style="min-width: 250px; max-width: 400px;"
-            :type="isPasswordVisible ? 'text' : 'password'"
-            @iconClicked="isPasswordVisible = !isPasswordVisible"
-          />
+          <div class="row justify-center">
+            <base-input
+              v-model="password"
+              class="col"
+              hint="Enter your password to continue"
+              :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
+              label="Password"
+              style="min-width: 250px; max-width: 400px;"
+              :type="isPasswordVisible ? 'text' : 'password'"
+              @iconClicked="isPasswordVisible = !isPasswordVisible"
+            />
+          </div>
         </q-card-section>
 
         <div v-else-if="isBackupComplete" class="text-center">
@@ -99,19 +103,24 @@
         <!-- Prompt user for password to unlock wallet -->
         <q-card-section v-if="!isPasswordVerified" class="q-pt-none">
           <div class="text-center q-mt-md q-mb-lg">
-            Your wallet is accessible by a seed. The seed is an ordered 12-word secret phrase.
+            Your wallet is accessible by a seed phrase. The seed phrase is an ordered 12-word secret
+            phrase.
             <br /><br />
-            Make sure no one is looking, and enter your password to reveal your seed phrase.
+            Enter your password to reveal your seed phrase. Make sure no one is looking, as anyone
+            with your seed phrase can access your wallet your funds. Keep it safe!
           </div>
-          <base-input
-            v-model="password"
-            hint="Enter your password to continue"
-            :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
-            label="Password"
-            style="min-width: 250px; max-width: 400px;"
-            :type="isPasswordVisible ? 'text' : 'password'"
-            @iconClicked="isPasswordVisible = !isPasswordVisible"
-          />
+          <div class="row justify-center">
+            <base-input
+              v-model="password"
+              class="col"
+              hint="Enter your password to continue"
+              :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
+              label="Password"
+              style="min-width: 250px; max-width: 400px;"
+              :type="isPasswordVisible ? 'text' : 'password'"
+              @iconClicked="isPasswordVisible = !isPasswordVisible"
+            />
+          </div>
         </q-card-section>
 
         <!-- If user verified password, show them the seed phrase -->
