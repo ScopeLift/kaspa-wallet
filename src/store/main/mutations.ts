@@ -2,8 +2,8 @@ import { MutationTree } from 'vuex';
 import { MainInterface } from './state';
 
 const mutation: MutationTree<MainInterface> = {
-  someMutation(/* state: MainInterface */) {
-    // your code
+  setHasWallet(state: MainInterface, hasWallet: boolean) {
+    state.hasWallet = hasWallet;
   },
 };
 

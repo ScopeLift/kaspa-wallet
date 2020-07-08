@@ -66,7 +66,7 @@ export default class WalletCreate extends mixins(Helpers) {
       LocalStorage.set('kaspa-wallet-data', encryptedMnemonic);
       LocalStorage.set('is-backed-up', false);
       await this.$store.dispatch('main/getWalletInfo', wallet);
-      // await this.$router.push({ name: 'walletBalance' });
+      await this.$router.push({ name: 'walletBalance' });
     } catch (err) {
       this.isLoading = false;
       this.showError(err);
