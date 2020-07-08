@@ -11,6 +11,6 @@ if (fs.existsSync('./.babelrc')) {
 }
 
 module.exports = {
-  presets: ['@quasar/babel-preset-app'],
+  presets: ['@quasar/babel-preset-app', '@babel/preset-typescript'],
   extends: extend,
 };

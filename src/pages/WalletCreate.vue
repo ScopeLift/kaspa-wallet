@@ -61,8 +61,11 @@ export default class WalletCreate extends mixins(Helpers) {
   async handleCreate() {
     try {
       this.isLoading = true;
+      console.log(1);
       const wallet = new Wallet();
+      console.log(2);
       const encryptedMnemonic = await wallet.export(this.password1);
+      console.log(3);
       LocalStorage.set('kaspa-wallet-data', encryptedMnemonic);
       LocalStorage.set('is-backed-up', false);
       await this.$store.dispatch('main/getWalletInfo', wallet);

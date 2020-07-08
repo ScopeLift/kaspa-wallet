@@ -6,7 +6,7 @@ import Mnemonic from 'bitcore-mnemonic';
 import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
-import { Network, Transaction } from '../../types/custom-types';
+import { Network, Transaction } from './custom-types';
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
