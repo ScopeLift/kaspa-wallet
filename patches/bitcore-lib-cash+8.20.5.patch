@@ -1,0 +1,102 @@
+diff --git a/node_modules/bitcore-lib-cash/lib/transaction/input/input.js b/node_modules/bitcore-lib-cash/lib/transaction/input/input.js
+index 8aaa33f..60a4243 100644
+--- a/node_modules/bitcore-lib-cash/lib/transaction/input/input.js
++++ b/node_modules/bitcore-lib-cash/lib/transaction/input/input.js
+@@ -10,8 +10,10 @@ var JSUtil = require('../../util/js');
+ var Script = require('../../script');
+ var Sighash = require('../sighash');
+ var Output = require('../output');
++var BN = require('../../crypto/bn')
+ 
+-var MAXINT = 0xffffffff; // Math.pow(2, 32) - 1;
++
++var MAXINT = BN.fromBuffer(Buffer('ffffffffffffffff', 'hex'));
+ var DEFAULT_RBF_SEQNUMBER = MAXINT - 2;
+ var DEFAULT_SEQNUMBER = MAXINT;
+ var DEFAULT_LOCKTIME_SEQNUMBER = MAXINT - 1;
+@@ -102,7 +104,7 @@ Input.fromBufferReader = function(br) {
+   input.prevTxId = br.readReverse(32);
+   input.outputIndex = br.readUInt32LE();
+   input._scriptBuffer = br.readVarLengthBuffer();
+-  input.sequenceNumber = br.readUInt32LE();
++  input.sequenceNumber = br.readUInt64LEBN();
+   // TODO: return different classes according to which input it is
+   // e.g: CoinbaseInput, PublicKeyHashInput, MultiSigScriptHashInput, etc.
+   return input;
+@@ -117,7 +119,7 @@ Input.prototype.toBufferWriter = function(writer) {
+   var script = this._scriptBuffer;
+   writer.writeVarintNum(script.length);
+   writer.write(script);
+-  writer.writeUInt32LE(this.sequenceNumber);
++  writer.writeUInt64LEBN(this.sequenceNumber);
+   return writer;
+ };
+ 
+@@ -172,7 +174,7 @@ Input.prototype.isFullySigned = function() {
+ };
+ 
+ Input.prototype.isFinal = function() {
+-  return this.sequenceNumber !== 4294967295;
++  return !this.sequenceNumber.eq(MAXINT);
+ };
+ 
+ Input.prototype.addSignature = function() {
+diff --git a/node_modules/bitcore-lib-cash/lib/transaction/transaction.js b/node_modules/bitcore-lib-cash/lib/transaction/transaction.js
+index 7f985f2..a794b8f 100644
+--- a/node_modules/bitcore-lib-cash/lib/transaction/transaction.js
++++ b/node_modules/bitcore-lib-cash/lib/transaction/transaction.js
+@@ -40,6 +40,11 @@ function Transaction(serialized) {
+   this.outputs = [];
+   this._inputAmount = undefined;
+   this._outputAmount = undefined;
++  this.subnetworkID = Buffer.alloc(20);
++  this.gas = Buffer.alloc(0);
++  this.payloadHash = Buffer.alloc(0);
++  this.payloadLength = Buffer.alloc(0);
++  this.payload = Buffer.alloc(0);
+ 
+   if (serialized) {
+     if (serialized instanceof Transaction) {
+@@ -59,7 +64,7 @@ function Transaction(serialized) {
+ }
+ 
+ var CURRENT_VERSION = 2;
+-var DEFAULT_NLOCKTIME = 0;
++var DEFAULT_NLOCKTIME = new BN(0);
+ var MAX_BLOCK_SIZE = 1000000;
+ 
+ // Minimum amount for an output for it not to be considered a dust output
+@@ -74,8 +79,8 @@ Transaction.MAX_MONEY = 21000000 * 1e8;
+ // nlocktime limit to be considered block height rather than a timestamp
+ Transaction.NLOCKTIME_BLOCKHEIGHT_LIMIT = 5e8;
+ 
+-// Max value for an unsigned 32 bit value
+-Transaction.NLOCKTIME_MAX_VALUE = 4294967295;
++// Max value for an unsigned 64 bit value
++Transaction.NLOCKTIME_MAX_VALUE = BN.fromBuffer(Buffer('ffffffffffffffff', 'hex'));
+ 
+ // Value used for fee estimation (satoshis per kilobyte)
+ Transaction.FEE_PER_KB = 100000;
+@@ -288,7 +293,12 @@ Transaction.prototype.toBufferWriter = function(writer) {
+   _.each(this.outputs, function(output) {
+     output.toBufferWriter(writer);
+   });
+-  writer.writeUInt32LE(this.nLockTime);
++  writer.writeUInt64LEBN(this.nLockTime);
++  writer.write(this.subnetworkID)
++  writer.write(this.gas)
++  writer.write(this.payloadHash)
++  writer.write(this.payloadLength)
++  writer.write(this.payload)
+   return writer;
+ };
+ 
+@@ -311,7 +321,7 @@ Transaction.prototype.fromBufferReader = function(reader) {
+   for (i = 0; i < sizeTxOuts; i++) {
+     this.outputs.push(Output.fromBufferReader(reader));
+   }
+-  this.nLockTime = reader.readUInt32LE();
++  this.nLockTime = reader.readUInt64LEBN();
+   return this;
+ };
+ 

@@ -18,7 +18,8 @@
     "test:unit:watch": "jest --watch",
     "test:unit:watchAll": "jest --watchAll",
     "serve:test:coverage": "quasar serve test/jest/coverage/lcov-report/ --port 8788",
-    "concurrently:dev:jest": "concurrently \"quasar dev\" \"jest --watch\""
+    "concurrently:dev:jest": "concurrently \"quasar dev\" \"jest --watch\"",
+    "postinstall": "patch-package"
   },
   "husky": {
     "hooks": {
@@ -58,6 +59,7 @@
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
     "node-webcrypto-ossl": "^2.1.0",
+    "patch-package": "^6.2.2",
     "prettier": "2.0.5",
     "workbox-webpack-plugin": "^5.1.3"
   },
