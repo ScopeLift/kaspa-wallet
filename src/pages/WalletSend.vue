@@ -10,6 +10,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { mapState } from 'vuex';
 
 export default Vue.extend({
   name: 'WalletSend',
@@ -22,18 +23,30 @@ export default Vue.extend({
   },
 
   computed: {
+    /* eslint-disable */
+    ...mapState({
+      wallet(state) {
+        // @ts-ignore
+        return state.main.wallet;
+      },
+    }),
+    /* eslint-enable */
+
     areInputsValid(): boolean {
       return this.toAddress.length > 0 && this.amount.length > 0;
     },
   },
 
+  mounted() {
+    const utxos = this.wallet.getUtxos();
+  },
+
   methods: {
     async next() {
-      // const res = await this.$store.main.wallet.sendTx({
-      //   amount: this.amount,
-      //   toAddr: this.toAddress,
-      // });
-      // alert(`response: ${res}`);
+      const res = await this.wallet.sendTx({
+        amount: this.amount,
+        toAddr: this.toAddress,
+      });
     },
   },
 });

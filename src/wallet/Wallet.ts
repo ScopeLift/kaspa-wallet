@@ -56,9 +56,9 @@ class Wallet {
    */
   mnemonic: string;
 
-  private utxoSet: Set<Utxo>;
+  private utxoSet: Set<Utxo> = new Set();
 
-  private addressDict: AddressDict;
+  private addressDict: AddressDict = {};
 
   /**
    * Transaction history
@@ -79,21 +79,60 @@ class Wallet {
       this.HDWallet = new bitcore.HDPrivateKey(temp.toHDPrivateKey().toString());
     }
     this.deriveAddress();
+    this.getUtxos();
   }
+
+  async getUtxos(): void {
+    const req = await fetch(`${API_ENDPOINT}/utxos/address/${this.address}`);
+    const res = await req.json();
+    res.utxos.map((utxo) => {
+      this.utxoSet.add(utxo);
+    });
+  }
+
+  /**
+   * 
+   {
+    "utxos":[
+        {
+            "transactionId":"string",
+            "index":int,
+            "value":"string",
+            "scriptPubKey":"string",
+            "acceptingBlockHash":"string",
+            "acceptingBlockBlueScore":"string",
+            "isCoinbase":boolean,
+            "confirmations":"string",
+            "isSpendable":boolean
+        },
+        {
+            "transactionId":"string",
+            "index":int,
+            "value":"string",
+            "scriptPubKey":"string",
+            "acceptingBlockHash":"string",
+            "acceptingBlockBlueScore":"string",
+            "isCoinbase":boolean,
+            "confirmations":"string",
+            "isSpendable":boolean
+        }
+      ]
+    }
+   */
 
   // TODO: add type of key to derive (change, etc)
   deriveAddress(isChange: boolean): string {
     if (isChange) {
       const derivePath = `m/44'/972/0'/1'/${this.changeIndex}`;
       const privateKey = this.HDWallet.deriveChild(derivePath);
-      this.changeAddress = privateKey.toAddress(this.network).toString();
+      this.changeAddress = privateKey.privateKey.toAddress(this.network).toString();
       this.addressDict[privateKey.toString()] = privateKey;
       this.changeIndex += 1;
       return this.changeAddress;
     }
     const derivePath = `m/44'/972/0'/0'/${this.childIndex}'`;
     const privateKey = this.HDWallet.deriveChild(derivePath);
-    this.address = privateKey.toAddress(this.network).toString();
+    this.address = privateKey.privateKey.toAddress(this.network).toString();
     this.addressDict[this.address] = privateKey;
     this.childIndex += 1;
     return this.address;
@@ -120,7 +159,7 @@ class Wallet {
 
   // TODO: convert amount to sompis aka satoshis
   // TODO: bn
-  sendTx({ toAddr, amount, fee }: TxSend): Promise<TxResponse> {
+  async sendTx({ toAddr, amount, fee }: TxSend): Promise<TxResponse> {
     // utxo selection
     if (!fee) fee = DEFAULT_FEE;
     if (amount < this.balance)
@@ -141,7 +180,7 @@ class Wallet {
       .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
     const rawTransaction = tx.toString();
     // send
-    return fetch(`${API_ENDPOINT}/transaction`, {
+    const response = await fetch(`${API_ENDPOINT}/transaction`, {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
@@ -150,6 +189,8 @@ class Wallet {
       },
       body: JSON.stringify({ rawTransaction }),
     });
+    jsonRes = await response.json();
+    // jsonRes.error
   }
 
   /**
