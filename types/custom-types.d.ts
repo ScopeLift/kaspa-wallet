@@ -33,3 +33,22 @@ export interface Transaction {
   mass: number;
   confirmations: number;
 }
+
+export type Utxo = {
+  transactionId: string;
+  value: number;
+  scriptPubKey: string;
+  acceptingBlockHash: string;
+  acceptingBlockBlueScore: number;
+  index: number;
+  isSpent: boolean;
+  isCoinbase: boolean;
+  isSpendable: boolean;
+  confirmations: number;
+};
+
+export type TxSend = {
+  to: string;
+  amount: number;
+  fee?: number;
+};

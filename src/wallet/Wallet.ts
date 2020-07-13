@@ -2,8 +2,15 @@ import Mnemonic from 'bitcore-mnemonic';
 import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
-import { Network, Transaction, WalletSave } from 'custom-types';
+import { Network, Transaction, WalletSave, Utxo, TxSend } from 'custom-types';
 import { dummyTx } from './dummyTx';
+
+const DEFAULT_FEE = 1000;
+// TODO: default network in global config
+const DEFAULT_NETWORK = 'kaspatest';
+const API_ENDPOINT = 'http://localhost:11224';
+
+type AddressDict = Record<string, bitcore.PrivateKey>;
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
@@ -15,9 +22,9 @@ class Wallet {
   balance: number | undefined = undefined;
 
   /**
-   * Current network. Set with useNetwork()
+   * Current network.
    */
-  network: Network = 'kaspatest'; // TODO: default network in global config
+  network: Network = DEFAULT_NETWORK;
 
   /**
    * The derived keypair that will be used as this Wallet's receive address.
@@ -30,18 +37,31 @@ class Wallet {
   address: string;
 
   /**
+   * The next change address in cashaddr format
+   */
+  changeAddress: string;
+
+  /**
    * The index of the derivation path
    */
   childIndex = 0;
+
+  /**
+   * The index of the change path
+   */
+  changeIndex = 0;
 
   /**
    * A 12 word mnemonic that is only present when the wallet was just created.
    */
   mnemonic: string;
 
+  private utxoSet: Set<Utxo>;
+
+  private addressDict: AddressDict;
+
   /**
    * Transaction history
-   * TODO: remove dummy transaction data
    */
   transactions: Transaction[] = dummyTx;
 
@@ -58,20 +78,78 @@ class Wallet {
       this.mnemonic = temp.toString();
       this.HDWallet = new bitcore.HDPrivateKey(temp.toHDPrivateKey().toString());
     }
-    this.currentChild = this.HDWallet.deriveChild("m/44'/972/0'/0'/0'");
-    this.address = this.currentChild.privateKey.toAddress(this.network).toString();
-  }
-
-  private newDerivePath(): string {
-    this.childIndex += 1;
-    return `m/44'/972/0'/0'/${this.childIndex}'`;
+    this.deriveAddress();
   }
 
   // TODO: add type of key to derive (change, etc)
-  deriveChild(): string {
-    this.currentChild = this.HDWallet.deriveChild(this.newDerivePath());
-    this.address = this.currentChild.privateKey.toAddress(this.network).toString();
+  deriveAddress(isChange: boolean): string {
+    if (isChange) {
+      const derivePath = `m/44'/972/0'/1'/${this.changeIndex}`;
+      const privateKey = this.HDWallet.deriveChild(derivePath);
+      this.changeAddress = privateKey.toAddress(this.network).toString();
+      this.addressDict[privateKey.toString()] = privateKey;
+      this.changeIndex += 1;
+      return this.changeAddress;
+    }
+    const derivePath = `m/44'/972/0'/0'/${this.childIndex}'`;
+    const privateKey = this.HDWallet.deriveChild(derivePath);
+    this.address = privateKey.toAddress(this.network).toString();
+    this.addressDict[this.address] = privateKey;
+    this.childIndex += 1;
     return this.address;
+  }
+
+  private addressDiscovery(): void {
+    // make a bunch of queries looking for transactions and UTXOs
+    // return:
+    //  set of UnspentOutputs,
+    //  set of Transactions,
+    //  address dictionary (key: address, value: bitcore.PrivateKey),
+    //  new index
+  }
+
+  private selectUtxos(txAmount: integer): Utxo[] {
+    const arr: Utxo[] = [];
+    let totalVal = 0;
+    for (let i = 0; i < this.utxoSet.length && totalVal < txAmount; i += 1) {
+      arr.push(this.utxoSet[i]);
+      totalVal += this.utxoSet[i].value;
+    }
+    return arr;
+  }
+
+  // TODO: convert amount to sompis aka satoshis
+  // TODO: bn
+  sendTx({ toAddr, amount, fee }: TxSend): Promise<TxResponse> {
+    // utxo selection
+    if (!fee) fee = DEFAULT_FEE;
+    if (amount < this.balance)
+      throw new Error(
+        `Not enough balance. Amount: ${amount}, Fee: ${fee}, Balance: ${this.balance}`
+      );
+    const utxos = this.selectUtxos(amount + fee);
+    const privKeys = utxos.reduce((prev, cur) => {
+      prev.add(this.addressDict[cur.address]);
+      return prev;
+    }, new Set());
+    // serialize
+    const tx: bitcore.Transaction = new bitcore.Transaction()
+      .from(utxos)
+      .to(toAddr, amount)
+      .setVersion(1)
+      .fee(fee)
+      .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
+    const rawTransaction = tx.toString();
+    // send
+    return fetch(`${API_ENDPOINT}/transaction`, {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {
+        ContentType: 'application/json',
+      },
+      body: JSON.stringify({ rawTransaction }),
+    });
   }
 
   /**
@@ -80,8 +158,8 @@ class Wallet {
    * @returns new Wallet
    */
   static fromMnemonic(seedPhrase: string): Wallet {
-    const mne = new Mnemonic(seedPhrase.trim());
-    const wallet = new this(mne.toHDPrivateKey().toString(), seedPhrase);
+    const privKey = new Mnemonic(seedPhrase.trim()).toHDPrivateKey().toString();
+    const wallet = new this(privKey, seedPhrase);
     return wallet;
   }
 

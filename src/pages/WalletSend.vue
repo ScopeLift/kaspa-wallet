@@ -28,8 +28,12 @@ export default Vue.extend({
   },
 
   methods: {
-    next() {
-      alert(`Sending ${this.amount} KAS to ${this.toAddress}`);
+    async next() {
+      // const res = await this.$store.main.wallet.sendTx({
+      //   amount: this.amount,
+      //   toAddr: this.toAddress,
+      // });
+      // alert(`response: ${res}`);
     },
   },
 });

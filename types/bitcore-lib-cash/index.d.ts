@@ -91,6 +91,7 @@ declare module 'bitcore-lib-cash' {
     to(address: Address[] | Address | string, amount: number): this;
     change(address: Address | string): this;
     fee(amount: number): this;
+    setVersion(version: number): this;
     feePerKb(amount: number): this;
     sign(privateKey: PrivateKey | string): this;
     applySignature(sig: crypto.Signature): this;
