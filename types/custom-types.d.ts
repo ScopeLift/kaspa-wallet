@@ -36,18 +36,27 @@ export interface Transaction {
   confirmations: number;
 }
 
-export type Utxo = {
-  transactionId: string;
-  value: number;
-  scriptPubKey: string;
-  acceptingBlockHash: string;
-  acceptingBlockBlueScore: number;
-  index: number;
-  isSpent: boolean;
-  isCoinbase: boolean;
-  isSpendable: boolean;
-  confirmations: number;
-};
+export namespace Api {
+  type Utxo = {
+    transactionId: string;
+    value: number;
+    scriptPubKey: string;
+    acceptingBlockHash: string;
+    acceptingBlockBlueScore: number;
+    index: number;
+    isSpent: boolean;
+    isCoinbase: boolean;
+    isSpendable: boolean;
+    confirmations: number;
+  };
+  type ErrorResponse = {
+    errorCode: number;
+    errorMessage: string;
+  };
+  export type UtxoResponse = Utxo[] | ErrorResponse;
+
+  export type SendTxResponse = ErrorResponse | undefined;
+}
 
 export interface TxSend {
   to: string;
@@ -55,10 +64,4 @@ export interface TxSend {
   fee?: number;
 }
 
-export type ErrorResponse = {
-  errorCode: number;
-  errorMessage: string;
-};
-export type UtxoResponse = Utxo[] | ErrorResponse;
-export type SendTxResponse = ErrorResponse | undefined;
 export type AddressDict = Record<string, bitcore.PrivateKey>;

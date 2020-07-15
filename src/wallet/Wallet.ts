@@ -2,7 +2,7 @@ import Mnemonic from 'bitcore-mnemonic';
 import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
-import { Network, Transaction, WalletSave, Utxo, TxSend, AddressDict } from 'custom-types';
+import { Network, Transaction, WalletSave, Api, TxSend, AddressDict } from 'custom-types';
 import { dummyTx } from './dummyTx';
 import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
 
@@ -116,7 +116,7 @@ class Wallet {
   }
 
   private selectUtxos(txAmount: number): bitcore.Transaction.UnspentOutput[] {
-    const arr: Utxo[] = [];
+    const arr: bitcore.Transaction.UnspentOutput[] = [];
     let totalVal = 0;
     Object.values(this.utxoSet).some((utxo) => {
       arr.push(utxo);
@@ -128,7 +128,7 @@ class Wallet {
     return arr;
   }
 
-  addUtxos(utxos: Utxo[], address: string): void {
+  addUtxos(utxos: Api.Utxo[], address: string): void {
     utxos.forEach((utxo) => {
       this.utxoSet.push(
         new bitcore.Transaction.UnspentOutput({
