@@ -37,16 +37,9 @@ export default Vue.extend({
     },
   },
 
-  mounted() {
-    const utxos = this.wallet.getUtxos();
-  },
-
   methods: {
-    async next() {
-      const res = await this.wallet.sendTx({
-        amount: this.amount,
-        toAddr: this.toAddress,
-      });
+    next() {
+      console.log('ok');
     },
   },
 });
