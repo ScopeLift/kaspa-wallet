@@ -1,6 +1,4 @@
-import Wallet from '../../../src/wallet/Wallet';
-import mockUtxos from './mockUtxo.json';
-import { apiTest } from './mockWallets';
+import { apiTest } from '../data/mockWallets';
 const { to, from } = apiTest;
 import * as api from '../../../src/wallet/apiHelpers';
 import { API_ENDPOINT } from '../../../config.json';

@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Jest single run all tests",
+      "name": "Jest single run a test",
       "cwd": "${workspaceRoot}/",
       "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
       "env": { "CI": "true" },

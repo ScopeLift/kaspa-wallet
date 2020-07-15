@@ -2,21 +2,6 @@ import bitcore from 'bitcore-lib-cash';
 
 const networkPrefixes = ['kaspa', 'kaspadev', 'kaspareg', 'kaspatest', 'kaspasim'];
 
-networkPrefixes.map((str) => {
-  bitcore.Networks.add({
-    name: str,
-    prefix: str,
-    pubkeyhash: 0x00, //publickey hash prefix
-    privatekey: 0x80, // privatekey prefix -- must be 128 or toWIF() result will not match with kaspa
-    scripthash: 0x05,
-    xpubkey: 0x0488b21e, // extended public key magic
-    xprivkey: 0x0488ade4, // extended private key magic
-    networkMagic: 0xdab5bffa, // network magic number
-  });
-});
-
-// bitcore.Networks.defaultNetwork = bitcore.Networks.kaspa
-
 let keyTest = {
   pubKeyHex: '02f707d9ce3bd3998744cb6bd3e3da4b68a5babef5b324948681ac9250723c8fc9',
   pubKeyCashAddr: 'kaspadev:qp02uemuxw2tva3fp9q5qunxxgk907r70uyxje5eg0',

@@ -1,7 +1,6 @@
 import bitcore from 'bitcore-lib-cash';
-import Wallet from '../../../src/wallet/Wallet';
-import mockUtxos from './mockUtxo.json';
-import { walletTestSerialize } from './mockWallets';
+import mockUtxos from '../data/mockUtxo.json';
+import { walletTestSerialize } from '../data/mockWallets';
 const { from, to } = walletTestSerialize;
 
 const utxos = mockUtxos.map((obj) => {

@@ -1,6 +1,6 @@
 import Wallet from '../../../src/wallet/Wallet';
-import mockUtxos from './mockUtxo.json';
-import { walletTestSerialize } from './mockWallets';
+import mockUtxos from '../data/mockUtxo.json';
+import { walletTestSerialize } from '../data/mockWallets';
 const { to, from } = walletTestSerialize;
 
 test(`Wallet: serializes a transaction correctly given inputs`, async () => {
