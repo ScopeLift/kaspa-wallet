@@ -2,44 +2,44 @@
 // Modified for bitcore-lib-cash
 
 declare module 'bitcore-lib-cash' {
-  //   export namespace crypto {
-  //     class BN {}
+  export namespace crypto {
+    class BN {}
 
-  //     namespace ECDSA {
-  //       function sign(message: Buffer, key: PrivateKey): Signature;
-  //       function verify(
-  //         hashbuf: Buffer,
-  //         sig: Signature,
-  //         pubkey: PublicKey,
-  //         endian?: 'little'
-  //       ): boolean;
-  //     }
+    namespace ECDSA {
+      function sign(message: Buffer, key: PrivateKey): Signature;
+      function verify(
+        hashbuf: Buffer,
+        sig: Signature,
+        pubkey: PublicKey,
+        endian?: 'little'
+      ): boolean;
+    }
 
-  //     namespace Hash {
-  //       function sha1(buffer: Buffer): Buffer;
-  //       function sha256(buffer: Buffer): Buffer;
-  //       function sha256sha256(buffer: Buffer): Buffer;
-  //       function sha256ripemd160(buffer: Buffer): Buffer;
-  //       function sha512(buffer: Buffer): Buffer;
-  //       function ripemd160(buffer: Buffer): Buffer;
+    namespace Hash {
+      function sha1(buffer: Buffer): Buffer;
+      function sha256(buffer: Buffer): Buffer;
+      function sha256sha256(buffer: Buffer): Buffer;
+      function sha256ripemd160(buffer: Buffer): Buffer;
+      function sha512(buffer: Buffer): Buffer;
+      function ripemd160(buffer: Buffer): Buffer;
 
-  //       function sha256hmac(data: Buffer, key: Buffer): Buffer;
-  //       function sha512hmac(data: Buffer, key: Buffer): Buffer;
-  //     }
+      function sha256hmac(data: Buffer, key: Buffer): Buffer;
+      function sha512hmac(data: Buffer, key: Buffer): Buffer;
+    }
 
-  //     namespace Random {
-  //       function getRandomBuffer(size: number): Buffer;
-  //     }
+    namespace Random {
+      function getRandomBuffer(size: number): Buffer;
+    }
 
-  //     namespace Point {}
+    namespace Point {}
 
-  //     class Signature {
-  //       static fromDER(sig: Buffer): Signature;
-  //       static fromString(data: string): Signature;
-  //       SIGHASH_ALL: number;
-  //       toString(): string;
-  //     }
-  //   }
+    class Signature {
+      static fromDER(sig: Buffer): Signature;
+      static fromString(data: string): Signature;
+      SIGHASH_ALL: number;
+      toString(): string;
+    }
+  }
 
   export namespace Transaction {
     class UnspentOutput {

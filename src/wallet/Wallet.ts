@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import Mnemonic from 'bitcore-mnemonic';
 import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
@@ -11,6 +13,15 @@ const DEFAULT_NETWORK = 'kaspatest';
 const API_ENDPOINT = 'http://localhost:11224';
 
 type AddressDict = Record<string, bitcore.PrivateKey>;
+
+type ErrorResponse = {
+  errorCode: number;
+  errorMessage: string;
+};
+
+type UtxoResponse = Utxo[] | ErrorResponse;
+
+type SendTxResponse = ErrorResponse | undefined;
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
@@ -56,7 +67,7 @@ class Wallet {
    */
   mnemonic: string;
 
-  private utxoSet: Set<Utxo> = new Set();
+  private utxoSet: Set<bitcore.Transaction.UnspentOutput> = new Set();
 
   private addressDict: AddressDict = {};
 
@@ -84,10 +95,14 @@ class Wallet {
 
   async getUtxos(): void {
     const req = await fetch(`${API_ENDPOINT}/utxos/address/${this.address}`);
-    const res = await req.json();
-    res.utxos.map((utxo) => {
-      this.utxoSet.add(utxo);
-    });
+    const data = await (req.json() as Promise<UtxoResponse>);
+    if (data.errorMessage && data.message) {
+      throw new Error('No UTXOs');
+    }
+    if (data.utxos.length)
+      data.utxos.map((utxo) => {
+        this.utxoSet.add(utxo);
+      });
   }
 
   /**
@@ -120,7 +135,6 @@ class Wallet {
     }
    */
 
-  // TODO: add type of key to derive (change, etc)
   deriveAddress(isChange: boolean): string {
     if (isChange) {
       const derivePath = `m/44'/972/0'/1'/${this.changeIndex}`;
@@ -138,13 +152,31 @@ class Wallet {
     return this.address;
   }
 
-  private addressDiscovery(): void {
+  private addressDiscovery(threshold: number): void {
     // make a bunch of queries looking for transactions and UTXOs
     // return:
     //  set of UnspentOutputs,
     //  set of Transactions,
     //  address dictionary (key: address, value: bitcore.PrivateKey),
     //  new index
+    ['main', 'change'].forEach((deriveType) => {
+      for (let i = 0; i < threshold; i++) {
+        const addr = this.deriveAddress(false);
+        const req = await fetch(`${API_ENDPOINT}/utxos/${addr}`);
+        const res = req.json();
+        const utxos = res.utxos.forEach((utxo) => {
+          this.utxoSet.add(
+            new bitcore.Transaction.UnspentOutput({
+              txid: utxo.transactionId,
+              address: addr,
+              vout: utxo.index,
+              scriptPubKey: utxo.scriptPubKey,
+              satoshis: utxo.value,
+            })
+          );
+        });
+      }
+    });
   }
 
   private selectUtxos(txAmount: integer): Utxo[] {
