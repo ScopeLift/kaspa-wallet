@@ -1,12 +1,10 @@
-/* eslint-disable */
-
 import Mnemonic from 'bitcore-mnemonic';
 import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
-import { Network, Transaction, WalletSave, Utxo, TxSend } from 'custom-types';
+import { Network, Transaction, WalletSave, Utxo, TxSend, AddressDict } from 'custom-types';
 import { dummyTx } from './dummyTx';
-import { DEFAULT_FEE, DEFAULT_NETWORK, API_ENDPOINT } from '../../.../../config.json';
+import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
@@ -52,7 +50,7 @@ class Wallet {
    */
   mnemonic: string;
 
-  private utxoSet: Set<bitcore.Transaction.UnspentOutput> = new Set();
+  private utxoSet: bitcore.Transaction.UnspentOutput[] = [];
 
   private addressDict: AddressDict = {};
 
@@ -81,7 +79,7 @@ class Wallet {
 
   deriveAddress(): string {
     const derivePath = `m/44'/972/0'/0'/${this.childIndex}'`;
-    const privateKey = this.HDWallet.deriveChild(derivePath).privateKey;
+    const { privateKey } = this.HDWallet.deriveChild(derivePath);
     this.currentChild = privateKey;
     this.address = privateKey.toAddress(this.network).toString();
     this.addressDict[this.address] = privateKey;
@@ -91,7 +89,7 @@ class Wallet {
 
   deriveChangeAddress(): string {
     const derivePath = `m/44'/972/0'/1'/${this.changeIndex}`;
-    const privateKey = this.HDWallet.deriveChild(derivePath).privateKey;
+    const { privateKey } = this.HDWallet.deriveChild(derivePath);
     this.changeAddress = privateKey.toAddress(this.network).toString();
     this.addressDict[this.changeAddress] = privateKey;
     this.changeIndex += 1;
@@ -99,6 +97,8 @@ class Wallet {
   }
 
   private addressDiscovery(threshold: number): void {
+    console.log(threshold);
+    console.log(this.address);
     // make a bunch of queries looking for transactions and UTXOs
     // desired side-effects:
     //  set of UnspentOutputs,
@@ -115,15 +115,14 @@ class Wallet {
     // });
   }
 
-  private selectUtxos(txAmount: integer): Utxo[] {
+  private selectUtxos(txAmount: number): bitcore.Transaction.UnspentOutput[] {
     const arr: Utxo[] = [];
     let totalVal = 0;
-    const setIter = this.utxoSet[Symbol.iterator]();
-    for (const utxo of this.utxoSet) {
+    Object.values(this.utxoSet).some((utxo) => {
       arr.push(utxo);
       totalVal += utxo.satoshis;
-      if (totalVal >= txAmount) break;
-    }
+      return totalVal >= txAmount;
+    });
     if (totalVal < txAmount)
       throw new Error(`Not enough balance. Need: ${txAmount}, UTXO Balance: ${totalVal}`);
     return arr;
@@ -131,7 +130,7 @@ class Wallet {
 
   addUtxos(utxos: Utxo[], address: string): void {
     utxos.forEach((utxo) => {
-      this.utxoSet.add(
+      this.utxoSet.push(
         new bitcore.Transaction.UnspentOutput({
           txid: utxo.transactionId,
           address,
@@ -145,7 +144,12 @@ class Wallet {
 
   // TODO: convert amount to sompis aka satoshis
   // TODO: bn
-  composeTx({ toAddr, amount, fee, changeAddrOverride }: TxSend): string {
+  composeTx({
+    toAddr,
+    amount,
+    fee,
+    changeAddrOverride,
+  }: TxSend & { changeAddrOverride?: string }): string {
     // utxo selection
     if (!fee) fee = DEFAULT_FEE;
     const utxos = this.selectUtxos(amount + fee);
@@ -153,7 +157,7 @@ class Wallet {
       prev.push(this.addressDict[cur.address]);
       return prev;
     }, []);
-    let changeAddr = changeAddrOverride ? changeAddrOverride : this.deriveChangeAddress();
+    const changeAddr = changeAddrOverride || this.deriveChangeAddress();
     // serialize
     const tx: bitcore.Transaction = new bitcore.Transaction()
       .from(utxos)

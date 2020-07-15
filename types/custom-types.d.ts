@@ -1,3 +1,5 @@
+import bitcore from 'bitcore-lib-cash';
+
 export type Network = 'kaspa' | 'kaspadev' | 'kaspareg' | 'kaspatest' | 'kaspasim';
 
 export type WalletSave = {
