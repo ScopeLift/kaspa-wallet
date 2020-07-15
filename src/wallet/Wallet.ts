@@ -6,22 +6,7 @@ import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
 import { Network, Transaction, WalletSave, Utxo, TxSend } from 'custom-types';
 import { dummyTx } from './dummyTx';
-
-const DEFAULT_FEE = 1000;
-// TODO: default network in global config
-const DEFAULT_NETWORK = 'kaspatest';
-const API_ENDPOINT = 'http://localhost:11224';
-
-type AddressDict = Record<string, bitcore.PrivateKey>;
-
-type ErrorResponse = {
-  errorCode: number;
-  errorMessage: string;
-};
-
-type UtxoResponse = Utxo[] | ErrorResponse;
-
-type SendTxResponse = ErrorResponse | undefined;
+import { DEFAULT_FEE, DEFAULT_NETWORK, API_ENDPOINT } from '../../.../../config.json';
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
@@ -90,139 +75,94 @@ class Wallet {
       this.HDWallet = new bitcore.HDPrivateKey(temp.toHDPrivateKey().toString());
     }
     this.deriveAddress();
-    this.getUtxos();
+    this.deriveChangeAddress();
+    // this.getUtxos();
   }
 
-  async getUtxos(): void {
-    const req = await fetch(`${API_ENDPOINT}/utxos/address/${this.address}`);
-    const data = await (req.json() as Promise<UtxoResponse>);
-    if (data.errorMessage && data.message) {
-      throw new Error('No UTXOs');
-    }
-    if (data.utxos.length)
-      data.utxos.map((utxo) => {
-        this.utxoSet.add(utxo);
-      });
-  }
-
-  /**
-   * 
-   {
-    "utxos":[
-        {
-            "transactionId":"string",
-            "index":int,
-            "value":"string",
-            "scriptPubKey":"string",
-            "acceptingBlockHash":"string",
-            "acceptingBlockBlueScore":"string",
-            "isCoinbase":boolean,
-            "confirmations":"string",
-            "isSpendable":boolean
-        },
-        {
-            "transactionId":"string",
-            "index":int,
-            "value":"string",
-            "scriptPubKey":"string",
-            "acceptingBlockHash":"string",
-            "acceptingBlockBlueScore":"string",
-            "isCoinbase":boolean,
-            "confirmations":"string",
-            "isSpendable":boolean
-        }
-      ]
-    }
-   */
-
-  deriveAddress(isChange: boolean): string {
-    if (isChange) {
-      const derivePath = `m/44'/972/0'/1'/${this.changeIndex}`;
-      const privateKey = this.HDWallet.deriveChild(derivePath);
-      this.changeAddress = privateKey.privateKey.toAddress(this.network).toString();
-      this.addressDict[privateKey.toString()] = privateKey;
-      this.changeIndex += 1;
-      return this.changeAddress;
-    }
+  deriveAddress(): string {
     const derivePath = `m/44'/972/0'/0'/${this.childIndex}'`;
-    const privateKey = this.HDWallet.deriveChild(derivePath);
-    this.address = privateKey.privateKey.toAddress(this.network).toString();
+    const privateKey = this.HDWallet.deriveChild(derivePath).privateKey;
+    this.currentChild = privateKey;
+    this.address = privateKey.toAddress(this.network).toString();
     this.addressDict[this.address] = privateKey;
     this.childIndex += 1;
     return this.address;
   }
 
+  deriveChangeAddress(): string {
+    const derivePath = `m/44'/972/0'/1'/${this.changeIndex}`;
+    const privateKey = this.HDWallet.deriveChild(derivePath).privateKey;
+    this.changeAddress = privateKey.toAddress(this.network).toString();
+    this.addressDict[this.changeAddress] = privateKey;
+    this.changeIndex += 1;
+    return this.changeAddress;
+  }
+
   private addressDiscovery(threshold: number): void {
     // make a bunch of queries looking for transactions and UTXOs
-    // return:
+    // desired side-effects:
     //  set of UnspentOutputs,
     //  set of Transactions,
     //  address dictionary (key: address, value: bitcore.PrivateKey),
     //  new index
-    ['main', 'change'].forEach((deriveType) => {
-      for (let i = 0; i < threshold; i++) {
-        const addr = this.deriveAddress(false);
-        const req = await fetch(`${API_ENDPOINT}/utxos/${addr}`);
-        const res = req.json();
-        const utxos = res.utxos.forEach((utxo) => {
-          this.utxoSet.add(
-            new bitcore.Transaction.UnspentOutput({
-              txid: utxo.transactionId,
-              address: addr,
-              vout: utxo.index,
-              scriptPubKey: utxo.scriptPubKey,
-              satoshis: utxo.value,
-            })
-          );
-        });
-      }
-    });
+    // ['main', 'change'].forEach((deriveType) => {
+    //   for (let i = 0; i < threshold; i++) {
+    //     const addr = deriveType === "main" ? this.deriveAddress() : this.deriveChangeAddress();
+    //     const req = await fetch(`${API_ENDPOINT}/utxos/${addr}`);
+    //     const res = req.json();
+    //     this.addUtxos(res.utxos);
+    //   }
+    // });
   }
 
   private selectUtxos(txAmount: integer): Utxo[] {
     const arr: Utxo[] = [];
     let totalVal = 0;
-    for (let i = 0; i < this.utxoSet.length && totalVal < txAmount; i += 1) {
-      arr.push(this.utxoSet[i]);
-      totalVal += this.utxoSet[i].value;
+    const setIter = this.utxoSet[Symbol.iterator]();
+    for (const utxo of this.utxoSet) {
+      arr.push(utxo);
+      totalVal += utxo.satoshis;
+      if (totalVal >= txAmount) break;
     }
+    if (totalVal < txAmount)
+      throw new Error(`Not enough balance. Need: ${txAmount}, UTXO Balance: ${totalVal}`);
     return arr;
+  }
+
+  addUtxos(utxos: Utxo[], address: string): void {
+    utxos.forEach((utxo) => {
+      this.utxoSet.add(
+        new bitcore.Transaction.UnspentOutput({
+          txid: utxo.transactionId,
+          address,
+          vout: utxo.index,
+          scriptPubKey: utxo.scriptPubKey,
+          satoshis: utxo.value,
+        })
+      );
+    });
   }
 
   // TODO: convert amount to sompis aka satoshis
   // TODO: bn
-  async sendTx({ toAddr, amount, fee }: TxSend): Promise<TxResponse> {
+  composeTx({ toAddr, amount, fee, changeAddrOverride }: TxSend): string {
     // utxo selection
     if (!fee) fee = DEFAULT_FEE;
-    if (amount < this.balance)
-      throw new Error(
-        `Not enough balance. Amount: ${amount}, Fee: ${fee}, Balance: ${this.balance}`
-      );
     const utxos = this.selectUtxos(amount + fee);
     const privKeys = utxos.reduce((prev, cur) => {
-      prev.add(this.addressDict[cur.address]);
+      prev.push(this.addressDict[cur.address]);
       return prev;
-    }, new Set());
+    }, []);
+    let changeAddr = changeAddrOverride ? changeAddrOverride : this.deriveChangeAddress();
     // serialize
     const tx: bitcore.Transaction = new bitcore.Transaction()
       .from(utxos)
       .to(toAddr, amount)
       .setVersion(1)
       .fee(fee)
+      .change(changeAddr)
       .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
-    const rawTransaction = tx.toString();
-    // send
-    const response = await fetch(`${API_ENDPOINT}/transaction`, {
-      method: 'POST',
-      mode: 'cors',
-      cache: 'no-cache',
-      headers: {
-        ContentType: 'application/json',
-      },
-      body: JSON.stringify({ rawTransaction }),
-    });
-    jsonRes = await response.json();
-    // jsonRes.error
+    return tx.toString();
   }
 
   /**

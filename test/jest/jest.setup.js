@@ -1,5 +1,6 @@
 import bitcoreKaspaSetup from '../../src/wallet/bitcoreKaspaSetup';
 import { Crypto } from '../../node_modules/node-webcrypto-ossl';
+import fetch from 'node-fetch';
 
 bitcoreKaspaSetup();
 
@@ -13,6 +14,8 @@ jest.setTimeout(10000);
 global.Promise = require('promise');
 // @ts-ignore
 global.crypto = new Crypto();
+// @ts-ignore
+global.fetch = fetch;
 
 /*
 import chai from 'chai'

@@ -1,22 +1,8 @@
 import bitcore from 'bitcore-lib-cash';
 import Wallet from '../../../src/wallet/Wallet';
 import mockUtxos from './mockUtxo.json';
-
-const from = {
-  address: 'kaspatest:qqy6tc7tcgpn9esl522uy6gq7ykscsrhkurdtn5xt2',
-  privKey: '2835efc695e59096441595fd36f32c4fe52d09c5e02fdcb6d2effeb3448a1999',
-  wallet: Wallet.fromMnemonic(
-    'ceiling retreat slogan deny kick museum fruit purchase fire zoo hire poem'
-  ),
-};
-
-const to = {
-  address: 'kaspatest:qpp9jgyjjy7qg2s2ye4h8ge8l9t0hgksxgf9xpc6zc',
-  privKey: '4f0367389d9f1b6ea361abcd44b44b9d0d5e25dbd32f6ca24bc4f040d820cc84',
-  wallet: Wallet.fromMnemonic(
-    'eyebrow stereo stone uniform settle moon cheese cause gain harvest radar before'
-  ),
-};
+import { walletTestSerialize } from './mockWallets';
+const { from, to } = walletTestSerialize;
 
 const utxos = mockUtxos.map((obj) => {
   return new bitcore.Transaction.UnspentOutput({
@@ -37,11 +23,7 @@ test('single utxo: a simple tx with no change', () => {
     .to(to.address, amount)
     .setVersion(1)
     .fee(0)
-    .sign(
-      [from.wallet.currentChild.privateKey.toString()],
-      bitcore.crypto.Signature.SIGHASH_ALL,
-      'schnorr'
-    );
+    .sign([from.wallet.currentChild.toString()], bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
 
   let serialized = tx.toString();
   expect(serialized).toEqual(resultFromKasparov);
@@ -57,11 +39,7 @@ test('single utxo: a simple tx with change and fee', () => {
     .setVersion(1)
     .fee(1000)
     .change(from.address)
-    .sign(
-      [from.wallet.currentChild.privateKey.toString()],
-      bitcore.crypto.Signature.SIGHASH_ALL,
-      'schnorr'
-    );
+    .sign([from.wallet.currentChild.toString()], bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
 
   let serialized = tx.toString();
   expect(serialized).toEqual(resultFromKasparov);
@@ -77,11 +55,7 @@ test('multiple utxo: tx with change and fee', () => {
     .setVersion(1)
     .fee(1000)
     .change(from.address)
-    .sign(
-      [from.wallet.currentChild.privateKey.toString()],
-      bitcore.crypto.Signature.SIGHASH_ALL,
-      'schnorr'
-    );
+    .sign([from.wallet.currentChild.toString()], bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
 
   let serialized = tx.toString();
   expect(serialized).toEqual(resultFromKasparov);

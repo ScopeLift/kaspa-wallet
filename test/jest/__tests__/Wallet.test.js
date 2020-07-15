@@ -16,7 +16,7 @@ test(`Import/Export: correct password`, async () => {
   let walletFile2 = await importedWallet.export('!@)#!(% !#okありがとう');
   let importedWallet2 = await Wallet.import('!@)#!(% !#okありがとう', walletFile2);
   expect(importedWallet.address).toEqual(importedWallet2.address);
-  expect(importedWallet.deriveChild()).toEqual(importedWallet2.deriveChild());
+  expect(importedWallet.deriveAddress()).toEqual(importedWallet2.deriveAddress());
 });
 
 test(`Import/Export: incorrect password`, async () => {
@@ -38,4 +38,5 @@ test(`Seed phrase: can be used to recover wallet`, () => {
   expect(myWallet.address).toEqual(recoveredWallet.address);
   // Trim test!
   let recoveredWallet2 = Wallet.fromMnemonic(`  ${myWallet.mnemonic}  `);
+  expect(myWallet.address).toEqual(recoveredWallet2.address);
 });

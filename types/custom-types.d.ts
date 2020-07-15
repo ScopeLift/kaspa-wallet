@@ -47,8 +47,16 @@ export type Utxo = {
   confirmations: number;
 };
 
-export type TxSend = {
+export interface TxSend {
   to: string;
   amount: number;
   fee?: number;
+}
+
+export type ErrorResponse = {
+  errorCode: number;
+  errorMessage: string;
 };
+export type UtxoResponse = Utxo[] | ErrorResponse;
+export type SendTxResponse = ErrorResponse | undefined;
+export type AddressDict = Record<string, bitcore.PrivateKey>;
