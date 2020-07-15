@@ -10,7 +10,6 @@
       </div>
       <div class="row justify-start q-mt-md">
         <base-button
-          :dense="true"
           :flat="true"
           class="col-auto q-mr-lg"
           color="white"
@@ -18,7 +17,6 @@
           @click="showSeedPhrase = true"
         />
         <base-button
-          :dense="true"
           :flat="true"
           class="col-auto"
           color="white"

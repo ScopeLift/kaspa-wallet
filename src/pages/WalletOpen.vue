@@ -19,13 +19,11 @@
         />
         <base-button
           :flat="true"
-          :dense="true"
           label="New wallet"
           @click="$router.push({ name: 'createWallet' })"
         />
         <base-button
           :flat="true"
-          :dense="true"
           label="Restore wallet"
           @click="$router.push({ name: 'restoreWallet' })"
         />

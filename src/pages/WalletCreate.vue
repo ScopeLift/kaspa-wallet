@@ -29,7 +29,7 @@
           :loading="isLoading"
           type="submit"
         />
-        <base-button :flat="true" :dense="true" label="I have a wallet" @click="navigate" />
+        <base-button :flat="true" label="I have a wallet" @click="navigate" />
       </div>
     </q-form>
   </q-page>
