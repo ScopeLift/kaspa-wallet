@@ -65,7 +65,7 @@ class Wallet {
    * @param walletSave.privKey Saved wallet's private key.
    * @param walletSave.seedPhrase Saved wallet's seed phrase.
    */
-  constructor(privKey?: string, seedPhrase?: string) {
+  constructor({ privKey, seedPhrase }?: WalletSave) {
     if (privKey && seedPhrase) {
       this.HDWallet = new bitcore.HDPrivateKey(privKey);
       this.mnemonic = seedPhrase;
