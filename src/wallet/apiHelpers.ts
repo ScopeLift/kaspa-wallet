@@ -1,8 +1,9 @@
 import { Api } from 'custom-types';
+import { API_ENDPOINT } from '../../config.json';
 
 export const getUtxos = async (
   address: string,
-  apiEndpoint: string
+  apiEndpoint: string = API_ENDPOINT
 ): Promise<Api.ApiResponse<Api.UtxoResponse>> => {
   let response = await fetch(`${apiEndpoint}/utxos/address/${address}`, {
     mode: 'cors',
@@ -23,7 +24,7 @@ export const getUtxos = async (
 
 export const postTx = async (
   rawTransaction: string,
-  apiEndpoint: string
+  apiEndpoint: string = API_ENDPOINT
 ): Promise<Api.ApiResponse<Api.SendTxResponse>> => {
   const response = await fetch(`${apiEndpoint}/transaction`, {
     method: 'POST',
@@ -34,7 +35,7 @@ export const postTx = async (
     },
     body: JSON.stringify({ rawTransaction }),
   });
-  if (response.ok && response.headers.get('Content-Length') === 0)
+  if (response.ok && response.headers.get('Content-Length') === '0')
     return {
       data: true,
       error: undefined,

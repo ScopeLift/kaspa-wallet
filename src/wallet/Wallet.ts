@@ -5,6 +5,7 @@ import { Buffer } from 'safe-buffer';
 import { Network, WalletSave, Api, TxSend, AddressDict } from 'custom-types';
 import { dummyTx } from './dummyTx';
 import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
+import * as api from './apiHelpers';
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
@@ -60,8 +61,9 @@ class Wallet {
   transactions: Api.Transaction[] = dummyTx;
 
   /** Create a wallet.
-   * @param privKey (optional) Saved wallet's private key.
-   * @param seedPhrase (optional) Saved wallet's seed phrase.
+   * @param walletSave (optional)
+   * @param walletSave.privKey Saved wallet's private key.
+   * @param walletSave.seedPhrase Saved wallet's seed phrase.
    */
   constructor(privKey?: string, seedPhrase?: string) {
     if (privKey && seedPhrase) {
@@ -73,9 +75,11 @@ class Wallet {
       this.HDWallet = new bitcore.HDPrivateKey(temp.toHDPrivateKey().toString());
     }
     this.deriveAddress();
-    this.deriveChangeAddress();
   }
 
+  /**
+   * Derives a new receive address. Sets related instance properties.
+   */
   deriveAddress(): string {
     const derivePath = `m/44'/972/0'/0'/${this.childIndex}'`;
     const { privateKey } = this.HDWallet.deriveChild(derivePath);
@@ -86,6 +90,9 @@ class Wallet {
     return this.address;
   }
 
+  /**
+   * Derives a new change address. Sets related instance properties.
+   */
   deriveChangeAddress(): string {
     const derivePath = `m/44'/972/0'/1'/${this.changeIndex}`;
     const { privateKey } = this.HDWallet.deriveChild(derivePath);
@@ -114,6 +121,11 @@ class Wallet {
     // });
   }
 
+  /**
+   * Naively select UTXOs.
+   * @param txAmount Provide the amount that the UTXOs should cover.
+   * @throws Error message if the UTXOs can't cover the `txAmount`
+   */
   private selectUtxos(txAmount: number): bitcore.Transaction.UnspentOutput[] {
     const arr: bitcore.Transaction.UnspentOutput[] = [];
     let totalVal = 0;
@@ -127,6 +139,11 @@ class Wallet {
     return arr;
   }
 
+  /**
+   * Add UTXOs to UTXO set.
+   * @param utxos Array of UTXOs from kaspa API.
+   * @param address Address of UTXO owner.
+   */
   addUtxos(utxos: Api.Utxo[], address: string): void {
     utxos.forEach((utxo) => {
       this.utxoSet.push(
@@ -143,21 +160,28 @@ class Wallet {
 
   // TODO: convert amount to sompis aka satoshis
   // TODO: bn
+  /**
+   * Compose a serialized, signed transaction
+   * @param obj
+   * @param obj.toAddr To address in cashaddr format (e.g. kaspatest:qq0d6h0prjm5mpdld5pncst3adu0yam6xch4tr69k2)
+   * @param obj.amount Amount to send in sompis (100000000 (1e8) sompis in 1 KSP)
+   * @param obj.fee Fee for miners in sompis
+   * @param obj.changeAddrOverride Use this to override automatic change address derivation
+   * @throws if amount is above `Number.MAX_SAFE_INTEGER`
+   */
   composeTx({
     toAddr,
     amount,
-    fee,
+    fee = DEFAULT_FEE,
     changeAddrOverride,
-  }: TxSend & { changeAddrOverride?: string }): string {
-    // utxo selection
-    if (!fee) fee = DEFAULT_FEE;
+  }: TxSend & { changeAddrOverride?: string }): { id: string; rawTx: string } {
+    if (!Number.isSafeInteger(amount)) throw new Error('Amount too large');
     const utxos = this.selectUtxos(amount + fee);
     const privKeys = utxos.reduce((prev, cur) => {
       prev.push(this.addressDict[cur.address]);
       return prev;
     }, []);
     const changeAddr = changeAddrOverride || this.deriveChangeAddress();
-    // serialize
     const tx: bitcore.Transaction = new bitcore.Transaction()
       .from(utxos)
       .to(toAddr, amount)
@@ -165,7 +189,22 @@ class Wallet {
       .fee(fee)
       .change(changeAddr)
       .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
-    return tx.toString();
+    return { id: tx.id, rawTx: tx.toString() };
+  }
+
+  /**
+   * Send a transaction. Returns transaction id.
+   * @param txParams
+   * @param txParams.toAddr To address in cashaddr format (e.g. kaspatest:qq0d6h0prjm5mpdld5pncst3adu0yam6xch4tr69k2)
+   * @param txParams.amount Amount to send in sompis (100000000 (1e8) sompis in 1 KSP)
+   * @param txParams.fee Fee for miners in sompis
+   * @throws `FetchError` if endpoint is down. API error message if tx error. Error if amount is too large to be represented as a javascript number.
+   */
+  async sendTx(txParams: TxSend): Promise<string> {
+    const { id, rawTx } = this.composeTx(txParams);
+    const tx = await api.postTx(rawTx);
+    if (tx.error) throw new Error(tx.error.errorMessage);
+    return id;
   }
 
   /**
