@@ -7,36 +7,24 @@ export type WalletSave = {
   privKey: string;
 };
 
+export type AddressDict = Record<string, bitcore.PrivateKey>;
+export interface TxSend {
+  to: string;
+  amount: number;
+  fee?: number;
+}
+
 export interface TransactionInput {
   previousTransactionId: string;
   previousTransactionOutputIndex: string;
   scriptSig: string;
   sequence: string;
 }
-
-export interface TransactionOutput {
-  value: string;
-  scriptPubKey: string;
-  address: string;
-}
-
-export interface Transaction {
-  transactionId: string;
-  transactionHash: string;
-  acceptingBlockHash: string;
-  acceptingBlockBlueScore: number;
-  subnetworkId: string;
-  lockTime: number;
-  gas: number;
-  payloadHash: string;
-  payload: string;
-  inputs: Array<TransactionInput>;
-  outputs: Array<TransactionOutput>;
-  mass: number;
-  confirmations: number;
-}
-
 export namespace Api {
+  interface ApiResponse<T> {
+    data: T;
+    error: ErrorResponse;
+  }
   type Utxo = {
     transactionId: string;
     value: number;
@@ -53,15 +41,28 @@ export namespace Api {
     errorCode: number;
     errorMessage: string;
   };
-  export type UtxoResponse = Utxo[] | ErrorResponse;
+  type UtxoResponse = Utxo[] | ErrorResponse;
 
-  export type SendTxResponse = ErrorResponse | undefined;
+  type SendTxResponse = boolean;
+  interface TransactionOutput {
+    value: string;
+    scriptPubKey: string;
+    address: string;
+  }
+
+  interface Transaction {
+    transactionId: string;
+    transactionHash: string;
+    acceptingBlockHash: string;
+    acceptingBlockBlueScore: number;
+    subnetworkId: string;
+    lockTime: number;
+    gas: number;
+    payloadHash: string;
+    payload: string;
+    inputs: Array<TransactionInput>;
+    outputs: Array<TransactionOutput>;
+    mass: number;
+    confirmations: number;
+  }
 }
-
-export interface TxSend {
-  to: string;
-  amount: number;
-  fee?: number;
-}
-
-export type AddressDict = Record<string, bitcore.PrivateKey>;

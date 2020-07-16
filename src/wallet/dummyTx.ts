@@ -1,6 +1,6 @@
-import { Transaction } from 'custom-types';
+import { Api } from 'custom-types';
 
-export const dummyTx: Transaction[] = [
+export const dummyTx: Api.Transaction[] = [
   {
     transactionId: '41d00aa0f4661b86e084de508a459dd8991dac9ac123ad3fe5d5c98d64820d55',
     transactionHash: '3d484feb3cb924bc665aece6cbeeb4091cd340a27ff8db44eddb72f5b0fed6ee',

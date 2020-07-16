@@ -2,7 +2,7 @@ import Mnemonic from 'bitcore-mnemonic';
 import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
-import { Network, Transaction, WalletSave, Api, TxSend, AddressDict } from 'custom-types';
+import { Network, WalletSave, Api, TxSend, AddressDict } from 'custom-types';
 import { dummyTx } from './dummyTx';
 import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
 
@@ -57,7 +57,7 @@ class Wallet {
   /**
    * Transaction history
    */
-  transactions: Transaction[] = dummyTx;
+  transactions: Api.Transaction[] = dummyTx;
 
   /** Create a wallet.
    * @param privKey (optional) Saved wallet's private key.
@@ -74,7 +74,6 @@ class Wallet {
     }
     this.deriveAddress();
     this.deriveChangeAddress();
-    // this.getUtxos();
   }
 
   deriveAddress(): string {

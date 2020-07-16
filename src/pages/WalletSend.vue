@@ -10,7 +10,6 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapState } from 'vuex';
 
 export default Vue.extend({
   name: 'WalletSend',
@@ -39,7 +38,7 @@ export default Vue.extend({
 
   methods: {
     next() {
-      console.log('ok');
+      alert(`Sending ${this.amount} KAS to ${this.toAddress}`);
     },
   },
 });

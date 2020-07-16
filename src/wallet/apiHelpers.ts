@@ -1,28 +1,9 @@
-import { UtxoResponse } from 'custom-types';
-
-// async getUtxos(): void {
-//     const req = await fetch(`${API_ENDPOINT}/utxos/address/${this.address}`);
-//     const data = await (req.json() as Promise<UtxoResponse>);
-//     if (data.errorMessage && data.message) {
-//       throw new Error('No UTXOs');
-//     }
-//     if (data.utxos.length)
-//       data.utxos.map((utxo) => {
-//         this.utxoSet.add(utxo);
-//       });
-//   }
-
-type SendTxResponse = boolean;
-
-interface ApiResponse<T> {
-  data: T;
-  error: ErrorResponse;
-}
+import { Api } from 'custom-types';
 
 export const getUtxos = async (
   address: string,
   apiEndpoint: string
-): Promise<ApiResponse<UtxoResponse>> => {
+): Promise<Api.ApiResponse<Api.UtxoResponse>> => {
   let response = await fetch(`${apiEndpoint}/utxos/address/${address}`, {
     mode: 'cors',
     cache: 'no-cache',
@@ -43,8 +24,8 @@ export const getUtxos = async (
 export const postTx = async (
   rawTransaction: string,
   apiEndpoint: string
-): Promise<ApiResponse<SendTxResponse>> => {
-  let response = await fetch(`${apiEndpoint}/transaction`, {
+): Promise<Api.ApiResponse<Api.SendTxResponse>> => {
+  const response = await fetch(`${apiEndpoint}/transaction`, {
     method: 'POST',
     mode: 'cors',
     cache: 'no-cache',
@@ -53,14 +34,14 @@ export const postTx = async (
     },
     body: JSON.stringify({ rawTransaction }),
   });
-  if (response.ok && response.headers['Content-Length'] === 0)
+  if (response.ok && response.headers.get('Content-Length') === 0)
     return {
       data: true,
       error: undefined,
     };
-  response = (await response.json()) as unknown;
+  const json = (await response.json()) as unknown;
   return {
     data: '',
-    error: response,
+    error: json,
   };
 };
