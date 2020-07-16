@@ -13,10 +13,11 @@
     "build": "npx quasar build",
     "test:e2e": "cypress open",
     "test:e2e:CI": "cypress run",
-    "test:unit": "jest --updateSnapshot",
+    "test:unit": "jest --updateSnapshot --testPathIgnorePatterns='Api.*'",
     "test:unit:coverage": "jest --coverage",
     "test:unit:watch": "jest --watch",
     "test:unit:watchAll": "jest --watchAll",
+    "test:api": "jest --updateSnapshot test/jest/__tests__/Api.helpers.test.js",
     "serve:test:coverage": "quasar serve test/jest/coverage/lcov-report/ --port 8788",
     "concurrently:dev:jest": "concurrently \"quasar dev\" \"jest --watch\"",
     "postinstall": "patch-package"

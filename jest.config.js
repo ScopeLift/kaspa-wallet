@@ -29,7 +29,7 @@ module.exports = {
     '<rootDir>/test/jest/__tests__/**/*.test.js',
     '<rootDir>/src/**/__tests__/*_jest.spec.js',
   ],
-  testPathIgnorePatterns: ['Api.*'],
+  testPathIgnorePatterns: [],
   moduleFileExtensions: ['vue', 'js', 'jsx', 'json', 'ts', 'tsx'],
   moduleNameMapper: {
     '^vue$': '<rootDir>/node_modules/vue/dist/vue.common.js',
