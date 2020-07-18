@@ -17,7 +17,7 @@ export const walletTestSerialize = {
   },
 };
 
-export const apiTest = {
+export const apiWallets = {
   from: {
     address: 'kaspatest:qq0d6h0prjm5mpdld5pncst3adu0yam6xch4tr69k2',
     wallet: Wallet.fromMnemonic(
@@ -31,3 +31,5 @@ export const apiTest = {
     ),
   },
 };
+
+export const discoveryWallets = {};

@@ -102,23 +102,30 @@ class Wallet {
     return this.changeAddress;
   }
 
-  private addressDiscovery(threshold: number): void {
-    console.log(threshold);
-    console.log(this.address);
-    // make a bunch of queries looking for transactions and UTXOs
-    // desired side-effects:
-    //  set of UnspentOutputs,
-    //  set of Transactions,
-    //  address dictionary (key: address, value: bitcore.PrivateKey),
-    //  new index
-    // ['main', 'change'].forEach((deriveType) => {
-    //   for (let i = 0; i < threshold; i++) {
-    //     const addr = deriveType === "main" ? this.deriveAddress() : this.deriveChangeAddress();
-    //     const req = await fetch(`${API_ENDPOINT}/utxos/${addr}`);
-    //     const res = req.json();
-    //     this.addUtxos(res.utxos);
-    //   }
-    // });
+  /* eslint-disable-next-line */
+  async addressDiscovery(threshold = 20): Promise<{ addresses; transactions; utxos }> {
+    const tx = {};
+    const addresses = [];
+    const deriveType = 'receive';
+    let i = 0;
+    while (i < threshold) {
+      /* eslint-disable no-await-in-loop */ //
+      const addr = deriveType === 'receive' ? this.deriveAddress() : this.deriveChangeAddress();
+      addresses.push(addr);
+      const { data } = await api.getTransactions(addr);
+      if (data.transactions && data.transactions.length > 0) {
+        tx[addr] = data.transactions;
+        i = 0;
+      } else {
+        i += 1;
+      }
+      /* eslint-enable no-await-in-loop */
+    }
+    return {
+      addresses,
+      transactions: tx,
+      utxos: '',
+    };
   }
 
   /**

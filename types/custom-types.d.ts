@@ -14,18 +14,8 @@ export interface TxSend {
   fee?: number;
 }
 
-export interface TransactionInput {
-  previousTransactionId: string;
-  previousTransactionOutputIndex: string;
-  scriptSig: string;
-  sequence: string;
-}
 export namespace Api {
-  interface ApiResponse<T> {
-    data: T;
-    error: ErrorResponse;
-  }
-  type Utxo = {
+  interface Utxo {
     transactionId: string;
     value: number;
     scriptPubKey: string;
@@ -36,20 +26,26 @@ export namespace Api {
     isCoinbase: boolean;
     isSpendable: boolean;
     confirmations: number;
-  };
-  type ErrorResponse = {
+  }
+  interface UtxoResponse {
+    utxos: Utxo[];
+  }
+  interface ErrorResponse {
     errorCode: number;
     errorMessage: string;
-  };
-  type UtxoResponse = Utxo[] | ErrorResponse;
+  }
 
-  type SendTxResponse = boolean;
+  interface TransactionInput {
+    previousTransactionId: string;
+    previousTransactionOutputIndex: string;
+    scriptSig: string;
+    sequence: string;
+  }
   interface TransactionOutput {
     value: string;
     scriptPubKey: string;
     address: string;
   }
-
   interface Transaction {
     transactionId: string;
     transactionHash: string;
@@ -65,4 +61,9 @@ export namespace Api {
     mass: number;
     confirmations: number;
   }
+
+  interface TransactionsResponse {
+    transactions: Transaction[];
+  }
+  type SendTxResponse = boolean;
 }

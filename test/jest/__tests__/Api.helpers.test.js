@@ -1,5 +1,5 @@
-import { apiTest } from '../data/mockWallets';
-const { to, from } = apiTest;
+import { apiWallets } from '../data/mockWallets';
+const { to, from } = apiWallets;
 import * as api from '../../../src/wallet/apiHelpers';
 
 test(`Wallet: serializes and sends a tx`, async () => {
