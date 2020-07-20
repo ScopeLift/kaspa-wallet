@@ -70,8 +70,16 @@ export default Vue.extend({
     async handleCreate() {
       try {
         this.isLoading = true;
+        // Generate new wallet
         const wallet = new Wallet(); // eslint-disable-line
         const encryptedMnemonic = await wallet.export(this.password1); // eslint-disable-line
+        // Backup old wallet if it exists
+        const existingWallet = this.$q.localStorage.getItem('kaspa-wallet-data');
+        if (existingWallet) {
+          const timestamp = new Date().getTime();
+          this.$q.localStorage.set(`kaspa-wallet-data-${timestamp}`, existingWallet);
+        }
+        // Save new wallet in localstorage and set state
         this.$q.localStorage.set('kaspa-wallet-data', encryptedMnemonic);
         this.$q.localStorage.set('is-backed-up', false);
         await this.$store.dispatch('main/getWalletInfo', wallet);
