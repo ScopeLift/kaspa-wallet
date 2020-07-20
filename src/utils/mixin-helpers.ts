@@ -19,8 +19,7 @@ export default Vue.extend({
       Notify.create({
         color,
         message,
-        // If positive, timeout after 5 seconds. Otherwise, show until dismissed by user
-        timeout: color.toLowerCase() === 'positive' ? 5000 : 0,
+        timeout: color.toLowerCase() === 'negative' ? 10000 : 5000,
         position: 'top',
         actions: [{ label: 'Dismiss', color: 'white' }],
       });
