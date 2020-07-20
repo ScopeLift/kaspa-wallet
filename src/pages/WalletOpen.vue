@@ -45,6 +45,8 @@ export default Vue.extend({
   data() {
     return {
       password: '',
+      failedAttempts: 0,
+      isDisabled: false,
       isLoading: false,
       isPasswordVisible: false,
     };
@@ -52,7 +54,7 @@ export default Vue.extend({
 
   computed: {
     isPasswordValid(): boolean {
-      return this.password.length > 0;
+      return this.password.length > 0 && !this.isDisabled;
     },
   },
 
@@ -68,10 +70,30 @@ export default Vue.extend({
         await this.$store.dispatch('main/getWalletInfo', wallet);
         await this.$router.push({ name: 'walletBalance' });
       } catch (err) {
+        // eslint-disable-next-line
+        if (err.message === 'Incorrect password') {
+          this.failedAttempts += 1;
+          // Temporarily diable the form after too many failed attempts
+          if (this.failedAttempts === 5) {
+            this.isDisabled = true;
+            this.temporarilyBlockLogin();
+            this.isLoading = false;
+            return;
+          }
+        }
         this.isLoading = false;
         // @ts-ignore
         this.showError(err); // eslint-disable-line
       }
+    },
+
+    temporarilyBlockLogin() {
+      const delay = 10;
+      this.notifyUser('negative', `Too many failed attempts. Please wait ${delay} seconds.`); // eslint-disable-line
+      setTimeout(() => {
+        this.isDisabled = false;
+        this.failedAttempts = 0;
+      }, delay * 1000);
     },
   },
 });
