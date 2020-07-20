@@ -3,9 +3,9 @@ import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
 import { Network, WalletSave, Api, TxSend, AddressDict } from 'custom-types';
-import { dummyTx } from './dummyTx';
 import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
 import * as api from './apiHelpers';
+import { UtxoSet } from './UtxoSet';
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
@@ -51,14 +51,16 @@ class Wallet {
    */
   mnemonic: string;
 
-  private utxoSet: bitcore.Transaction.UnspentOutput[] = [];
+  utxoSet = new UtxoSet();
 
   private addressDict: AddressDict = {};
 
   /**
    * Transaction history
    */
-  transactions: Api.Transaction[] = dummyTx;
+  transactionsSorted: Api.Transaction[] = [];
+
+  transactionsStorage: Record<string, Api.Transaction[]> = {};
 
   /** Create a wallet.
    * @param walletSave (optional)
@@ -102,48 +104,39 @@ class Wallet {
     return this.changeAddress;
   }
 
+  async updateUtxos(): Promise<void> {
+    const addresses = Object.keys(this.addressDict);
+    const utxoResults = await Promise.all(addresses.map((address) => api.getUtxos(address)));
+    addresses.forEach((address, i) => {
+      this.utxoSet.add(utxoResults[i].utxos, address);
+    });
+  }
+
+  async updateTransactions(): Promise<void> {
+    const addresses = Object.keys(this.addressDict);
+    const txResults = await Promise.all(addresses.map((address) => api.getTransactions(address)));
+    addresses.forEach((address, i) => {
+      this.transactionsStorage[address] = txResults[i];
+    });
+    this.transactionsSorted = Object.values(this.transactionsStorage)
+      .flat()
+      .sort(
+        (a, b) => a.acceptingBlockHash > b.acceptingBlockHash // TODO: get block by hash and look up timestamp
+      );
+  }
+
   /* eslint-disable-next-line */
-  async addressDiscovery(threshold = 20): Promise<{ addresses; transactions; utxos }> {
-    const tx = {};
+  async addressDiscovery(threshold = 20): Promise<void> {
     const addresses = [];
     const deriveType = 'receive';
     let i = 0;
     while (i < threshold) {
-      /* eslint-disable no-await-in-loop */ //
       const addr = deriveType === 'receive' ? this.deriveAddress() : this.deriveChangeAddress();
       addresses.push(addr);
-      const { data } = await api.getTransactions(addr);
-      if (data.transactions && data.transactions.length > 0) {
-        tx[addr] = data.transactions;
-        i = 0;
-      } else {
-        i += 1;
-      }
-      /* eslint-enable no-await-in-loop */
+      i += 1;
     }
-    return {
-      addresses,
-      transactions: tx,
-      utxos: '',
-    };
-  }
-
-  /**
-   * Naively select UTXOs.
-   * @param txAmount Provide the amount that the UTXOs should cover.
-   * @throws Error message if the UTXOs can't cover the `txAmount`
-   */
-  private selectUtxos(txAmount: number): bitcore.Transaction.UnspentOutput[] {
-    const arr: bitcore.Transaction.UnspentOutput[] = [];
-    let totalVal = 0;
-    Object.values(this.utxoSet).some((utxo) => {
-      arr.push(utxo);
-      totalVal += utxo.satoshis;
-      return totalVal >= txAmount;
-    });
-    if (totalVal < txAmount)
-      throw new Error(`Not enough balance. Need: ${txAmount}, UTXO Balance: ${totalVal}`);
-    return arr;
+    await this.updateTransactions();
+    await this.updateUtxos();
   }
 
   /**
@@ -151,19 +144,19 @@ class Wallet {
    * @param utxos Array of UTXOs from kaspa API.
    * @param address Address of UTXO owner.
    */
-  addUtxos(utxos: Api.Utxo[], address: string): void {
-    utxos.forEach((utxo) => {
-      this.utxoSet.push(
-        new bitcore.Transaction.UnspentOutput({
-          txid: utxo.transactionId,
-          address,
-          vout: utxo.index,
-          scriptPubKey: utxo.scriptPubKey,
-          satoshis: utxo.value,
-        })
-      );
-    });
-  }
+  // addUtxos(utxos: Api.Utxo[], address: string): void {
+  //   utxos.forEach((utxo) => {
+  //     const utxoId = utxo.transactionId + utxo.index.toString();
+  //     if (!this.utxoSet[utxoId] && this.utxosInUse.indexOf(utxoId) !== utxoId)
+  //       this.utxoSet[utxoId] = new bitcore.Transaction.UnspentOutput({
+  //         txid: utxo.transactionId,
+  //         address,
+  //         vout: utxo.index,
+  //         scriptPubKey: utxo.scriptPubKey,
+  //         satoshis: utxo.value,
+  //       });
+  //   });
+  // }
 
   // TODO: convert amount to sompis aka satoshis
   // TODO: bn
@@ -181,9 +174,9 @@ class Wallet {
     amount,
     fee = DEFAULT_FEE,
     changeAddrOverride,
-  }: TxSend & { changeAddrOverride?: string }): { id: string; rawTx: string } {
+  }: TxSend & { changeAddrOverride?: string }): { id: string; rawTx: string; utxoIds: string[] } {
     if (!Number.isSafeInteger(amount)) throw new Error('Amount too large');
-    const utxos = this.selectUtxos(amount + fee);
+    const { utxos, utxoIds } = this.utxoSet.selectUtxos(amount + fee);
     const privKeys = utxos.reduce((prev, cur) => {
       prev.push(this.addressDict[cur.address]);
       return prev;
@@ -196,7 +189,9 @@ class Wallet {
       .fee(fee)
       .change(changeAddr)
       .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
-    return { id: tx.id, rawTx: tx.toString() };
+    this.utxoSet.inUse.push(...utxoIds);
+    this.utxoSet.updateBalance();
+    return { id: tx.id, rawTx: tx.toString(), utxoIds };
   }
 
   /**
@@ -209,8 +204,7 @@ class Wallet {
    */
   async sendTx(txParams: TxSend): Promise<string> {
     const { id, rawTx } = this.composeTx(txParams);
-    const tx = await api.postTx(rawTx);
-    if (tx.error) throw new Error(tx.error.errorMessage);
+    await api.postTx(rawTx);
     return id;
   }
 
