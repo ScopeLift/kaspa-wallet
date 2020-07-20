@@ -20,7 +20,7 @@
     </div>
 
     <!-- Restore from file -->
-    <q-dialog v-model="showFileRestore">
+    <q-dialog v-model="showFileRestore" @hide="reset">
       <q-card class="q-px-lg">
         <!-- Header Section -->
         <q-card-section class="row items-center justify-between">
@@ -71,7 +71,7 @@
     </q-dialog>
 
     <!-- Restore from seed -->
-    <q-dialog v-model="showSeedRestore">
+    <q-dialog v-model="showSeedRestore" @hide="reset">
       <q-card>
         <!-- Header Section -->
         <q-card-section class="row items-center justify-between">
@@ -80,8 +80,9 @@
           <q-btn v-close-popup icon="close" color="primary" flat round dense />
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          <q-form @submit="restoreFromSeed">
+        <!-- Get seed phrase -->
+        <q-card-section v-if="!isReadyForPassword" class="q-pt-none">
+          <q-form @submit="continueToPassword">
             <p>
               Enter your 12 word seed phrase, with a space between each word. Be sure you're doing
               this in a private space. Anyone with these 12 words can steal your funds.
@@ -94,6 +95,26 @@
               style="min-width: 275px;"
             />
 
+            <div class="row justify-end q-mt-lg">
+              <base-button
+                class="col-auto"
+                color="primary"
+                :disabled="isSeedPhraseValid"
+                label="Next"
+                :loading="isLoading"
+                type="submit"
+              />
+            </div>
+          </q-form>
+        </q-card-section>
+
+        <!-- Get password -->
+        <q-card-section v-else class="q-pt-none">
+          <q-form @submit="restoreFromSeed">
+            <p>
+              Enter a password to encrypt your seed phrase.
+            </p>
+
             <base-input
               v-if="seedPhrase"
               v-model="password"
@@ -101,6 +122,17 @@
               hint="Enter a password to protect this phrase"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Password"
+              :type="isPasswordVisible ? 'text' : 'password'"
+              @iconClicked="isPasswordVisible = !isPasswordVisible"
+            />
+
+            <!-- Confirm password -->
+            <base-input
+              v-model="password2"
+              class="q-mt-lg"
+              hint="Re-enter your password"
+              :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
+              label="Confirm Password"
               :type="isPasswordVisible ? 'text' : 'password'"
               @iconClicked="isPasswordVisible = !isPasswordVisible"
             />
@@ -145,6 +177,8 @@ export default Vue.extend({
       seedFile: undefined,
       // For seed phrase
       seedPhrase: '',
+      isReadyForPassword: false,
+      password2: '',
     };
   },
 
@@ -153,12 +187,33 @@ export default Vue.extend({
       return Boolean(this.seedFile && this.password);
     },
 
+    isSeedPhraseValid(): boolean {
+      return this.seedPhrase.split(' ').length !== 12 || this.seedPhrase.split(' ')[11] === '';
+    },
+
     isReadyToRestoreFromSeed(): boolean {
-      return Boolean(this.seedPhrase && this.password);
+      return Boolean(
+        this.seedPhrase && this.password.length > 0 && this.password === this.password2
+      );
     },
   },
 
   methods: {
+    reset() {
+      // Generic
+      this.showFileRestore = false;
+      this.showSeedRestore = false;
+      this.isPasswordVisible = false;
+      this.isLoading = false;
+      this.password = '';
+      // For file upload
+      this.seedFile = undefined;
+      // For seed phrase
+      this.seedPhrase = '';
+      this.isReadyForPassword = false;
+      this.password2 = '';
+    },
+
     readFile() {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -187,6 +242,10 @@ export default Vue.extend({
         // @ts-ignore
         this.showError(err); // eslint-disable-line
       }
+    },
+
+    continueToPassword() {
+      this.isReadyForPassword = true;
     },
 
     async restoreFromSeed() {
