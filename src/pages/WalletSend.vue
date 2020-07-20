@@ -21,8 +21,8 @@ export default Vue.extend({
     };
   },
 
+  /* eslint-disable */
   computed: {
-    /* eslint-disable */
     ...mapState({
       wallet(state) {
         // @ts-ignore
