@@ -7,12 +7,14 @@
       class="q-my-sm"
       :dense="dense"
       :hide-bottom-space="hideBottomSpace"
-      :hint="hint"
+      :hint="hintString"
       :label="label"
       :lazy-rules="lazyRules"
       :rules="[(val) => rules(val)]"
       :type="type"
       :outlined="outlined"
+      @blur="hideHint"
+      @focus="showHint"
       @input="handleInput"
     >
       <template v-if="iconAppend" v-slot:append>
@@ -101,6 +103,7 @@ export default Vue.extend({
   data() {
     return {
       content: this.value,
+      hintString: '',
     };
   },
 
@@ -118,6 +121,14 @@ export default Vue.extend({
   methods: {
     handleInput() {
       this.$emit('input', this.content);
+    },
+
+    hideHint() {
+      this.hintString = '';
+    },
+
+    showHint() {
+      this.hintString = this.hint;
     },
   },
 });
