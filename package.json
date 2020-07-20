@@ -36,7 +36,8 @@
     "browser-passworder": "^2.0.3",
     "core-js": "^3.6.5",
     "quasar": "^1.0.0",
-    "safe-buffer": "^5.2.1"
+    "safe-buffer": "^5.2.1",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.10.4",

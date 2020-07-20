@@ -1,11 +1,13 @@
 import Mnemonic from 'bitcore-mnemonic';
-import bitcore from 'bitcore-lib-cash';
+import bitcore, { Address } from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
-import { Network, WalletSave, Api, TxSend, AddressDict } from 'custom-types';
+import { Network, WalletSave, Api, TxSend } from 'custom-types';
+import { AddressManager } from './AddressManager';
 import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
 import * as api from './apiHelpers';
 import { UtxoSet } from './UtxoSet';
+import { logger } from '../utils/logger';
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
@@ -22,38 +24,13 @@ class Wallet {
   network: Network = DEFAULT_NETWORK;
 
   /**
-   * The derived keypair that will be used as this Wallet's receive address.
-   */
-  currentChild: bitcore.HDPrivateKey;
-
-  /**
-   * The next receiving address in cashaddr format
-   */
-  address: string;
-
-  /**
-   * The next change address in cashaddr format
-   */
-  changeAddress: string;
-
-  /**
-   * The index of the derivation path
-   */
-  childIndex = 0;
-
-  /**
-   * The index of the change path
-   */
-  changeIndex = 0;
-
-  /**
    * A 12 word mnemonic that is only present when the wallet was just created.
    */
   mnemonic: string;
 
   utxoSet = new UtxoSet();
 
-  private addressDict: AddressDict = {};
+  addressManager: AddressManager;
 
   /**
    * Transaction history
@@ -76,47 +53,30 @@ class Wallet {
       this.mnemonic = temp.toString();
       this.HDWallet = new bitcore.HDPrivateKey(temp.toHDPrivateKey().toString());
     }
-    this.deriveAddress();
+    this.addressManager = new AddressManager(this.HDWallet, this.network);
+    this.addressManager.deriveAddress();
   }
 
-  /**
-   * Derives a new receive address. Sets related instance properties.
-   */
-  deriveAddress(): string {
-    const derivePath = `m/44'/972/0'/0'/${this.childIndex}'`;
-    const { privateKey } = this.HDWallet.deriveChild(derivePath);
-    this.currentChild = privateKey;
-    this.address = privateKey.toAddress(this.network).toString();
-    this.addressDict[this.address] = privateKey;
-    this.childIndex += 1;
-    return this.address;
-  }
-
-  /**
-   * Derives a new change address. Sets related instance properties.
-   */
-  deriveChangeAddress(): string {
-    const derivePath = `m/44'/972/0'/1'/${this.changeIndex}`;
-    const { privateKey } = this.HDWallet.deriveChild(derivePath);
-    this.changeAddress = privateKey.toAddress(this.network).toString();
-    this.addressDict[this.changeAddress] = privateKey;
-    this.changeIndex += 1;
-    return this.changeAddress;
-  }
-
-  async updateUtxos(): Promise<void> {
-    const addresses = Object.keys(this.addressDict);
+  async updateUtxos(offset = 0): Promise<void> {
+    const addresses = Object.keys(this.addressManager.all);
+    logger.log('info', `Getting utxos for ${addresses.length} addresses.`);
     const utxoResults = await Promise.all(addresses.map((address) => api.getUtxos(address)));
     addresses.forEach((address, i) => {
-      this.utxoSet.add(utxoResults[i].utxos, address);
+      const { utxos } = utxoResults[i];
+      logger.log('info', `${address}: ${utxos.length} UTXOs found.`);
+      this.utxoSet.add(utxos, address);
     });
+    this.updateBalance();
   }
 
-  async updateTransactions(): Promise<void> {
-    const addresses = Object.keys(this.addressDict);
+  async updateTransactions(offset = 0): Promise<void> {
+    const addresses = Object.keys(this.addressManager.all);
+    logger.log('info', `Getting transactions for ${addresses.length} addresses.`);
     const txResults = await Promise.all(addresses.map((address) => api.getTransactions(address)));
     addresses.forEach((address, i) => {
-      this.transactionsStorage[address] = txResults[i];
+      const { transactions } = txResults[i];
+      logger.log('info', `${address}: ${transactions.length} transactions found.`);
+      this.transactionsStorage[address] = transactions;
     });
     this.transactionsSorted = Object.values(this.transactionsStorage)
       .flat()
@@ -125,13 +85,20 @@ class Wallet {
       );
   }
 
+  updateBalance(): void {
+    this.balance = this.utxoSet.availableBalance;
+  }
+
   /* eslint-disable-next-line */
   async addressDiscovery(threshold = 20): Promise<void> {
     const addresses = [];
     const deriveType = 'receive';
     let i = 0;
     while (i < threshold) {
-      const addr = deriveType === 'receive' ? this.deriveAddress() : this.deriveChangeAddress();
+      const addr =
+        deriveType === 'receive'
+          ? this.addressManager.deriveAddress()
+          : this.addressManager.deriveChangeAddress();
       addresses.push(addr);
       i += 1;
     }
@@ -178,10 +145,10 @@ class Wallet {
     if (!Number.isSafeInteger(amount)) throw new Error('Amount too large');
     const { utxos, utxoIds } = this.utxoSet.selectUtxos(amount + fee);
     const privKeys = utxos.reduce((prev, cur) => {
-      prev.push(this.addressDict[cur.address]);
+      prev.push(this.addressManager.all[cur.address]);
       return prev;
     }, []);
-    const changeAddr = changeAddrOverride || this.deriveChangeAddress();
+    const changeAddr = changeAddrOverride || this.addressManager.deriveChangeAddress();
     const tx: bitcore.Transaction = new bitcore.Transaction()
       .from(utxos)
       .to(toAddr, amount)
@@ -190,7 +157,7 @@ class Wallet {
       .change(changeAddr)
       .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
     this.utxoSet.inUse.push(...utxoIds);
-    this.utxoSet.updateBalance();
+    this.utxoSet.updateUtxoBalance();
     return { id: tx.id, rawTx: tx.toString(), utxoIds };
   }
 

@@ -1,5 +1,6 @@
 import { Api } from 'custom-types';
 import bitcore from 'bitcore-lib-cash';
+import { logger } from '../utils/logger';
 
 export class UtxoSet {
   utxos: Record<string, bitcore.Transaction.UnspentOutput> = {};
@@ -32,7 +33,8 @@ export class UtxoSet {
         });
       }
     });
-    this.updateBalance();
+    if (utxoIds.length) logger.log('info', `Added ${utxoIds.length} UTXOs to UtxoSet.`);
+    this.updateUtxoBalance();
     return utxoIds;
   }
 
@@ -41,7 +43,7 @@ export class UtxoSet {
     this.inUse = this.inUse.filter((utxoId) => utxoIdsToEnable.indexOf(utxoId) === -1);
   }
 
-  updateBalance(): number {
+  updateUtxoBalance(): number {
     const utxoIds = Object.keys(this.utxos).filter((key) => this.inUse.indexOf(key) === -1);
     this.balance = utxoIds.reduce((prev, cur) => prev + this.utxos[cur].satoshis, 0);
   }
@@ -49,7 +51,7 @@ export class UtxoSet {
   clear(): void {
     this.utxos = {};
     this.inUse = [];
-    this.balance = 0;
+    this.availableBalance = 0;
   }
 
   /**

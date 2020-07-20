@@ -6,7 +6,7 @@ bitcoreKaspaSetup();
 
 // No console.log() / setTimeout
 // console.log = jest.fn(() => { throw new Error('Do not use console.log() in production') })
-jest.setTimeout(10000);
+// jest.setTimeout(10000);
 
 // jest speedup when errors are part of the game
 // Error.stackTraceLimit = 0

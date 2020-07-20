@@ -7,7 +7,10 @@ export type WalletSave = {
   privKey: string;
 };
 
-export type AddressDict = Record<string, bitcore.PrivateKey>;
+export type AddressDict = {
+  receive: Record<string, bitcore.PrivateKey>;
+  change: Record<string, bitcore.PrivateKey>;
+};
 export interface TxSend {
   to: string;
   amount: number;
