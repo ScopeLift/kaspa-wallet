@@ -32,7 +32,7 @@
         <!-- Header Section -->
         <q-card-section class="row items-center justify-between">
           <q-btn icon="close" flat round dense style="opacity: 0; cursor: default;" />
-          <h6 class="text-primary q-my-none">Save Walllet</h6>
+          <h6 class="text-primary q-my-none">Save Wallet</h6>
           <q-btn v-close-popup icon="close" color="primary" flat round dense />
         </q-card-section>
 
@@ -50,6 +50,7 @@
             <div class="row justify-center">
               <base-input
                 v-model="password"
+                :autofocus="true"
                 class="col"
                 :hint="passwordHint"
                 :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
@@ -114,6 +115,7 @@
             <div class="row justify-center">
               <base-input
                 v-model="password"
+                :autofocus="true"
                 class="col"
                 :hint="passwordHint"
                 :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"

@@ -2,6 +2,7 @@
   <div>
     <q-input
       v-model="content"
+      :autofocus="autofocus"
       :autogrow="autogrow"
       color="primary"
       class="q-my-sm"
@@ -31,6 +32,12 @@ export default Vue.extend({
   name: 'BaseInput',
 
   props: {
+    autofocus: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+
     autogrow: {
       type: Boolean,
       required: false,
