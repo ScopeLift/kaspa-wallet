@@ -2,19 +2,26 @@ import Mnemonic from 'bitcore-mnemonic';
 import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
-import { Network, WalletSave, Api, TxSend, AddressDict } from 'custom-types';
-import { dummyTx } from './dummyTx';
-import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
+import { Network, WalletSave, Api, TxSend, PendingTransactions } from 'custom-types';
+import { logger } from '../utils/logger';
+import { AddressManager } from './AddressManager';
+import { UtxoSet } from './UtxoSet';
 import * as api from './apiHelpers';
+import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
-  private HDWallet: bitcore.HDPrivateKey;
+  HDWallet: bitcore.HDPrivateKey;
 
   /**
-   * The summed balance across all of Wallet's discovered addresses.
+   * The summed balance across all of Wallet's discovered addresses, minus amount from pending transactions.
    */
   balance: number | undefined = undefined;
+
+  /**
+   * Set by addressManager
+   */
+  receiveAddress: string;
 
   /**
    * Current network.
@@ -22,43 +29,35 @@ class Wallet {
   network: Network = DEFAULT_NETWORK;
 
   /**
-   * The derived keypair that will be used as this Wallet's receive address.
-   */
-  currentChild: bitcore.HDPrivateKey;
-
-  /**
-   * The next receiving address in cashaddr format
-   */
-  address: string;
-
-  /**
-   * The next change address in cashaddr format
-   */
-  changeAddress: string;
-
-  /**
-   * The index of the derivation path
-   */
-  childIndex = 0;
-
-  /**
-   * The index of the change path
-   */
-  changeIndex = 0;
-
-  /**
-   * A 12 word mnemonic that is only present when the wallet was just created.
+   * A 12 word mnemonic.
    */
   mnemonic: string;
 
-  private utxoSet: bitcore.Transaction.UnspentOutput[] = [];
+  utxoSet = new UtxoSet();
 
-  private addressDict: AddressDict = {};
+  addressManager: AddressManager;
+
+  /* eslint-disable */
+  pending: PendingTransactions = {
+    transactions: {},
+    get amount() {
+      const transactions = Object.values(this.transactions);
+      if (transactions.length === 0) return 0;
+      return transactions.reduce((prev, cur) => prev + cur.amount, 0);
+    },
+    add(id: string, tx: { utxoIds: string[]; rawTx: string; amount: number }) {
+      this.transactions[id] = tx;
+    },
+  };
+  /**
+   * Transactions sorted by hash.
+   */
+  transactions: Api.Transaction[] = [];
 
   /**
-   * Transaction history
+   * Transaction arrays keyed by address.
    */
-  transactions: Api.Transaction[] = dummyTx;
+  transactionsStorage: Record<string, Api.Transaction[]> = {};
 
   /** Create a wallet.
    * @param walletSave (optional)
@@ -74,88 +73,96 @@ class Wallet {
       this.mnemonic = temp.toString();
       this.HDWallet = new bitcore.HDPrivateKey(temp.toHDPrivateKey().toString());
     }
-    this.deriveAddress();
+    this.addressManager = new AddressManager(this.HDWallet, this.network);
+    this.receiveAddress = this.addressManager.receiveAddress.next();
   }
 
   /**
-   * Derives a new receive address. Sets related instance properties.
+   * Queries API for address[] UTXOs. Adds UTXOs to UTXO set. Updates wallet balance.
+   * @param addresses
    */
-  deriveAddress(): string {
-    const derivePath = `m/44'/972/0'/0'/${this.childIndex}'`;
-    const { privateKey } = this.HDWallet.deriveChild(derivePath);
-    this.currentChild = privateKey;
-    this.address = privateKey.toAddress(this.network).toString();
-    this.addressDict[this.address] = privateKey;
-    this.childIndex += 1;
-    return this.address;
-  }
-
-  /**
-   * Derives a new change address. Sets related instance properties.
-   */
-  deriveChangeAddress(): string {
-    const derivePath = `m/44'/972/0'/1'/${this.changeIndex}`;
-    const { privateKey } = this.HDWallet.deriveChild(derivePath);
-    this.changeAddress = privateKey.toAddress(this.network).toString();
-    this.addressDict[this.changeAddress] = privateKey;
-    this.changeIndex += 1;
-    return this.changeAddress;
-  }
-
-  private addressDiscovery(threshold: number): void {
-    console.log(threshold);
-    console.log(this.address);
-    // make a bunch of queries looking for transactions and UTXOs
-    // desired side-effects:
-    //  set of UnspentOutputs,
-    //  set of Transactions,
-    //  address dictionary (key: address, value: bitcore.PrivateKey),
-    //  new index
-    // ['main', 'change'].forEach((deriveType) => {
-    //   for (let i = 0; i < threshold; i++) {
-    //     const addr = deriveType === "main" ? this.deriveAddress() : this.deriveChangeAddress();
-    //     const req = await fetch(`${API_ENDPOINT}/utxos/${addr}`);
-    //     const res = req.json();
-    //     this.addUtxos(res.utxos);
-    //   }
-    // });
-  }
-
-  /**
-   * Naively select UTXOs.
-   * @param txAmount Provide the amount that the UTXOs should cover.
-   * @throws Error message if the UTXOs can't cover the `txAmount`
-   */
-  private selectUtxos(txAmount: number): bitcore.Transaction.UnspentOutput[] {
-    const arr: bitcore.Transaction.UnspentOutput[] = [];
-    let totalVal = 0;
-    Object.values(this.utxoSet).some((utxo) => {
-      arr.push(utxo);
-      totalVal += utxo.satoshis;
-      return totalVal >= txAmount;
+  async updateUtxos(addresses: string[]): Promise<void> {
+    logger.log('info', `Getting utxos for ${addresses.length} addresses.`);
+    const utxoResults = await Promise.all(addresses.map((address) => api.getUtxos(address)));
+    addresses.forEach((address, i) => {
+      const { utxos } = utxoResults[i];
+      logger.log('info', `${address}: ${utxos.length} UTXOs found.`);
+      this.utxoSet.add(utxos, address);
     });
-    if (totalVal < txAmount)
-      throw new Error(`Not enough balance. Need: ${txAmount}, UTXO Balance: ${totalVal}`);
-    return arr;
+    this.updateBalance();
   }
 
   /**
-   * Add UTXOs to UTXO set.
-   * @param utxos Array of UTXOs from kaspa API.
-   * @param address Address of UTXO owner.
+   * Queries API for address[] transactions. Adds tx to transactions storage. Also sorts the entire transaction set.
+   * @param addresses
    */
-  addUtxos(utxos: Api.Utxo[], address: string): void {
-    utxos.forEach((utxo) => {
-      this.utxoSet.push(
-        new bitcore.Transaction.UnspentOutput({
-          txid: utxo.transactionId,
-          address,
-          vout: utxo.index,
-          scriptPubKey: utxo.scriptPubKey,
-          satoshis: utxo.value,
-        })
+  async addTransactions(addresses: string[]): Promise<string[]> {
+    logger.log('info', `Getting transactions for ${addresses.length} addresses.`);
+    const addressesWithTx: string[] = [];
+    const txResults = await Promise.all(addresses.map((address) => api.getTransactions(address)));
+    addresses.forEach((address, i) => {
+      const { transactions } = txResults[i];
+      logger.log('info', `${address}: ${transactions.length} transactions found.`);
+      if (transactions.length !== 0) {
+        this.transactionsStorage[address] = transactions;
+        addressesWithTx.push(address);
+      }
+    });
+    this.transactions = Object.values(this.transactionsStorage)
+      .flat(2)
+      .sort(
+        (a, b) => a.acceptingBlockHash > b.acceptingBlockHash // TODO: get block by hash and look up timestamp
       );
-    });
+    return addressesWithTx;
+  }
+
+  /**
+   * Recalculates wallet balance.
+   */
+  updateBalance(): void {
+    this.balance = this.utxoSet.totalBalance - this.pending.amount;
+  }
+
+  /**
+   * Derives receiveAddresses and changeAddresses and checks their transactions and UTXOs.
+   * @param threshold stop discovering after `threshold` addresses with no activity
+   */
+  async addressDiscovery(threshold = 20): Promise<void> {
+    const doDiscovery = async (n: number, deriveType: string, offset: number): Promise<number> => {
+      const derivedObjs = this.addressManager.getAddresses(n, deriveType, offset);
+      const addresses = derivedObjs.map((obj) => obj.address);
+      logger.log(
+        'info',
+        `Fetching ${deriveType} address data for derived indices ${JSON.stringify(
+          derivedObjs.map((obj) => obj.index)
+        )}`
+      );
+      const addressesWithTx = await this.addTransactions(addresses);
+      if (addressesWithTx.length === 0) {
+        const lastIndexWithTx = offset - (threshold - n) - 1;
+        logger.log(
+          'info',
+          `${deriveType}Address discovery complete. Last activity on address #${lastIndexWithTx}. No activity from ${deriveType}#${
+            lastIndexWithTx + 1
+          }~${lastIndexWithTx + threshold + 1}.`
+        );
+        return lastIndexWithTx;
+      }
+      const newN =
+        derivedObjs
+          .filter((obj) => addressesWithTx.indexOf(obj.address) !== -1)
+          .reduce((prev, cur) => Math.max(prev, cur.index), 0) + 1;
+      return doDiscovery(newN, deriveType, offset + n);
+    };
+    const highestReceiveIndex = await doDiscovery(threshold, 'receive', 0);
+    const highestChangeIndex = await doDiscovery(threshold, 'change', 0);
+    this.addressManager.receiveAddress.advance(highestReceiveIndex + 1);
+    this.addressManager.changeAddress.advance(highestChangeIndex + 1);
+    logger.log(
+      'info',
+      `receive address index: ${highestReceiveIndex}; change address index: ${highestChangeIndex}`
+    );
+    return this.updateUtxos(Object.keys(this.transactionsStorage));
   }
 
   // TODO: convert amount to sompis aka satoshis
@@ -174,14 +181,19 @@ class Wallet {
     amount,
     fee = DEFAULT_FEE,
     changeAddrOverride,
-  }: TxSend & { changeAddrOverride?: string }): { id: string; rawTx: string } {
+  }: TxSend & { changeAddrOverride?: string }): {
+    id: string;
+    rawTx: string;
+    utxoIds: string[];
+    amount: number;
+  } {
     if (!Number.isSafeInteger(amount)) throw new Error('Amount too large');
-    const utxos = this.selectUtxos(amount + fee);
+    const { utxos, utxoIds } = this.utxoSet.selectUtxos(amount + fee);
     const privKeys = utxos.reduce((prev, cur) => {
-      prev.push(this.addressDict[cur.address]);
+      prev.push(this.addressManager.all[cur.address]);
       return prev;
     }, []);
-    const changeAddr = changeAddrOverride || this.deriveChangeAddress();
+    const changeAddr = changeAddrOverride || this.addressManager.changeAddress.next();
     const tx: bitcore.Transaction = new bitcore.Transaction()
       .from(utxos)
       .to(toAddr, amount)
@@ -189,7 +201,12 @@ class Wallet {
       .fee(fee)
       .change(changeAddr)
       .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
-    return { id: tx.id, rawTx: tx.toString() };
+    this.utxoSet.inUse.push(...utxoIds);
+    this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount: amount + fee });
+    this.utxoSet.updateUtxoBalance();
+    this.updateBalance();
+    this.receiveAddress = this.addressManager.receiveAddress.next();
+    return { id: tx.id, rawTx: tx.toString(), utxoIds, amount: amount + fee };
   }
 
   /**
@@ -202,9 +219,23 @@ class Wallet {
    */
   async sendTx(txParams: TxSend): Promise<string> {
     const { id, rawTx } = this.composeTx(txParams);
-    const tx = await api.postTx(rawTx);
-    if (tx.error) throw new Error(tx.error.errorMessage);
+    try {
+      await api.postTx(rawTx);
+      await this.updateUtxos(this.addressManager.all);
+      this.deleteTx(id);
+    } catch (e) {
+      this.deleteTx(id);
+      throw e;
+    }
     return id;
+  }
+
+  deleteTx(id: string): void {
+    const { utxoIds } = this.pending.transactions[id];
+    delete this.pending.transactions[id];
+    this.utxoSet.release(utxoIds);
+    this.utxoSet.updateUtxoBalance();
+    this.updateBalance();
   }
 
   /**

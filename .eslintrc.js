@@ -83,6 +83,8 @@ module.exports = {
     'import/no-extraneous-dependencies': 'off',
     'import/prefer-default-export': 'off',
     'prefer-promise-reject-errors': 'off',
+    // override airbnb's preference against for/of
+    'no-restricted-syntax': ['error', 'ForInStatement', 'LabeledStatement', 'WithStatement'],
 
     // TypeScript
     quotes: ['warn', 'single', { avoidEscape: true }],

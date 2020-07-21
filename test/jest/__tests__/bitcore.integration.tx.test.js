@@ -22,7 +22,11 @@ test('single utxo: a simple tx with no change', () => {
     .to(to.address, amount)
     .setVersion(1)
     .fee(0)
-    .sign([from.wallet.currentChild.toString()], bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
+    .sign(
+      [from.wallet.addressManager.receiveAddress.current.privateKey.toString()],
+      bitcore.crypto.Signature.SIGHASH_ALL,
+      'schnorr'
+    );
 
   let serialized = tx.toString();
   expect(serialized).toEqual(resultFromKasparov);
@@ -38,7 +42,11 @@ test('single utxo: a simple tx with change and fee', () => {
     .setVersion(1)
     .fee(1000)
     .change(from.address)
-    .sign([from.wallet.currentChild.toString()], bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
+    .sign(
+      [from.wallet.addressManager.receiveAddress.current.privateKey.toString()],
+      bitcore.crypto.Signature.SIGHASH_ALL,
+      'schnorr'
+    );
 
   let serialized = tx.toString();
   expect(serialized).toEqual(resultFromKasparov);
@@ -54,7 +62,11 @@ test('multiple utxo: tx with change and fee', () => {
     .setVersion(1)
     .fee(1000)
     .change(from.address)
-    .sign([from.wallet.currentChild.toString()], bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
+    .sign(
+      [from.wallet.addressManager.receiveAddress.current.privateKey.toString()],
+      bitcore.crypto.Signature.SIGHASH_ALL,
+      'schnorr'
+    );
 
   let serialized = tx.toString();
   expect(serialized).toEqual(resultFromKasparov);

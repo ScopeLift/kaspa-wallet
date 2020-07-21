@@ -41,17 +41,26 @@ export default Vue.extend({
         // @ts-ignore
         return state.main.wallet.balance || '0';
       },
+      wallet(state) {
+        // @ts-ignore
+        return state.main.wallet;
+      },
     }),
     /* eslint-enable */
   },
 
-  mounted() {
+  async mounted() {
     this.getBackupStatus();
+    await this.addressDiscovery();
   },
 
   methods: {
     getBackupStatus() {
       this.isBackedUp = Boolean(this.$q.localStorage.getItem('is-backed-up'));
+    },
+    async addressDiscovery() {
+      /* eslint-disable-next-line */
+      await this.wallet.addressDiscovery();
     },
   },
 });

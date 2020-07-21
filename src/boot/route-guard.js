@@ -3,7 +3,7 @@
 export default ({ router, store }) => {
   router.beforeEach((to, from, next) => {
     // Check if user has opened a wallet
-    const isLoggedIn = store.state.main.wallet?.address;
+    const isLoggedIn = store.state.main.wallet?.receiveAddress;
     // Define list of page names that don't require login to access
     const publicPages = ['home', 'createWallet', 'openWallet', 'restoreWallet'];
     if (isLoggedIn || publicPages.includes(to.name)) {
