@@ -46,18 +46,31 @@
             containting the encrypted contents to your device, and it can be decrypted using the
             same password.
           </div>
-          <div class="row justify-center">
-            <base-input
-              v-model="password"
-              class="col"
-              :hint="passwordHint"
-              :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
-              label="Password"
-              style="min-width: 250px; max-width: 400px;"
-              :type="isPasswordVisible ? 'text' : 'password'"
-              @iconClicked="isPasswordVisible = !isPasswordVisible"
-            />
-          </div>
+          <q-form @submit="saveWalletFile">
+            <div class="row justify-center">
+              <base-input
+                v-model="password"
+                class="col"
+                :hint="passwordHint"
+                :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                label="Password"
+                style="min-width: 250px; max-width: 400px;"
+                :type="isPasswordVisible ? 'text' : 'password'"
+                :rules="checkPasswordRequirements"
+                @iconClicked="isPasswordVisible = !isPasswordVisible"
+              />
+            </div>
+
+            <q-card-actions align="right">
+              <base-button
+                v-if="!isBackupComplete"
+                label="Next"
+                color="primary"
+                :loading="isLoading"
+                type="submit"
+              />
+            </q-card-actions>
+          </q-form>
         </q-card-section>
 
         <div v-else-if="isBackupComplete" class="text-center">
@@ -71,19 +84,8 @@
               safe!
             </div>
           </div>
-          <q-btn v-close-popup label="Done" color="primary" />
+          <q-btn v-close-popup class="q-mb-lg" label="Done" color="primary" />
         </div>
-
-        <q-card-actions align="right">
-          <base-button
-            v-if="!isBackupComplete"
-            label="Next"
-            color="primary"
-            :loading="isLoading"
-            :disabled="!checkPasswordRequirements(password)"
-            @click="saveWalletFile"
-          />
-        </q-card-actions>
       </q-card>
     </q-dialog>
     <!-- END DIALOG THAT HANDLES SAVE FILE FLOW -->
@@ -107,18 +109,25 @@
             Enter your password to reveal your seed phrase. Make sure no one is looking, as anyone
             with your seed phrase can access your wallet your funds. Keep it safe!
           </div>
-          <div class="row justify-center">
-            <base-input
-              v-model="password"
-              class="col"
-              :hint="passwordHint"
-              :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
-              label="Password"
-              style="min-width: 250px; max-width: 400px;"
-              :type="isPasswordVisible ? 'text' : 'password'"
-              @iconClicked="isPasswordVisible = !isPasswordVisible"
-            />
-          </div>
+          <q-form @submit="seedPhraseHandler">
+            <div class="row justify-center">
+              <base-input
+                v-model="password"
+                class="col"
+                :hint="passwordHint"
+                :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                label="Password"
+                style="min-width: 250px; max-width: 400px;"
+                :type="isPasswordVisible ? 'text' : 'password'"
+                :rules="checkPasswordRequirements"
+                @iconClicked="isPasswordVisible = !isPasswordVisible"
+              />
+            </div>
+
+            <q-card-actions align="right">
+              <base-button label="Next" color="primary" :loading="isLoading" type="submit" />
+            </q-card-actions>
+          </q-form>
         </q-card-section>
 
         <!-- If user verified password, show them the seed phrase -->
@@ -165,7 +174,7 @@
               Anyone with this 12-word phrase can access your wallet your funds. Keep it safe!
             </div>
           </div>
-          <q-btn v-close-popup label="Done" color="primary" />
+          <q-btn v-close-popup class="q-mb-lg" label="Done" color="primary" />
         </div>
 
         <!-- Test user on seed phrase -->
@@ -196,13 +205,12 @@
           </div>
         </div>
 
-        <q-card-actions align="right">
+        <q-card-actions v-if="isPasswordVerified" align="right">
           <base-button
             v-if="currentTestIndex === -1"
             label="Next"
             color="primary"
             :loading="isLoading"
-            :disabled="!checkPasswordRequirements(password)"
             @click="seedPhraseHandler"
           />
         </q-card-actions>
@@ -364,6 +372,7 @@ export default Vue.extend({
       } catch (err) {
         // @ts-ignore
         this.showError(err); // eslint-disable-line
+        throw new Error(err); // to exit the top function
       }
     },
 

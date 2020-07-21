@@ -51,6 +51,7 @@
               :hint="passwordHint"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Password"
+              :rules="checkPasswordRequirements"
               :type="isPasswordVisible ? 'text' : 'password'"
               @iconClicked="isPasswordVisible = !isPasswordVisible"
             />
@@ -59,7 +60,6 @@
               <base-button
                 class="col-auto"
                 color="primary"
-                :disabled="!isReadyToDecrypt"
                 label="Restore Wallet"
                 :loading="isLoading"
                 type="submit"
@@ -92,6 +92,7 @@
               :autogrow="true"
               hint="Enter the your 12 word seed phrase"
               label="Seed Phrase"
+              :rules="isSeedPhraseValid"
               style="min-width: 275px;"
             />
 
@@ -99,7 +100,6 @@
               <base-button
                 class="col-auto"
                 color="primary"
-                :disabled="isSeedPhraseValid"
                 label="Next"
                 :loading="isLoading"
                 type="submit"
@@ -115,6 +115,7 @@
               Enter a password to encrypt your seed phrase.
             </p>
 
+            <!-- First password -->
             <base-input
               v-if="seedPhrase"
               v-model="password"
@@ -123,6 +124,7 @@
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Password"
               :type="isPasswordVisible ? 'text' : 'password'"
+              :rules="checkPasswordRequirements"
               @iconClicked="isPasswordVisible = !isPasswordVisible"
             />
 
@@ -134,6 +136,7 @@
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Confirm Password"
               :type="isPasswordVisible ? 'text' : 'password'"
+              :rules="verifyPasswordsMatch(password, password2)"
               @iconClicked="isPasswordVisible = !isPasswordVisible"
             />
 
@@ -141,7 +144,6 @@
               <base-button
                 class="col-auto"
                 color="primary"
-                :disabled="!isReadyToRestoreFromSeed"
                 label="Restore Wallet"
                 :loading="isLoading"
                 type="submit"
@@ -182,21 +184,6 @@ export default Vue.extend({
     };
   },
 
-  computed: {
-    isReadyToDecrypt(): boolean {
-      return Boolean(this.seedFile && this.password);
-    },
-
-    isSeedPhraseValid(): boolean {
-      return this.seedPhrase.split(' ').length !== 12 || this.seedPhrase.split(' ')[11] === '';
-    },
-
-    isReadyToRestoreFromSeed(): boolean {
-      const isValid = this.checkPasswordRequirements(this.password); // eslint-disable-line
-      return Boolean(this.seedPhrase && isValid && this.password === this.password2);
-    },
-  },
-
   methods: {
     reset() {
       // Generic
@@ -211,6 +198,12 @@ export default Vue.extend({
       this.seedPhrase = '';
       this.isReadyForPassword = false;
       this.password2 = '';
+    },
+
+    isSeedPhraseValid() {
+      const seedParts = this.seedPhrase.split(' ');
+      const isValid = seedParts.length === 12 && seedParts[11] !== '';
+      return isValid || 'Please enter a valid 12 word seed phrase';
     },
 
     readFile() {
