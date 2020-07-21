@@ -223,6 +223,8 @@ class Wallet {
     const { id, rawTx } = this.composeTx(txParams);
     try {
       await api.postTx(rawTx);
+      await this.updateUtxos(this.addressManager.all);
+      this.deleteTx(id);
     } catch (e) {
       this.deleteTx(id);
       throw e;
