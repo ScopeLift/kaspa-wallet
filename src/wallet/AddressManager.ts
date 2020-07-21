@@ -11,28 +11,50 @@ export class AddressManager {
 
   network: Network;
 
-  /**
-   * The next receiving address in cashaddr format
-   */
-  address: string;
-
-  /**
-   * The index of the derivation path
-   */
-  childIndex = 0;
-
-  /**
-   * The index of the change path
-   */
-  changeIndex = 0;
-
-  receive: Record<string, bitcore.PrivateKey> = {};
-
-  change: Record<string, bitcore.PrivateKey> = {};
-
   get all(): Record<string, bitcore.PrivateKey> {
     return { ...this.receive, ...this.change };
   }
+
+  receive: Record<string, bitcore.PrivateKey> = {};
+
+  /**
+   * Derives a new receive address. Sets related instance properties.
+   */
+  receiveAddress = {
+    counter: 0,
+    current: {},
+    next: (): string => {
+      const { address, privateKey } = this.deriveAddress('receive', this.receiveAddress.counter);
+      this.receiveAddress.current = { address, privateKey };
+      this.receive[address] = privateKey;
+      this.receiveAddress.counter += 1;
+      return address;
+    },
+    advance(n: number): string {
+      this.counter = n;
+      this.next();
+    },
+  };
+
+  change: Record<string, bitcore.PrivateKey> = {};
+
+  /**
+   * Derives a new change address. Sets related instance properties.
+   */
+  changeAddress = {
+    counter: 0,
+    current: {},
+    next: (): string => {
+      const { address, privateKey } = this.deriveAddress('change', this.changeAddress.counter);
+      this.change[this.changeAddress] = privateKey;
+      this.changeAddress.counter += 1;
+      return address;
+    },
+    advance(n: number): string {
+      this.counter = n;
+      // no call to next() here because composeTx will call it when it needs to.
+    },
+  };
 
   deriveAddress(
     deriveType: 'receive' | 'change',
@@ -57,33 +79,4 @@ export class AddressManager {
       };
     });
   }
-
-  /**
-   * Derives a new receive address. Sets related instance properties.
-   */
-  receiveAddress = {
-    counter: 0,
-    current: {},
-    next: (): string => {
-      const { address, privateKey } = this.deriveAddress('receive', this.receiveAddress.counter);
-      this.receiveAddress.current = { address, privateKey };
-      this.receive[address] = privateKey;
-      this.receiveAddress.counter += 1;
-      return address;
-    },
-  };
-
-  /**
-   * Derives a new change address. Sets related instance properties.
-   */
-  changeAddress = {
-    counter: 0,
-    current: {},
-    next: (): string => {
-      const { address, privateKey } = this.deriveAddress('change', this.changeAddress.counter);
-      this.change[this.changeAddress] = privateKey;
-      this.changeIndex += 1;
-      return address;
-    },
-  };
 }

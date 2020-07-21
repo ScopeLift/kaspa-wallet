@@ -26,9 +26,11 @@ class Wallet {
   HDWallet: bitcore.HDPrivateKey;
 
   /**
-   * The summed balance across all of Wallet's discovered addresses.
+   * The summed balance across all of Wallet's discovered addresses, minus amount from pending transactions.
    */
   balance: number | undefined = undefined;
+
+  receiveAddress: string;
 
   /**
    * Current network.
@@ -78,7 +80,7 @@ class Wallet {
       this.HDWallet = new bitcore.HDPrivateKey(temp.toHDPrivateKey().toString());
     }
     this.addressManager = new AddressManager(this.HDWallet, this.network);
-    this.addressManager.receiveAddress.next();
+    this.receiveAddress = this.addressManager.receiveAddress.next();
   }
 
   async updateUtxos(addresses: string[]): Promise<void> {
@@ -122,12 +124,20 @@ class Wallet {
       const addresses = derivedObjs.map((obj) => obj.address);
       logger.log(
         'info',
-        `${deriveType} address indices: ${JSON.stringify(derivedObjs.map((obj) => obj.index))}`
+        `Fetching ${deriveType} address data for derived indices ${JSON.stringify(
+          derivedObjs.map((obj) => obj.index)
+        )}`
       );
       const addressesWithTx = await this.addTransactions(addresses);
       if (addressesWithTx.length === 0) {
-        logger.log('info', `${deriveType} address discovery complete.`);
-        return offset - n;
+        const lastIndexWithTx = offset - (threshold - n) - 1;
+        logger.log(
+          'info',
+          `${deriveType}Address discovery complete. Last activity on address #${lastIndexWithTx}. No activity from ${deriveType}#${
+            lastIndexWithTx + 1
+          }~${lastIndexWithTx + threshold + 1}.`
+        );
+        return lastIndexWithTx;
       }
       const newN =
         derivedObjs
@@ -137,6 +147,8 @@ class Wallet {
     };
     const highestReceiveIndex = await doDiscovery(threshold, 'receive', 0);
     const highestChangeIndex = await doDiscovery(threshold, 'change', 0);
+    this.addressManager.receiveAddress.advance(highestReceiveIndex + 1);
+    this.addressManager.changeAddress.advance(highestChangeIndex + 1);
     logger.log(
       'info',
       `receive address index: ${highestReceiveIndex}; change address index: ${highestChangeIndex}`
@@ -184,6 +196,7 @@ class Wallet {
     this.pending.transactions[tx.id] = { rawTx: tx.toString(), utxoIds, amount };
     this.utxoSet.updateUtxoBalance();
     this.updateBalance();
+    this.receiveAddress = this.addressManager.receiveAddress.next();
     return { id: tx.id, rawTx: tx.toString(), utxoIds, amount };
   }
 

@@ -28,7 +28,7 @@ export default Vue.extend({
     ...mapState({
       address(state): string {
         // @ts-ignore
-        return state.main.wallet.address;
+        return state.main.wallet.receiveAddress;
       },
     }),
     /* eslint-enable */

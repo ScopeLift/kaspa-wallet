@@ -11,7 +11,7 @@
       "cwd": "${workspaceRoot}/",
       "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
       "env": { "CI": "true" },
-      "args": ["-c", "./jest.config.js", "--verbose", "-i", "--no-cache", "Wallet.utxo"],
+      "args": ["-c", "./jest.config.js", "--verbose", "-i", "--no-cache", "Wallet.discovery"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     }

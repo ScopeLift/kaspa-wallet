@@ -4,7 +4,7 @@ import * as api from '../../../src/wallet/apiHelpers';
 
 test(`Wallet: serializes and sends a tx`, async () => {
   let utxoReq = await api.getUtxos(from.address);
-  let utxos = utxoReq.data.filter((utxo) => utxo.isSpendable);
+  let utxos = utxoReq.utxos.filter((utxo) => utxo.isSpendable);
   from.wallet.utxoSet.add(utxos, from.address);
   let attempt = await from.wallet.sendTx({
     toAddr: to.address,
