@@ -37,6 +37,7 @@
     "core-js": "^3.6.5",
     "quasar": "^1.0.0",
     "safe-buffer": "^5.2.1",
+    "setimmediate": "^1.0.5",
     "winston": "^3.3.3"
   },
   "devDependencies": {

@@ -1,5 +1,6 @@
 import { LocalStorage } from 'quasar';
 import bitcoreKaspaSetup from 'src/wallet/bitcoreKaspaSetup';
+import 'setimmediate';
 
 // more info on params: https://quasar.dev/quasar-cli/cli-documentation/boot-files#Anatomy-of-a-boot-file
 export default async ({ store }) => {

@@ -49,12 +49,10 @@ class Wallet {
       this.transactions[id] = tx;
     },
   };
-  /* eslint-enable */
-
   /**
    * Transactions sorted by hash.
    */
-  transactionsSorted: Api.Transaction[] = [];
+  transactions: Api.Transaction[] = [];
 
   /**
    * Transaction arrays keyed by address.
@@ -110,7 +108,7 @@ class Wallet {
         addressesWithTx.push(address);
       }
     });
-    this.transactionsSorted = Object.values(this.transactionsStorage)
+    this.transactions = Object.values(this.transactionsStorage)
       .flat(2)
       .sort(
         (a, b) => a.acceptingBlockHash > b.acceptingBlockHash // TODO: get block by hash and look up timestamp
