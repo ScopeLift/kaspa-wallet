@@ -4,7 +4,7 @@
       <p class="text-primary">Unlock the wallet with your password</p>
       <base-input
         v-model="password"
-        hint="Enter your password"
+        :hint="passwordHint"
         :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
         label="Password"
         :type="isPasswordVisible ? 'text' : 'password'"
@@ -54,7 +54,8 @@ export default Vue.extend({
 
   computed: {
     isPasswordValid(): boolean {
-      return this.password.length > 0 && !this.isDisabled;
+      const isValid = this.checkPasswordRequirements(this.password); // eslint-disable-line
+      return isValid && !this.isDisabled;
     },
   },
 

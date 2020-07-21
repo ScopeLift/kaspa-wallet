@@ -6,7 +6,7 @@
       <base-input
         v-model="password1"
         :type="isPasswordVisible ? 'text' : 'password'"
-        hint="Enter your password"
+        :hint="passwordHint"
         label="Password"
         :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
         @iconClicked="isPasswordVisible = !isPasswordVisible"
@@ -15,7 +15,7 @@
       <base-input
         v-model="password2"
         class="q-mt-lg"
-        hint="Re-enter your password"
+        :hint="passwordHint"
         :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
         label="Confirm Password"
         :type="isPasswordVisible ? 'text' : 'password'"
@@ -59,7 +59,8 @@ export default Vue.extend({
      * @notice Returns true if all requirements for a valid password are met
      */
     isPasswordValid(): boolean {
-      return this.password1.length > 0 && this.password1 === this.password2;
+      const isValid = this.checkPasswordRequirements(this.password1); // eslint-disable-line
+      return isValid > 0 && this.password1 === this.password2;
     },
   },
 

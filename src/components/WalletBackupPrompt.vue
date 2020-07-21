@@ -50,7 +50,7 @@
             <base-input
               v-model="password"
               class="col"
-              hint="Enter your password to continue"
+              :hint="passwordHint"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Password"
               style="min-width: 250px; max-width: 400px;"
@@ -80,7 +80,7 @@
             label="Next"
             color="primary"
             :loading="isLoading"
-            :disabled="password.length < 1"
+            :disabled="!checkPasswordRequirements(password)"
             @click="saveWalletFile"
           />
         </q-card-actions>
@@ -111,7 +111,7 @@
             <base-input
               v-model="password"
               class="col"
-              hint="Enter your password to continue"
+              :hint="passwordHint"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Password"
               style="min-width: 250px; max-width: 400px;"
@@ -202,7 +202,7 @@
             label="Next"
             color="primary"
             :loading="isLoading"
-            :disabled="password.length < 1"
+            :disabled="!checkPasswordRequirements(password)"
             @click="seedPhraseHandler"
           />
         </q-card-actions>

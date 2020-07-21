@@ -48,7 +48,7 @@
               v-if="seedFile"
               v-model="password"
               class="q-mt-lg"
-              hint="Enter the password for this file"
+              :hint="passwordHint"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Password"
               :type="isPasswordVisible ? 'text' : 'password'"
@@ -119,7 +119,7 @@
               v-if="seedPhrase"
               v-model="password"
               class="q-mt-lg"
-              hint="Enter a password to protect this phrase"
+              :hint="passwordHint"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Password"
               :type="isPasswordVisible ? 'text' : 'password'"
@@ -130,7 +130,7 @@
             <base-input
               v-model="password2"
               class="q-mt-lg"
-              hint="Re-enter your password"
+              :hint="passwordHint"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Confirm Password"
               :type="isPasswordVisible ? 'text' : 'password'"
@@ -192,9 +192,8 @@ export default Vue.extend({
     },
 
     isReadyToRestoreFromSeed(): boolean {
-      return Boolean(
-        this.seedPhrase && this.password.length > 0 && this.password === this.password2
-      );
+      const isValid = this.checkPasswordRequirements(this.password); // eslint-disable-line
+      return Boolean(this.seedPhrase && isValid && this.password === this.password2);
     },
   },
 
