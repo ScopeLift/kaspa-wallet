@@ -5,7 +5,7 @@
       :data="transactions"
       flat
       hide-header
-      :hide-pagination="true"
+      :hide-pagination="false"
       row-key="name"
     >
       <!-- Confirmations column -->
