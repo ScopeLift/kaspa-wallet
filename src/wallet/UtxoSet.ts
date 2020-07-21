@@ -22,7 +22,9 @@ export class UtxoSet {
     const utxoIds: string[] = [];
     utxos.forEach((utxo) => {
       const utxoId = utxo.transactionId + utxo.index.toString();
-      if (!this.utxos[utxoId] && this.inUse.indexOf(utxoId) !== utxoId) {
+      const utxoInUse = this.inUse.indexOf(utxoId) !== -1;
+      const alreadyHaveIt = this.utxos[utxoId];
+      if (!utxoInUse && !alreadyHaveIt) {
         utxoIds.push(utxoId);
         this.utxos[utxoId] = new bitcore.Transaction.UnspentOutput({
           txid: utxo.transactionId,
@@ -33,19 +35,22 @@ export class UtxoSet {
         });
       }
     });
-    if (utxoIds.length) logger.log('info', `Added ${utxoIds.length} UTXOs to UtxoSet.`);
-    this.updateUtxoBalance();
+    if (utxoIds.length) {
+      logger.log('info', `Added ${utxoIds.length} UTXOs to UtxoSet.`);
+      this.updateUtxoBalance();
+    }
     return utxoIds;
   }
 
-  enable(utxoIdsToEnable: string[]): void {
+  release(utxoIdsToEnable: string[]): void {
     // assigns new array without any utxoIdsToEnable
     this.inUse = this.inUse.filter((utxoId) => utxoIdsToEnable.indexOf(utxoId) === -1);
+    this.updateUtxoBalance();
   }
 
   updateUtxoBalance(): number {
     const utxoIds = Object.keys(this.utxos).filter((key) => this.inUse.indexOf(key) === -1);
-    this.balance = utxoIds.reduce((prev, cur) => prev + this.utxos[cur].satoshis, 0);
+    this.availableBalance = utxoIds.reduce((prev, cur) => prev + this.utxos[cur].satoshis, 0);
   }
 
   clear(): void {

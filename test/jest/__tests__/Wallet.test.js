@@ -2,10 +2,10 @@ import Wallet from '../../../src/wallet/Wallet';
 
 test(`Networks: prefix changes`, () => {
   let myWallet = new Wallet();
-  expect(myWallet.addressManager.address).toContain(myWallet.network);
+  expect(myWallet.addressManager.receiveAddress.current.address).toContain(myWallet.network);
   myWallet.network = 'kaspa';
   expect(myWallet.network).toEqual('kaspa');
-  expect(myWallet.addressManager.address).toContain('kaspa');
+  expect(myWallet.addressManager.receiveAddress.current.address).toContain('kaspa');
 });
 
 test(`Import/Export: correct password`, async () => {
@@ -16,8 +16,8 @@ test(`Import/Export: correct password`, async () => {
   let walletFile2 = await importedWallet.export('!@)#!(% !#okありがとう');
   let importedWallet2 = await Wallet.import('!@)#!(% !#okありがとう', walletFile2);
   expect(importedWallet.addressManager.address).toEqual(importedWallet2.addressManager.address);
-  expect(importedWallet.addressManager.deriveAddress()).toEqual(
-    importedWallet2.addressManager.deriveAddress()
+  expect(importedWallet.addressManager.receiveAddress.next()).toEqual(
+    importedWallet2.addressManager.receiveAddress.next()
   );
 });
 

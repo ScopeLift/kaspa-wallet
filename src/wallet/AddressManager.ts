@@ -17,11 +17,6 @@ export class AddressManager {
   address: string;
 
   /**
-   * The next change address in cashaddr format
-   */
-  changeAddress: string;
-
-  /**
    * The index of the derivation path
    */
   childIndex = 0;
@@ -39,27 +34,56 @@ export class AddressManager {
     return { ...this.receive, ...this.change };
   }
 
+  deriveAddress(
+    deriveType: 'receive' | 'change',
+    index: number
+  ): { address: string; privateKey: bitcore.HDPrivateKey } {
+    const dType = deriveType === 'receive' ? 0 : 1;
+    const { privateKey } = this.HDWallet.deriveChild(`m/44'/972/0'/${dType}'/${index}'`);
+    return {
+      address: privateKey.toAddress(this.network).toString(),
+      privateKey,
+    };
+  }
+
+  getAddresses(n: number, deriveType: 'receive' | 'change', offset = 0) {
+    return [...Array(n).keys()].map((i) => {
+      const index = i + offset;
+      const { address, privateKey } = this.deriveAddress(deriveType, index);
+      return {
+        index,
+        address,
+        privateKey,
+      };
+    });
+  }
+
   /**
    * Derives a new receive address. Sets related instance properties.
    */
-  deriveAddress(): string {
-    const derivePath = `m/44'/972/0'/0'/${this.childIndex}'`;
-    const { privateKey } = this.HDWallet.deriveChild(derivePath);
-    this.address = privateKey.toAddress(this.network).toString();
-    this.receive[this.address] = privateKey;
-    this.childIndex += 1;
-    return this.address;
-  }
+  receiveAddress = {
+    counter: 0,
+    current: {},
+    next: (): string => {
+      const { address, privateKey } = this.deriveAddress('receive', this.receiveAddress.counter);
+      this.receiveAddress.current = { address, privateKey };
+      this.receive[address] = privateKey;
+      this.receiveAddress.counter += 1;
+      return address;
+    },
+  };
 
   /**
    * Derives a new change address. Sets related instance properties.
    */
-  deriveChangeAddress(): string {
-    const derivePath = `m/44'/972/0'/1'/${this.changeIndex}`;
-    const { privateKey } = this.HDWallet.deriveChild(derivePath);
-    this.changeAddress = privateKey.toAddress(this.network).toString();
-    this.change[this.changeAddress] = privateKey;
-    this.changeIndex += 1;
-    return this.changeAddress;
-  }
+  changeAddress = {
+    counter: 0,
+    current: {},
+    next: (): string => {
+      const { address, privateKey } = this.deriveAddress('change', this.changeAddress.counter);
+      this.change[this.changeAddress] = privateKey;
+      this.changeIndex += 1;
+      return address;
+    },
+  };
 }
