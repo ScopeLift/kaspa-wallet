@@ -46,7 +46,7 @@
             containting the encrypted contents to your device, and it can be decrypted using the
             same password.
           </div>
-          <q-form @submit="saveWalletFile">
+          <q-form ref="form" @submit="saveWalletFile">
             <div class="row justify-center">
               <base-input
                 v-model="password"
@@ -58,6 +58,7 @@
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :rules="checkPasswordRequirements"
                 @iconClicked="isPasswordVisible = !isPasswordVisible"
+                @input="resetFormValidations('form')"
               />
             </div>
 
@@ -109,7 +110,7 @@
             Enter your password to reveal your seed phrase. Make sure no one is looking, as anyone
             with your seed phrase can access your wallet your funds. Keep it safe!
           </div>
-          <q-form @submit="seedPhraseHandler">
+          <q-form ref="form" @submit="seedPhraseHandler">
             <div class="row justify-center">
               <base-input
                 v-model="password"
@@ -121,6 +122,7 @@
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :rules="checkPasswordRequirements"
                 @iconClicked="isPasswordVisible = !isPasswordVisible"
+                @input="resetFormValidations('form')"
               />
             </div>
 

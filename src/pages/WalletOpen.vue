@@ -1,6 +1,6 @@
 <template>
   <q-page padding class="text-primary page-margin">
-    <q-form @submit="handleOpen">
+    <q-form ref="form" @submit="handleOpen">
       <p class="text-primary">Unlock the wallet with your password</p>
       <base-input
         v-model="password"
@@ -10,6 +10,7 @@
         :rules="checkPasswordRequirements"
         :type="isPasswordVisible ? 'text' : 'password'"
         @iconClicked="isPasswordVisible = !isPasswordVisible"
+        @input="resetFormValidations('form')"
       />
       <div class="column content-center text-center q-mt-lg">
         <base-button label="Open Wallet" :loading="isLoading" type="submit" />

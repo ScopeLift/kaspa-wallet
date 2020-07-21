@@ -13,6 +13,14 @@ export default Vue.extend({
 
   methods: {
     /**
+     * Clears form validations for the ref specified
+     * @param ref name of ref to reset
+     */
+    resetFormValidations(ref) {
+      this.$refs[ref].resetValidation(); // eslint-disable-line
+    },
+
+    /**
      * Checks if a single password meets the requirements. Used as the rules function
      * for input components
      * @param password Password to check
