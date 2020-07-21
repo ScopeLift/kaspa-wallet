@@ -54,16 +54,13 @@ export default Vue.extend({
 
   async mounted() {
     this.getBackupStatus();
-    await this.addressDiscovery();
+    /* eslint-disable-next-line */
+    await this.wallet.addressDiscovery();
   },
 
   methods: {
     getBackupStatus() {
       this.isBackedUp = Boolean(this.$q.localStorage.getItem('is-backed-up'));
-    },
-    async addressDiscovery() {
-      /* eslint-disable-next-line */
-      await this.wallet.addressDiscovery();
     },
   },
 });
