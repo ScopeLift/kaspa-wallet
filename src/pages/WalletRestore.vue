@@ -30,7 +30,7 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          <q-form @submit="decryptFile">
+          <q-form ref="form" @submit="decryptFile">
             <q-file
               v-model="seedFile"
               accept=".dag"
@@ -54,6 +54,7 @@
               :rules="checkPasswordRequirements"
               :type="isPasswordVisible ? 'text' : 'password'"
               @iconClicked="isPasswordVisible = !isPasswordVisible"
+              @input="resetFormValidations('form')"
             />
 
             <div class="row justify-end q-mt-lg">
@@ -82,7 +83,7 @@
 
         <!-- Get seed phrase -->
         <q-card-section v-if="!isReadyForPassword" class="q-pt-none">
-          <q-form @submit="continueToPassword">
+          <q-form ref="form" @submit="continueToPassword">
             <p>
               Enter your 12 word seed phrase, with a space between each word. Be sure you're doing
               this in a private space. Anyone with these 12 words can steal your funds.
@@ -94,6 +95,7 @@
               label="Seed Phrase"
               :rules="isSeedPhraseValid"
               style="min-width: 275px;"
+              @input="resetFormValidations('form')"
             />
 
             <div class="row justify-end q-mt-lg">
@@ -110,7 +112,7 @@
 
         <!-- Get password -->
         <q-card-section v-else class="q-pt-none">
-          <q-form @submit="restoreFromSeed">
+          <q-form ref="form" @submit="restoreFromSeed">
             <p>
               Enter a password to encrypt your seed phrase.
             </p>
@@ -126,6 +128,7 @@
               :type="isPasswordVisible ? 'text' : 'password'"
               :rules="checkPasswordRequirements"
               @iconClicked="isPasswordVisible = !isPasswordVisible"
+              @input="resetFormValidations('form')"
             />
 
             <!-- Confirm password -->
@@ -138,6 +141,7 @@
               :type="isPasswordVisible ? 'text' : 'password'"
               :rules="verifyPasswordsMatch(password, password2)"
               @iconClicked="isPasswordVisible = !isPasswordVisible"
+              @input="resetFormValidations('form')"
             />
 
             <div class="row justify-end q-mt-lg">

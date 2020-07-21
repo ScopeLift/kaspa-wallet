@@ -1,6 +1,6 @@
 <template>
   <q-page padding class="page-margin">
-    <q-form @submit="handleCreate">
+    <q-form ref="form" @submit="handleCreate">
       <p class="text-primary">Create a password for your new wallet</p>
       <!-- Password -->
       <base-input
@@ -11,6 +11,7 @@
         :rules="checkPasswordRequirements"
         :type="isPasswordVisible ? 'text' : 'password'"
         @iconClicked="isPasswordVisible = !isPasswordVisible"
+        @input="resetFormValidations('form')"
       />
       <!-- Confirm password -->
       <base-input
@@ -22,6 +23,7 @@
         :rules="verifyPasswordsMatch(password1, password2)"
         :type="isPasswordVisible ? 'text' : 'password'"
         @iconClicked="isPasswordVisible = !isPasswordVisible"
+        @input="resetFormValidations('createForm')"
       />
       <!-- Continue buttons -->
       <div class="column content-center text-center q-mt-lg">
