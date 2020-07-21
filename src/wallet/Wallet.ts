@@ -36,6 +36,7 @@ class Wallet {
   utxoSet = new UtxoSet();
 
   addressManager: AddressManager;
+
   /* eslint-disable */
   pending: PendingTransactions = {
     transactions: {},
@@ -121,7 +122,7 @@ class Wallet {
    * Recalculates wallet balance.
    */
   updateBalance(): void {
-    this.balance = this.utxoSet.balance - this.pending.amount;
+    this.balance = this.utxoSet.totalBalance - this.pending.amount;
   }
 
   /**
@@ -203,11 +204,11 @@ class Wallet {
       .change(changeAddr)
       .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
     this.utxoSet.inUse.push(...utxoIds);
-    this.pending.transactions[tx.id] = { rawTx: tx.toString(), utxoIds, amount };
+    this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount: amount + fee });
     this.utxoSet.updateUtxoBalance();
     this.updateBalance();
     this.receiveAddress = this.addressManager.receiveAddress.next();
-    return { id: tx.id, rawTx: tx.toString(), utxoIds, amount };
+    return { id: tx.id, rawTx: tx.toString(), utxoIds, amount: amount + fee };
   }
 
   /**
@@ -219,17 +220,22 @@ class Wallet {
    * @throws `FetchError` if endpoint is down. API error message if tx error. Error if amount is too large to be represented as a javascript number.
    */
   async sendTx(txParams: TxSend): Promise<string> {
-    const { id, rawTx, utxoIds } = this.composeTx(txParams);
+    const { id, rawTx } = this.composeTx(txParams);
     try {
       await api.postTx(rawTx);
     } catch (e) {
-      delete this.pending.transactions[id];
-      this.utxoSet.release(utxoIds);
-      this.utxoSet.updateUtxoBalance();
-      this.updateBalance();
+      this.deleteTx(id);
       throw e;
     }
     return id;
+  }
+
+  deleteTx(id: string): void {
+    const { utxoIds } = this.pending.transactions[id];
+    delete this.pending.transactions[id];
+    this.utxoSet.release(utxoIds);
+    this.utxoSet.updateUtxoBalance();
+    this.updateBalance();
   }
 
   /**

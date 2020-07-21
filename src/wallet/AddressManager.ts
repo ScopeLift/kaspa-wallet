@@ -11,52 +11,63 @@ export class AddressManager {
 
   network: Network;
 
-  get all(): Record<string, bitcore.PrivateKey> {
-    return { ...this.receive, ...this.change };
+  get all(): Record<string, bitcore.HDPrivateKey> {
+    return { ...this.receiveAddress.keypairs, ...this.changeAddress.keypairs };
   }
-
-  receive: Record<string, bitcore.PrivateKey> = {};
 
   /**
    * Derives a new receive address. Sets related instance properties.
    */
-  receiveAddress = {
+  receiveAddress: {
+    counter: number;
+    current: { address: string; privateKey: bitcore.HDPrivateKey };
+    keypairs: Record<string, bitcore.HDPrivateKey>;
+    next: () => string;
+    advance: (n: number) => void;
+  } = {
     counter: 0,
     current: {},
+    keypairs: {},
     next: (): string => {
       const { address, privateKey } = this.deriveAddress('receive', this.receiveAddress.counter);
       this.receiveAddress.current = { address, privateKey };
-      this.receive[address] = privateKey;
+      this.receiveAddress.keypairs[address] = privateKey;
       this.receiveAddress.counter += 1;
       return address;
     },
-    advance(n: number): string {
+    advance(n: number): void {
       this.counter = n;
       this.next();
     },
   };
 
-  change: Record<string, bitcore.PrivateKey> = {};
-
   /**
    * Derives a new change address. Sets related instance properties.
    */
-  changeAddress = {
+  changeAddress: {
+    counter: number;
+    current: { address: string; privateKey: bitcore.HDPrivateKey };
+    keypairs: Record<string, bitcore.HDPrivateKey>;
+    next: () => string;
+    advance: (n: number) => void;
+  } = {
     counter: 0,
     current: {},
+    keypairs: {},
     next: (): string => {
       const { address, privateKey } = this.deriveAddress('change', this.changeAddress.counter);
-      this.change[this.changeAddress] = privateKey;
+      this.changeAddress.keypairs[address] = privateKey;
+      this.changeAddress.current = { address, privateKey };
       this.changeAddress.counter += 1;
       return address;
     },
-    advance(n: number): string {
+    advance(n: number): void {
       this.counter = n;
-      // no call to next() here because composeTx will call it when it needs to.
+      // no call to next() here; composeTx calls it on demand.
     },
   };
 
-  deriveAddress(
+  private deriveAddress(
     deriveType: 'receive' | 'change',
     index: number
   ): { address: string; privateKey: bitcore.HDPrivateKey } {
@@ -68,10 +79,21 @@ export class AddressManager {
     };
   }
 
+  /**
+   * Derives n addresses and adds their keypairs to their deriveType-respective address object
+   * @param n How many addresses to derive
+   * @param deriveType receive or change address
+   * @param offset Index to start at in derive path
+   */
   getAddresses(n: number, deriveType: 'receive' | 'change', offset = 0) {
     return [...Array(n).keys()].map((i) => {
       const index = i + offset;
       const { address, privateKey } = this.deriveAddress(deriveType, index);
+      if (deriveType === 'receive') {
+        this.receiveAddress.keypairs[address] = privateKey;
+      } else {
+        this.changeAddress.keypairs[address] = privateKey;
+      }
       return {
         index,
         address,

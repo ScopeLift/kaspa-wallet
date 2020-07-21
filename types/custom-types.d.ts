@@ -7,7 +7,7 @@ export type WalletSave = {
   privKey: string;
 };
 
-interface PendingTransactions {
+type PendingTransactions = {
   amount: number;
   transactions: Record<
     string,
@@ -17,7 +17,8 @@ interface PendingTransactions {
       amount: number;
     }
   >;
-}
+  add(id: string, tx: { utxoIds: string[]; rawTx: string; amount: number }): void;
+};
 
 export interface TxSend {
   to: string;

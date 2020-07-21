@@ -7,6 +7,8 @@ export class UtxoSet {
 
   inUse: string[] = [];
 
+  totalBalance = 0;
+
   availableBalance = 0;
 
   get length(): number {
@@ -48,15 +50,21 @@ export class UtxoSet {
     this.updateUtxoBalance();
   }
 
-  updateUtxoBalance(): number {
-    const utxoIds = Object.keys(this.utxos).filter((key) => this.inUse.indexOf(key) === -1);
-    this.availableBalance = utxoIds.reduce((prev, cur) => prev + this.utxos[cur].satoshis, 0);
+  updateUtxoBalance(): void {
+    const utxoIds = Object.keys(this.utxos);
+    const utxoIdsNotInUse = utxoIds.filter((key) => this.inUse.indexOf(key) === -1);
+    this.totalBalance = utxoIds.reduce((prev, cur) => prev + this.utxos[cur].satoshis, 0);
+    this.availableBalance = utxoIdsNotInUse.reduce(
+      (prev, cur) => prev + this.utxos[cur].satoshis,
+      0
+    );
   }
 
   clear(): void {
     this.utxos = {};
     this.inUse = [];
     this.availableBalance = 0;
+    logger.log('info', 'UTXO set cleared.');
   }
 
   /**

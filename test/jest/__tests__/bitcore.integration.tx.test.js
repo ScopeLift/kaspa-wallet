@@ -23,7 +23,7 @@ test('single utxo: a simple tx with no change', () => {
     .setVersion(1)
     .fee(0)
     .sign(
-      [from.wallet.addressManager.receive[from.address].toString()],
+      [from.wallet.addressManager.receiveAddress.current.privateKey.toString()],
       bitcore.crypto.Signature.SIGHASH_ALL,
       'schnorr'
     );
@@ -43,7 +43,7 @@ test('single utxo: a simple tx with change and fee', () => {
     .fee(1000)
     .change(from.address)
     .sign(
-      [from.wallet.addressManager.receive[from.address].toString()],
+      [from.wallet.addressManager.receiveAddress.current.privateKey.toString()],
       bitcore.crypto.Signature.SIGHASH_ALL,
       'schnorr'
     );
@@ -63,7 +63,7 @@ test('multiple utxo: tx with change and fee', () => {
     .fee(1000)
     .change(from.address)
     .sign(
-      [from.wallet.addressManager.receive[from.address].toString()],
+      [from.wallet.addressManager.receiveAddress.current.privateKey.toString()],
       bitcore.crypto.Signature.SIGHASH_ALL,
       'schnorr'
     );
