@@ -13,13 +13,27 @@ export default Vue.extend({
 
   methods: {
     /**
-     * Checks if the provided password meets the requirements
+     * Checks if a single password meets the requirements. Used as the rules function
+     * for input components
      * @param password Password to check
-     * @returns true if password is valid, false otherwise
+     * @returns true if password is valid, error message otherwise
      */
     checkPasswordRequirements(password) {
       const regex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
-      return regex.test(password);
+      return regex.test(password) || this.passwordHint;
+    },
+
+    /**
+     * Verifies that both passwords match. Returns a function so it can be used in input rules
+     * @param password1 First password to check
+     * @param password2 Second password to check
+     * @returns function that returns true if password is valid, error message otherwise
+     */
+    verifyPasswordsMatch(password1, password2) {
+      const passwordsMatch = () => {
+        return password1 === password2 || 'Passwords do not match';
+      };
+      return passwordsMatch;
     },
 
     /**

@@ -5,10 +5,11 @@
       <!-- Password -->
       <base-input
         v-model="password1"
-        :type="isPasswordVisible ? 'text' : 'password'"
         :hint="passwordHint"
-        label="Password"
         :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
+        label="Password"
+        :rules="checkPasswordRequirements"
+        :type="isPasswordVisible ? 'text' : 'password'"
         @iconClicked="isPasswordVisible = !isPasswordVisible"
       />
       <!-- Confirm password -->
@@ -18,17 +19,13 @@
         :hint="passwordHint"
         :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
         label="Confirm Password"
+        :rules="verifyPasswordsMatch(password1, password2)"
         :type="isPasswordVisible ? 'text' : 'password'"
         @iconClicked="isPasswordVisible = !isPasswordVisible"
       />
       <!-- Continue buttons -->
       <div class="column content-center text-center q-mt-lg">
-        <base-button
-          :disable="!isPasswordValid"
-          label="Create Wallet"
-          :loading="isLoading"
-          type="submit"
-        />
+        <base-button label="Create Wallet" :loading="isLoading" type="submit" />
         <base-button :flat="true" label="I have a wallet" @click="navigate" />
       </div>
     </q-form>
@@ -52,16 +49,6 @@ export default Vue.extend({
       isLoading: false,
       isPasswordVisible: false,
     };
-  },
-
-  computed: {
-    /**
-     * @notice Returns true if all requirements for a valid password are met
-     */
-    isPasswordValid(): boolean {
-      const isValid = this.checkPasswordRequirements(this.password1); // eslint-disable-line
-      return isValid > 0 && this.password1 === this.password2;
-    },
   },
 
   methods: {

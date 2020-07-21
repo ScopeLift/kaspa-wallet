@@ -7,16 +7,12 @@
         :hint="passwordHint"
         :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
         label="Password"
+        :rules="checkPasswordRequirements"
         :type="isPasswordVisible ? 'text' : 'password'"
         @iconClicked="isPasswordVisible = !isPasswordVisible"
       />
       <div class="column content-center text-center q-mt-lg">
-        <base-button
-          :disable="!isPasswordValid"
-          label="Open Wallet"
-          :loading="isLoading"
-          type="submit"
-        />
+        <base-button label="Open Wallet" :loading="isLoading" type="submit" />
         <base-button
           :flat="true"
           label="New wallet"
@@ -50,13 +46,6 @@ export default Vue.extend({
       isLoading: false,
       isPasswordVisible: false,
     };
-  },
-
-  computed: {
-    isPasswordValid(): boolean {
-      const isValid = this.checkPasswordRequirements(this.password); // eslint-disable-line
-      return isValid && !this.isDisabled;
-    },
   },
 
   methods: {

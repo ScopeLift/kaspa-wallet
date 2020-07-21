@@ -68,9 +68,9 @@ export default Vue.extend({
     },
 
     lazyRules: {
-      type: Boolean,
+      type: undefined, // can be true, false, or ondemand
       required: false,
-      default: true,
+      default: 'ondemand',
     },
 
     rules: {
