@@ -4,7 +4,7 @@
     <wallet-backup-prompt v-if="!isBackedUp" @backupComplete="getBackupStatus" />
     <!-- Wallet balance -->
     <div class="text-primary text-center">
-      <transaction-amount :amount="balance" :is-balance="true" />
+      <transaction-amount :amount="formatBalanceForHuman(balance)" :is-balance="true" />
     </div>
     <!-- Transaction history -->
     <div class="text-primary text-left">
@@ -19,9 +19,12 @@ import Vue from 'vue';
 import { mapState } from 'vuex';
 import TransactionAmount from 'components/TransactionAmount.vue';
 import WalletBalanceTransactions from 'components/WalletBalanceTransactions.vue';
+import formatters from 'src/utils/mixin-formatters';
 
 export default Vue.extend({
   name: 'WalletBalance',
+
+  mixins: [formatters],
 
   components: {
     TransactionAmount,
