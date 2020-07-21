@@ -47,6 +47,7 @@
             <base-input
               v-if="seedFile"
               v-model="password"
+              :autofocus="true"
               class="q-mt-lg"
               :hint="passwordHint"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
@@ -90,6 +91,7 @@
             </p>
             <base-input
               v-model="seedPhrase"
+              :autofocus="!isReadyForPassword"
               :autogrow="true"
               hint="Enter the your 12 word seed phrase"
               label="Seed Phrase"
@@ -121,6 +123,7 @@
             <base-input
               v-if="seedPhrase"
               v-model="password"
+              :autofocus="true"
               class="q-mt-lg"
               :hint="passwordHint"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"

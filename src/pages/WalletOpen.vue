@@ -4,6 +4,7 @@
       <p class="text-primary">Unlock the wallet with your password</p>
       <base-input
         v-model="password"
+        :autofocus="true"
         :hint="passwordHint"
         :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
         label="Password"

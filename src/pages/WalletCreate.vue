@@ -5,6 +5,7 @@
       <!-- Password -->
       <base-input
         v-model="password1"
+        :autofocus="true"
         :hint="passwordHint"
         :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
         label="Password"
