@@ -6,10 +6,22 @@ import { Notify } from 'quasar';
 
 export default Vue.extend({
   data() {
-    return {};
+    return {
+      passwordHint: 'At least 8 characters, one capital, one lower, one number, and one symbol',
+    };
   },
 
   methods: {
+    /**
+     * Checks if the provided password meets the requirements
+     * @param password Password to check
+     * @returns true if password is valid, false otherwise
+     */
+    checkPasswordRequirements(password) {
+      const regex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+      return regex.test(password);
+    },
+
     /**
      * Present notification alert to the user
      * @param {string} color alert color, choose positive, negative, warning, info, or others
