@@ -2,24 +2,12 @@ import Mnemonic from 'bitcore-mnemonic';
 import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
-import { Network, WalletSave, Api, TxSend } from 'custom-types';
-import { AddressManager } from './AddressManager';
-import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
-import * as api from './apiHelpers';
-import { UtxoSet } from './UtxoSet';
+import { Network, WalletSave, Api, TxSend, PendingTransactions } from 'custom-types';
 import { logger } from '../utils/logger';
-
-interface PendingTransactions {
-  amount: number;
-  transactions: Record<
-    string,
-    {
-      utxoIds: string[];
-      rawTx: string;
-      amount: number;
-    }
-  >;
-}
+import { AddressManager } from './AddressManager';
+import { UtxoSet } from './UtxoSet';
+import * as api from './apiHelpers';
+import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
@@ -30,6 +18,9 @@ class Wallet {
    */
   balance: number | undefined = undefined;
 
+  /**
+   * Set by addressManager
+   */
   receiveAddress: string;
 
   /**
@@ -38,14 +29,14 @@ class Wallet {
   network: Network = DEFAULT_NETWORK;
 
   /**
-   * A 12 word mnemonic that is only present when the wallet was just created.
+   * A 12 word mnemonic.
    */
   mnemonic: string;
 
   utxoSet = new UtxoSet();
 
   addressManager: AddressManager;
-
+  /* eslint-disable */
   pending: PendingTransactions = {
     transactions: {},
     get amount() {
@@ -57,12 +48,16 @@ class Wallet {
       this.transactions[id] = tx;
     },
   };
+  /* eslint-enable */
 
   /**
-   * Transaction history
+   * Transactions sorted by hash.
    */
   transactionsSorted: Api.Transaction[] = [];
 
+  /**
+   * Transaction arrays keyed by address.
+   */
   transactionsStorage: Record<string, Api.Transaction[]> = {};
 
   /** Create a wallet.
@@ -83,6 +78,10 @@ class Wallet {
     this.receiveAddress = this.addressManager.receiveAddress.next();
   }
 
+  /**
+   * Queries API for address[] UTXOs. Adds UTXOs to UTXO set. Updates wallet balance.
+   * @param addresses
+   */
   async updateUtxos(addresses: string[]): Promise<void> {
     logger.log('info', `Getting utxos for ${addresses.length} addresses.`);
     const utxoResults = await Promise.all(addresses.map((address) => api.getUtxos(address)));
@@ -94,6 +93,10 @@ class Wallet {
     this.updateBalance();
   }
 
+  /**
+   * Queries API for address[] transactions. Adds tx to transactions storage. Also sorts the entire transaction set.
+   * @param addresses
+   */
   async addTransactions(addresses: string[]): Promise<string[]> {
     logger.log('info', `Getting transactions for ${addresses.length} addresses.`);
     const addressesWithTx: string[] = [];
@@ -114,10 +117,17 @@ class Wallet {
     return addressesWithTx;
   }
 
+  /**
+   * Recalculates wallet balance.
+   */
   updateBalance(): void {
-    this.balance = this.utxoSet.balance - this.pending.transactions.amount;
+    this.balance = this.utxoSet.balance - this.pending.amount;
   }
 
+  /**
+   * Derives receiveAddresses and changeAddresses and checks their transactions and UTXOs.
+   * @param threshold stop discovering after `threshold` addresses with no activity
+   */
   async addressDiscovery(threshold = 20): Promise<void> {
     const doDiscovery = async (n: number, deriveType: string, offset: number): Promise<number> => {
       const derivedObjs = this.addressManager.getAddresses(n, deriveType, offset);

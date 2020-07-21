@@ -7,10 +7,18 @@ export type WalletSave = {
   privKey: string;
 };
 
-export type AddressDict = {
-  receive: Record<string, bitcore.PrivateKey>;
-  change: Record<string, bitcore.PrivateKey>;
-};
+interface PendingTransactions {
+  amount: number;
+  transactions: Record<
+    string,
+    {
+      utxoIds: string[];
+      rawTx: string;
+      amount: number;
+    }
+  >;
+}
+
 export interface TxSend {
   to: string;
   amount: number;
