@@ -71,7 +71,7 @@ export namespace Api {
     address: string;
   }
   interface TransactionOutput {
-    value: string;
+    value: number;
     scriptPubKey: string;
     address: string;
   }
