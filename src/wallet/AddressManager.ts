@@ -11,7 +11,7 @@ export class AddressManager {
 
   network: Network;
 
-  get all(): Record<string, bitcore.HDPrivateKey> {
+  get all(): Record<string, bitcore.PrivateKey> {
     return { ...this.receiveAddress.keypairs, ...this.changeAddress.keypairs };
   }
 
@@ -20,12 +20,13 @@ export class AddressManager {
    */
   receiveAddress: {
     counter: number;
-    current: { address: string; privateKey: bitcore.HDPrivateKey };
-    keypairs: Record<string, bitcore.HDPrivateKey>;
+    current: { address: string; privateKey: bitcore.PrivateKey };
+    keypairs: Record<string, bitcore.PrivateKey>;
     next: () => string;
     advance: (n: number) => void;
   } = {
     counter: 0,
+    // @ts-ignore
     current: {},
     keypairs: {},
     next: (): string => {
@@ -46,12 +47,13 @@ export class AddressManager {
    */
   changeAddress: {
     counter: number;
-    current: { address: string; privateKey: bitcore.HDPrivateKey };
-    keypairs: Record<string, bitcore.HDPrivateKey>;
+    current: { address: string; privateKey: bitcore.PrivateKey };
+    keypairs: Record<string, bitcore.PrivateKey>;
     next: () => string;
     advance: (n: number) => void;
   } = {
     counter: 0,
+    // @ts-ignore
     current: {},
     keypairs: {},
     next: (): string => {
@@ -70,7 +72,7 @@ export class AddressManager {
   private deriveAddress(
     deriveType: 'receive' | 'change',
     index: number
-  ): { address: string; privateKey: bitcore.HDPrivateKey } {
+  ): { address: string; privateKey: bitcore.PrivateKey } {
     const dType = deriveType === 'receive' ? 0 : 1;
     const { privateKey } = this.HDWallet.deriveChild(`m/44'/972/0'/${dType}'/${index}'`);
     return {

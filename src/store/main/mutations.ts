@@ -1,4 +1,5 @@
 import { MutationTree } from 'vuex';
+// @ts-ignore
 import Wallet from 'wallet/Wallet';
 import { MainStateInterface } from './state';
 

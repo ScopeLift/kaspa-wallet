@@ -37,7 +37,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
+// @ts-ignore
 import Wallet from 'src/wallet/Wallet';
+// @ts-ignore
 import helpers from 'src/utils/mixin-helpers';
 
 export default Vue.extend({

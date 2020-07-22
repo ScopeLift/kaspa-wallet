@@ -21,7 +21,7 @@ type PendingTransactions = {
 };
 
 export interface TxSend {
-  to: string;
+  toAddr: string;
   amount: number;
   fee?: number;
 }
@@ -75,7 +75,7 @@ export namespace Api {
     scriptPubKey: string;
     address: string;
   }
-  interface Transaction {
+  export interface Transaction {
     transactionId: string;
     transactionHash: string;
     acceptingBlockHash: string;

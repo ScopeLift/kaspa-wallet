@@ -63,8 +63,17 @@
 import Vue from 'vue';
 import { mapState } from 'vuex';
 import TransactionAmount from 'components/TransactionAmount.vue';
+// @ts-ignore
 import { partialAddress } from 'src/utils/formatters';
+// @ts-ignore
 import { Transaction } from '../../types/custom-types';
+
+interface txSummary {
+  value: number;
+  direction: string;
+  timestamp: number;
+  address: string;
+}
 
 export default Vue.extend({
   name: 'WalletBalanceTransactions',
@@ -119,14 +128,14 @@ export default Vue.extend({
   methods: {
     partialAddress, // eslint-disable-line
 
-    getConfirmationRatio(numConfirmations) {
+    getConfirmationRatio(numConfirmations: number) {
       const maxVal = 400; // 400 confirmations = 100% confirmation
       const fraction = (100 * numConfirmations) / maxVal;
       const value = fraction > 100 ? 100 : fraction;
       return value;
     },
 
-    getConfirmationColor(numConfirmations) {
+    getConfirmationColor(numConfirmations: number) {
       const confirmationRatio = this.getConfirmationRatio(numConfirmations);
       if (confirmationRatio >= 75) return 'positive';
       if (confirmationRatio < 75 && confirmationRatio >= 25) return 'warning';
@@ -134,7 +143,7 @@ export default Vue.extend({
       return 'negative';
     },
 
-    getValue(summary) {
+    getValue(summary: txSummary) {
       const amount = summary.value / 1e8;
       const scale = summary.direction === 'in' ? 1 : -1;
       return String(amount * scale);

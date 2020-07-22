@@ -13,6 +13,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapState } from 'vuex';
+// @ts-ignore
 import formatters from 'src/utils/mixin-formatters';
 
 export default Vue.extend({
@@ -44,9 +45,11 @@ export default Vue.extend({
 
   methods: {
     async sendTransaction() {
+      // eslint-disable-next-line
       const response = await this.wallet.sendTx({
         toAddr: this.toAddress,
-        amount: this.formatBalanceForMachine(this.amount),
+        // @ts-ignore
+        amount: this.formatBalanceForMachine(this.amount), // eslint-disable-line
       });
       console.log('response:', response);
     },

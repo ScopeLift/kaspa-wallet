@@ -29,17 +29,18 @@ import Vue from 'vue';
 import { mapState } from 'vuex';
 import TransactionAmount from 'components/TransactionAmount.vue';
 import WalletBalanceTransactions from 'components/WalletBalanceTransactions.vue';
+// @ts-ignore
 import formatters from 'src/utils/mixin-formatters';
 
 export default Vue.extend({
   name: 'WalletBalance',
 
-  mixins: [formatters],
-
   components: {
     TransactionAmount,
     WalletBalanceTransactions,
   },
+
+  mixins: [formatters],
 
   data() {
     return {

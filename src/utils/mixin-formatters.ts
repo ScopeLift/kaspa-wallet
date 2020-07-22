@@ -10,7 +10,7 @@ export default Vue.extend({
      * @param val Value to convert, as string or number
      * @returns Converted value as a string
      */
-    formatBalanceForHuman(val) {
+    formatBalanceForHuman(val: number | string) {
       return String(Number(val) / 1e8);
     },
 
@@ -19,7 +19,7 @@ export default Vue.extend({
      * @param val Value to convert, as string or number
      * @returns Converted value as a string
      */
-    formatBalanceForMachine(val) {
+    formatBalanceForMachine(val: number | string) {
       return Number(val) * 1e8;
     },
   },
