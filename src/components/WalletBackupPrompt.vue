@@ -228,7 +228,9 @@
 import Vue from 'vue';
 import { mapState } from 'vuex';
 import { exportFile, LocalStorage } from 'quasar';
+// @ts-ignore
 import Wallet from 'src/wallet/Wallet';
+// @ts-ignore
 import helpers from 'src/utils/mixin-helpers';
 
 interface TestWord {
@@ -371,6 +373,7 @@ export default Vue.extend({
     async checkPassword() {
       try {
         const encryptedMnemonic = LocalStorage.getItem('kaspa-wallet-data');
+        // @ts-ignore
         await Wallet.import(this.password, encryptedMnemonic); // eslint-disable-line
         this.isPasswordVerified = true;
       } catch (err) {

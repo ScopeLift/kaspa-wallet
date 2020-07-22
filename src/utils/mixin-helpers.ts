@@ -16,7 +16,8 @@ export default Vue.extend({
      * Clears form validations for the ref specified
      * @param ref name of ref to reset
      */
-    resetFormValidations(ref) {
+    resetFormValidations(ref: string) {
+      // @ts-ignore
       this.$refs[ref].resetValidation(); // eslint-disable-line
     },
 
@@ -26,7 +27,7 @@ export default Vue.extend({
      * @param password Password to check
      * @returns true if password is valid, error message otherwise
      */
-    checkPasswordRequirements(password) {
+    checkPasswordRequirements(password: string) {
       const regex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
       return regex.test(password) || this.passwordHint;
     },
@@ -37,7 +38,7 @@ export default Vue.extend({
      * @param password2 Second password to check
      * @returns function that returns true if password is valid, error message otherwise
      */
-    verifyPasswordsMatch(password1, password2) {
+    verifyPasswordsMatch(password1: string, password2: string) {
       const passwordsMatch = () => {
         return password1 === password2 || 'Passwords do not match';
       };

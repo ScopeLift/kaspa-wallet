@@ -27,6 +27,7 @@ class Wallet {
   /**
    * Current network.
    */
+  // @ts-ignore
   network: Network = DEFAULT_NETWORK;
 
   /**
@@ -102,7 +103,7 @@ class Wallet {
     const addressesWithTx: string[] = [];
     const txResults = await Promise.all(addresses.map((address) => api.getTransactions(address)));
 
-    const blockHashes = new Set();
+    const blockHashes: Set<string> = new Set();
     addresses.forEach((address, i) => {
       const { transactions } = txResults[i];
       logger.log('info', `${address}: ${transactions.length} transactions found.`);
@@ -114,7 +115,7 @@ class Wallet {
       }
     });
     let blockRes = await Promise.all(Array.from(blockHashes).map((hash) => api.getBlock(hash)));
-    let blockTimestamps = blockRes.flat().reduce((map, val) => {
+    let blockTimestamps = blockRes.flat().reduce((map: Record<string, number>, val) => {
       map[val.blockHash] = val.timestamp;
       return map;
     }, {});
@@ -138,7 +139,11 @@ class Wallet {
    * @param threshold stop discovering after `threshold` addresses with no activity
    */
   async addressDiscovery(threshold = 20): Promise<void> {
-    const doDiscovery = async (n: number, deriveType: string, offset: number): Promise<number> => {
+    const doDiscovery = async (
+      n: number,
+      deriveType: 'receive' | 'change',
+      offset: number
+    ): Promise<number> => {
       const derivedObjs = this.addressManager.getAddresses(n, deriveType, offset);
       const addresses = derivedObjs.map((obj) => obj.address);
       logger.log(
@@ -199,9 +204,9 @@ class Wallet {
   } {
     if (!Number.isSafeInteger(amount)) throw new Error('Amount too large');
     const { utxos, utxoIds } = this.utxoSet.selectUtxos(amount + fee);
-    const privKeys = utxos.reduce((prev, cur) => {
-      prev.push(this.addressManager.all[cur.address]);
-      return prev;
+    // @ts-ignore
+    const privKeys = utxos.reduce((prev: string[], cur) => {
+      return [this.addressManager.all[String(cur.address)], ...prev];
     }, []);
     const changeAddr = changeAddrOverride || this.addressManager.changeAddress.next();
     const tx: bitcore.Transaction = new bitcore.Transaction()
@@ -210,6 +215,7 @@ class Wallet {
       .setVersion(1)
       .fee(fee)
       .change(changeAddr)
+      // @ts-ignore
       .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
     this.utxoSet.inUse.push(...utxoIds);
     this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount: amount + fee });

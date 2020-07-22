@@ -16,6 +16,7 @@
 import Vue from 'vue';
 import { mapState } from 'vuex';
 import { copyToClipboard } from 'quasar';
+// @ts-ignore
 import helpers from 'src/utils/mixin-helpers';
 
 export default Vue.extend({

@@ -4,11 +4,12 @@
     "baseUrl": ".",
     // this enables stricter inference for data properties on `this`
     "strict": true,
+    "skipLibCheck": true,
     "typeRoots": ["types", "node_modules/@types"],
     "paths": {
       "*": ["./types/*", "src/*"]
     },
-    "lib": ["ES2020"]
+    "lib": ["ES2020", "DOM"]
   },
   "include": ["src/**/*", "src-pwa/**/*"],
   "exclude": ["./node_modules", "test/**/*", "types"]

@@ -165,7 +165,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
+// @ts-ignore
 import Wallet from 'src/wallet/Wallet';
+// @ts-ignore
 import helpers from 'src/utils/mixin-helpers';
 import { LocalStorage } from 'quasar';
 
@@ -214,7 +216,9 @@ export default Vue.extend({
     },
 
     readFile() {
+      /* eslint-disable */
       return new Promise((resolve, reject) => {
+        // @ts-ignore
         const reader = new FileReader();
         reader.onload = () => {
           resolve(reader.result);
@@ -223,12 +227,13 @@ export default Vue.extend({
         // @ts-ignore
         reader.readAsText(this.seedFile);
       });
+      /* eslint-enable */
     },
 
     async decryptFile() {
       try {
         this.isLoading = true;
-        const seedFileText = await this.readFile();
+        const seedFileText = String(await this.readFile());
         const wallet = await Wallet.import(this.password, seedFileText); // eslint-disable-line
         // Save this info into local storage for later
         LocalStorage.set('kaspa-wallet-data', String(seedFileText));

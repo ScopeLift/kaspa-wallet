@@ -32,7 +32,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
+// @ts-ignore
 import Wallet from 'src/wallet/Wallet';
+// @ts-ignore
 import helpers from 'src/utils/mixin-helpers';
 
 export default Vue.extend({
@@ -58,6 +60,7 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         const encryptedMnemonic = this.$q.localStorage.getItem('kaspa-wallet-data');
+        // @ts-ignore
         const wallet = await Wallet.import(this.password, encryptedMnemonic); // eslint-disable-line
         await this.$store.dispatch('main/getWalletInfo', wallet);
         await this.$router.push({ name: 'walletBalance' });
@@ -81,6 +84,7 @@ export default Vue.extend({
 
     temporarilyBlockLogin() {
       const delay = 10;
+      // @ts-ignore
       this.notifyUser('negative', `Too many failed attempts. Please wait ${delay} seconds.`); // eslint-disable-line
       setTimeout(() => {
         this.isDisabled = false;
