@@ -13,9 +13,9 @@
         <q-td :props="props" style="padding-left: 0 !important; padding-right: 0 !important;">
           <div class="text-darkestgrey">
             <q-circular-progress
-              :value="75"
+              :value="getConfirmationRatio(props.row.confirmations)"
               size="40px"
-              color="positive"
+              :color="getConfirmationColor(props.row.confirmations)"
               class="q-ma-md"
               show-value
               style="margin-left: 0 !important;"
@@ -32,13 +32,13 @@
         <q-td :props="props">
           <div class="text-darkestgrey">
             <!-- Show arrow based on incoming or outgoing -->
-            <span v-if="props.row.direction === 'out'">
+            <span v-if="props.row.summary.direction === 'out'">
               <q-icon class="q-mr-xs" color="negative" name="fas fa-arrow-right" />
             </span>
             <span v-else>
               <q-icon class="q-mr-xs" color="primary" name="fas fa-arrow-left" />
             </span>
-            {{ partialAddress(props.row.outputs[0].address) }}
+            {{ partialAddress(props.row.summary.address) }}
           </div>
           <div class="text-grey text-caption">
             <span v-if="props.row.confirmations === 0">In progress...</span>
@@ -51,7 +51,7 @@
       <template v-slot:body-cell-amount="props">
         <q-td :props="props">
           <div class="text-darkestgrey">
-            <transaction-amount amount="-14.34780000" />
+            <transaction-amount :amount="getValue(props.row.summary)" />
           </div>
         </q-td>
       </template>
@@ -118,6 +118,27 @@ export default Vue.extend({
 
   methods: {
     partialAddress, // eslint-disable-line
+
+    getConfirmationRatio(numConfirmations) {
+      const maxVal = 400; // 400 confirmations = 100% confirmation
+      const fraction = (100 * numConfirmations) / maxVal;
+      const value = fraction > 100 ? 100 : fraction;
+      return value;
+    },
+
+    getConfirmationColor(numConfirmations) {
+      const confirmationRatio = this.getConfirmationRatio(numConfirmations);
+      if (confirmationRatio >= 75) return 'positive';
+      if (confirmationRatio < 75 && confirmationRatio >= 25) return 'warning';
+      if (confirmationRatio < 25) return 'negative';
+      return 'negative';
+    },
+
+    getValue(summary) {
+      const amount = summary.value / 1e8;
+      const scale = summary.direction === 'in' ? 1 : -1;
+      return String(amount * scale);
+    },
   },
 });
 </script>

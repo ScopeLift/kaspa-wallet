@@ -54,6 +54,5 @@ export const txParser = (
     }
     return tx;
   });
-  debugger;
   return result;
 };
