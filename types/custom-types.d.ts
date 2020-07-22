@@ -47,11 +47,28 @@ export namespace Api {
     errorMessage: string;
   }
 
+  interface BlockResponse {
+    blockHash: string;
+    parentBlockHashes: string[];
+    version: number;
+    hashMerkleRoot: string;
+    acceptedIdMerkleRoot: string;
+    utxoCommitment: string;
+    timestamp: number;
+    bits: number;
+    nonce: number;
+    acceptingBlockHash: string;
+    blueScore: number;
+    isChainBlock: boolean;
+    mass: number;
+  }
+
   interface TransactionInput {
     previousTransactionId: string;
     previousTransactionOutputIndex: string;
     scriptSig: string;
     sequence: string;
+    address: string;
   }
   interface TransactionOutput {
     value: string;

@@ -11,9 +11,20 @@
       "cwd": "${workspaceRoot}/",
       "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
       "env": { "CI": "true" },
-      "args": ["-c", "./jest.config.js", "--verbose", "-i", "--no-cache", "Wallet.utxo"],
+      "args": ["-c", "./jest.config.js", "--verbose", "-i", "--no-cache", "Api"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Quasar App: chrome",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}/src",
+      "breakOnLoad": true,
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/*"
+      }
     }
   ]
 }
