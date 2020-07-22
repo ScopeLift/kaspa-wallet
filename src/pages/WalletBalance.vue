@@ -3,13 +3,23 @@
     <!-- Wallet backup prompt -->
     <wallet-backup-prompt v-if="!isBackedUp" @backupComplete="getBackupStatus" />
     <!-- Wallet balance -->
-    <div class="text-primary text-center">
-      <transaction-amount :amount="formatBalanceForHuman(balance)" :is-balance="true" />
+    <div v-if="!isLoading">
+      <div class="text-primary text-center">
+        <transaction-amount :amount="formatBalanceForHuman(balance)" :is-balance="true" />
+      </div>
+      <!-- Transaction history -->
+      <div class="text-primary text-left">
+        <h4 class="text-left q-mb-none">Transaction History</h4>
+        <wallet-balance-transactions />
+      </div>
     </div>
-    <!-- Transaction history -->
-    <div class="text-primary text-left">
-      <h4 class="text-left q-mb-none">Transaction History</h4>
-      <wallet-balance-transactions />
+    <div v-else>
+      <div class="row justify-center">
+        <q-spinner class="q-my-lg" color="primary" size="3em" />
+      </div>
+      <div class="text-center text-caption text-grey text-italic">
+        Fetching wallet data...
+      </div>
     </div>
   </q-page>
 </template>
@@ -34,6 +44,7 @@ export default Vue.extend({
   data() {
     return {
       isBackedUp: true,
+      isLoading: false,
     };
   },
 
@@ -53,9 +64,12 @@ export default Vue.extend({
   },
 
   async mounted() {
+    this.isLoading = true;
     this.getBackupStatus();
     /* eslint-disable-next-line */
     await this.wallet.addressDiscovery();
+    await this.$store.dispatch('main/getWalletInfo', this.wallet);
+    this.isLoading = false;
   },
 
   methods: {
