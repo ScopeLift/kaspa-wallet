@@ -4,27 +4,56 @@ export const txParser = (
   transactionStorage: Record<string, Api.Transaction[]>,
   addressArray: string[],
   blockTimestamps: Record<string, number>
-) => {
+): Api.Transaction[] => {
+  const keyedTx = Object.values(transactionStorage)
+    .flat()
+    .reduce((map, val) => {
+      val.summary = {
+        timestamp: blockTimestamps[val.acceptingBlockHash],
+      };
+      map[val.transactionId] = val;
+      return map;
+    }, {});
+  const dedupedTx: (Api.Transaction & {
+    summary: { direction: string; value: number; timestamp: number; address: string };
+  })[] = Object.values(keyedTx);
+  const result = dedupedTx.map((tx) => {
+    const hasNoInputs = tx.inputs.length === 0;
+    const controlsAllInputs = tx.inputs
+      .map((input) => input.address)
+      .every((address) => addressArray.includes(address));
+    if (hasNoInputs) {
+      tx.summary = {
+        direction: 'in',
+        value: tx.outputs.reduce((prev, cur) => prev + cur.value, 0),
+        address: 'mined',
+        ...tx.summary,
+      };
+    } else if (controlsAllInputs) {
+      tx.summary = {
+        direction: 'out',
+        value: tx.outputs.reduce((prev, cur) => {
+          const value = addressArray.includes(cur.address) ? 0 : cur.value;
+          return prev + value;
+        }, 0),
+        address: tx.outputs[0].address,
+        ...tx.summary,
+      };
+    } else if (!controlsAllInputs) {
+      tx.summary = {
+        direction: 'in',
+        value: tx.outputs.reduce((prev, cur) => {
+          const value = addressArray.includes(cur.address) ? cur.value : 0;
+          return prev + value;
+        }, 0),
+        address: tx.inputs[0].address,
+        ...tx.summary,
+      };
+    } else {
+      throw new Error(`Can't determine transaction metadata:\n${JSON.stringify(tx)}`);
+    }
+    return tx;
+  });
   debugger;
-  console.log('hi');
+  return result;
 };
-
-// const augmented = Object.entries(transactionStorage).map((record) => {
-//     const address = record[0];
-//     const augTx = record[1].map((tx) => {
-//       const inputsWithAppearance = tx.inputs.filter((input) => address === input.address);
-//       const outputsWithAppearance = tx.outputs.filter((output) => address === output.address);
-//       if (inputsWithAppearance.length) {
-//         tx.direction = 'out';
-//         tx.value = 0;
-//       } else {
-//         tx.direction = 'in';
-//         tx.value = outputsWithAppearance.reduce((prev, cur) => prev + Number(cur.value), 0);
-//       }
-//       return tx;
-//     });
-//     return augTx;
-//   });
-//   return augmented.flat(1).sort(
-//     (a, b) => a.acceptingBlockHash > b.acceptingBlockHash // TODO: get block by hash and look up timestamp
-//   );

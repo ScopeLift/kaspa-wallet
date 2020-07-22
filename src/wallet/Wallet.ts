@@ -113,7 +113,6 @@ class Wallet {
         addressesWithTx.push(address);
       }
     });
-    debugger;
     let blockRes = await Promise.all(Array.from(blockHashes).map((hash) => api.getBlock(hash)));
     let blockTimestamps = blockRes.flat().reduce((map, val) => {
       map[val.blockHash] = val.timestamp;
