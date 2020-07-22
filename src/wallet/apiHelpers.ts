@@ -32,17 +32,28 @@ export const getTransactions = async (
   address: string,
   apiEndpoint: string = API_ENDPOINT
 ): Promise<Api.TransactionsResponse> => {
-  const response = await fetch(`${apiEndpoint}/transactions/address/${address}`, {
-    mode: 'cors',
-    cache: 'no-cache',
-  }).catch((e) => {
-    throw new ApiError(`API connection error. ${e}`);
-  });
-  const json = (await response.json()) as unknown;
-  if (json.errorMessage) {
-    const err = json as Api.ErrorResponse;
-    throw new ApiError(`API error ${err.errorCode}: ${err.errorMessage}`);
-  }
+  const getTx = async (n: number, skip: number) => {
+    const response = await fetch(
+      `${apiEndpoint}/transactions/address/${address}?limit=${n}&skip=${skip}`,
+      {
+        mode: 'cors',
+        cache: 'no-cache',
+      }
+    ).catch((e) => {
+      throw new ApiError(`API connection error. ${e}`);
+    });
+    let json = (await response.json()) as unknown;
+    if (json.errorMessage) {
+      const err = json as Api.ErrorResponse;
+      throw new ApiError(`API error ${err.errorCode}: ${err.errorMessage}`);
+    }
+    if (json.length === 1000) {
+      const tx = await getTx(n, skip + 1000);
+      json = [...tx, ...json];
+    }
+    return json;
+  };
+  const json = await getTx(1000, 0);
   return { transactions: json } as Api.TransactionsResponse;
 };
 
