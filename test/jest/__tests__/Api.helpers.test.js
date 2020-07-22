@@ -8,7 +8,7 @@ test(`Wallet: serializes and sends a tx`, async () => {
   from.wallet.utxoSet.add(utxos, from.address);
   let attempt = await from.wallet.sendTx({
     toAddr: to.address,
-    amount: 80000000,
+    amount: 70000000,
     fee: 1000,
   });
   expect(typeof attempt).toEqual('string');
