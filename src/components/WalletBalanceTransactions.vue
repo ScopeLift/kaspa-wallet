@@ -32,7 +32,7 @@
         <q-td :props="props">
           <div class="text-darkestgrey">
             <!-- Show arrow based on incoming or outgoing -->
-            <span v-if="props.row.inputs.length === 0">
+            <span v-if="props.row.direction === 'out'">
               <q-icon class="q-mr-xs" color="negative" name="fas fa-arrow-right" />
             </span>
             <span v-else>

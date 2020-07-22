@@ -7,6 +7,7 @@ import { logger } from '../utils/logger';
 import { AddressManager } from './AddressManager';
 import { UtxoSet } from './UtxoSet';
 import * as api from './apiHelpers';
+import { txParser } from './txParser';
 import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
 
 /** Class representing an HDWallet with derivable child addresses */
@@ -96,23 +97,33 @@ class Wallet {
    * Queries API for address[] transactions. Adds tx to transactions storage. Also sorts the entire transaction set.
    * @param addresses
    */
-  async addTransactions(addresses: string[]): Promise<string[]> {
+  async updateTransactions(addresses: string[]): Promise<string[]> {
     logger.log('info', `Getting transactions for ${addresses.length} addresses.`);
     const addressesWithTx: string[] = [];
     const txResults = await Promise.all(addresses.map((address) => api.getTransactions(address)));
+
+    const blockHashes = new Set();
     addresses.forEach((address, i) => {
       const { transactions } = txResults[i];
       logger.log('info', `${address}: ${transactions.length} transactions found.`);
       if (transactions.length !== 0) {
-        this.transactionsStorage[address] = transactions;
+        const confirmedTx = transactions.filter((tx) => tx.confirmations > 0);
+        confirmedTx.forEach((tx) => blockHashes.add(tx.acceptingBlockHash));
+        this.transactionsStorage[address] = confirmedTx;
         addressesWithTx.push(address);
       }
     });
-    this.transactions = Object.values(this.transactionsStorage)
-      .flat(2)
-      .sort(
-        (a, b) => a.acceptingBlockHash > b.acceptingBlockHash // TODO: get block by hash and look up timestamp
-      );
+    debugger;
+    let blockRes = await Promise.all(Array.from(blockHashes).map((hash) => api.getBlock(hash)));
+    let blockTimestamps = blockRes.flat().reduce((map, val) => {
+      map[val.blockHash] = val.timestamp;
+      return map;
+    }, {});
+    this.transactions = txParser(
+      this.transactionsStorage,
+      Object.keys(this.addressManager.all),
+      blockTimestamps
+    );
     return addressesWithTx;
   }
 
@@ -137,7 +148,7 @@ class Wallet {
           derivedObjs.map((obj) => obj.index)
         )}`
       );
-      const addressesWithTx = await this.addTransactions(addresses);
+      const addressesWithTx = await this.updateTransactions(addresses);
       if (addressesWithTx.length === 0) {
         const lastIndexWithTx = offset - (threshold - n) - 1;
         logger.log(
