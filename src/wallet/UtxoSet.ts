@@ -26,7 +26,7 @@ export class UtxoSet {
       const utxoId = utxo.transactionId + utxo.index.toString();
       const utxoInUse = this.inUse.indexOf(utxoId) !== -1;
       const alreadyHaveIt = this.utxos[utxoId];
-      if (!utxoInUse && !alreadyHaveIt) {
+      if (!utxoInUse && !alreadyHaveIt && utxo.isSpendable) {
         utxoIds.push(utxoId);
         this.utxos[utxoId] = new bitcore.Transaction.UnspentOutput({
           txid: utxo.transactionId,
