@@ -5,6 +5,7 @@ A web wallet for the Kaspa blockchain network
 - [Kaspa Wallet](#kaspa-wallet)
   - [Development](#development)
     - [Setup](#setup)
+    - [Wallet Setup](#wallet-setup)
     - [Development considerations](#development-considerations)
       - [Creating Components and Pages](#creating-components-and-pages)
     - [Git Hooks](#git-hooks)
@@ -43,9 +44,18 @@ npm run test:e2e
 npm run test:e2e:CI
 ```
 
-While running the app, you may occasionally notice some caching issues (i.e. a page
-displaying outdated content). Until more robust cache-busting is implemented, simply
-do a hard refresh to fix this.
+### Wallet Setup
+
+The steps below are necessary to see your actual balance and transaction history from
+the local KDX instance on the web app.
+
+1. Log in to the web app and copy your receive address
+2. Open KDX, navigate to settings, make sure "Enable Mining" is checked, and in "Service Configuration" replace `miningaddr` with the address you copied
+3. Click "Apply" at the bottom
+4. Head to the console and run `wallet balance <yourAddress>` to check your balance. Once the `Balance` is non-zero (not the `Pending Balance`), go to the next step.
+5. Turn off mining in KDX and reload the web app. We turn off mining to ensure balances are constant which makes it easier to verify the app is displaying the correct data.
+6. After opening your wallet in the app, it may take a minute or two to fetch the data due to address discovery.
+7. Afterwards, the balance in the app should match the balance shown in KDX and your transactions will display.
 
 ### Development considerations
 
