@@ -1,10 +1,13 @@
 <template>
-  <q-page padding class="text-primary page-margin">
-    <q-form ref="form" @submit="handleOpen">
-      <p class="text-primary">Unlock the wallet with your password</p>
+  <q-page padding class="text-primary page-margin" data-cy="wallet-open">
+    <q-form ref="form" data-cy="wallet-open-form" @submit="handleOpen">
+      <p class="text-primary" data-cy="wallet-open-form-text">
+        Unlock the wallet with your password
+      </p>
       <base-input
         v-model="password"
         :autofocus="true"
+        data-cy="wallet-open-form-pwInput"
         :hint="passwordHint"
         :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
         label="Password"
@@ -14,13 +17,20 @@
         @input="resetFormValidations('form')"
       />
       <div class="column content-center text-center q-mt-lg">
-        <base-button label="Open Wallet" :loading="isLoading" type="submit" />
         <base-button
+          label="Open Wallet"
+          data-cy="wallet-open-form-openBtn"
+          :loading="isLoading"
+          type="submit"
+        />
+        <base-button
+          data-cy="wallet-open-form-newBtn"
           :flat="true"
           label="New wallet"
           @click="$router.push({ name: 'createWallet' })"
         />
         <base-button
+          data-cy="wallet-open-form-restoreBtn"
           :flat="true"
           label="Restore wallet"
           @click="$router.push({ name: 'restoreWallet' })"

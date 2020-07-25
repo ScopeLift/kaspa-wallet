@@ -3,13 +3,17 @@
     <q-table
       :columns="columns"
       :data="transactions"
+      data-cy="wallet-balance-transactions"
       flat
       hide-header
       :hide-pagination="false"
       row-key="name"
     >
       <!-- Confirmations column -->
-      <template v-slot:body-cell-confirmations="props">
+      <template
+        v-slot:body-cell-confirmations="props"
+        data-cy="wallet-balance-transactions-confirmationsCol"
+      >
         <q-td :props="props" style="padding-left: 0 !important; padding-right: 0 !important;">
           <div class="text-darkestgrey">
             <q-circular-progress
@@ -17,20 +21,25 @@
               size="40px"
               :color="getConfirmationColor(props.row.confirmations)"
               class="q-ma-md"
+              data-cy="wallet-balance-transactions-confirmationsCircle"
               show-value
               style="margin-left: 0 !important;"
               :thickness="0.1"
             >
-              <span class="font-smaller-1">{{ props.row.confirmations }}</span>
+              <span
+                class="font-smaller-1"
+                data-cy="wallet-balance-transactions-confirmationsCount"
+                >{{ props.row.confirmations }}</span
+              >
             </q-circular-progress>
           </div>
         </q-td>
       </template>
 
       <!-- Status column -->
-      <template v-slot:body-cell-status="props">
+      <template v-slot:body-cell-status="props" data-cy="wallet-balance-transactions-statusCol">
         <q-td :props="props">
-          <div class="text-darkestgrey">
+          <div class="text-darkestgrey" data-cy="wallet-balance-transactions-statusDirAndAddr">
             <!-- Show arrow based on incoming or outgoing -->
             <span v-if="props.row.summary.direction === 'out'">
               <q-icon class="q-mr-xs" color="negative" name="fas fa-arrow-right" />
@@ -40,7 +49,7 @@
             </span>
             {{ partialAddress(props.row.summary.address) }}
           </div>
-          <div class="text-grey text-caption">
+          <div class="text-grey text-caption" data-cy="wallet-balance-transactions-statusText">
             <span v-if="props.row.confirmations === 0">In progress...</span>
             <span v-else>Confirmations: {{ props.row.confirmations }}</span>
           </div>
@@ -48,10 +57,13 @@
       </template>
 
       <!-- Amount column -->
-      <template v-slot:body-cell-amount="props">
+      <template v-slot:body-cell-amount="props" data-cy="wallet-balance-transactions-amountCol">
         <q-td :props="props">
           <div class="text-darkestgrey">
-            <transaction-amount :amount="getValue(props.row.summary)" />
+            <transaction-amount
+              :amount="getValue(props.row.summary)"
+              data-cy="wallet-balance-transactions-amountCol-amount"
+            />
           </div>
         </q-td>
       </template>

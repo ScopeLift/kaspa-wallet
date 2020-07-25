@@ -4,6 +4,7 @@
       class="q-my-sm"
       :class="{ 'full-width': fullWidth }"
       :color="color"
+      data-cy="base-button"
       :disable="disable"
       :dense="dense"
       :flat="flat"

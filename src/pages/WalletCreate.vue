@@ -1,11 +1,14 @@
 <template>
-  <q-page padding class="page-margin">
-    <q-form ref="form" @submit="handleCreate">
-      <p class="text-primary">Create a password for your new wallet</p>
+  <q-page padding class="page-margin" data-cy="wallet-create">
+    <q-form ref="form" data-cy="wallet-create-form" @submit="handleCreate">
+      <p class="text-primary" data-cy="wallet-create-form-text">
+        Create a password for your new wallet
+      </p>
       <!-- Password -->
       <base-input
         v-model="password1"
         :autofocus="true"
+        data-cy="wallet-create-form-pwInput1"
         :hint="passwordHint"
         :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
         label="Password"
@@ -18,6 +21,7 @@
       <base-input
         v-model="password2"
         class="q-mt-lg"
+        data-cy="wallet-create-form-pwInput2"
         :hint="passwordHint"
         :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
         label="Confirm Password"
@@ -28,8 +32,18 @@
       />
       <!-- Continue buttons -->
       <div class="column content-center text-center q-mt-lg">
-        <base-button label="Create Wallet" :loading="isLoading" type="submit" />
-        <base-button :flat="true" label="I have a wallet" @click="navigate" />
+        <base-button
+          data-cy="wallet-create-form-createBtn"
+          label="Create Wallet"
+          :loading="isLoading"
+          type="submit"
+        />
+        <base-button
+          data-cy="wallet-create-form-openBtn"
+          :flat="true"
+          label="I have a wallet"
+          @click="navigate"
+        />
       </div>
     </q-form>
   </q-page>

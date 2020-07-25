@@ -1,15 +1,29 @@
 <template>
-  <div>
-    <span v-if="isBalance" class="text-caption text-secondary q-mr-sm">$KSP</span>
-    <span class="text-accent" :class="[isBalance ? 'font-bigger-4' : 'font-bigger-2']">{{
-      preDecimal
-    }}</span>
-    <span class="text-secondary" :class="[isBalance ? 'font-bigger-4' : 'font-bigger-2']"
+  <div data-cy="transaction-amount">
+    <span
+      v-if="isBalance"
+      class="text-caption text-secondary q-mr-sm"
+      data-cy="transaction-amount-currency"
+      >$KSP</span
+    >
+    <span
+      class="text-accent"
+      :class="[isBalance ? 'font-bigger-4' : 'font-bigger-2']"
+      data-cy="transaction-amount-preDecimal"
+      >{{ preDecimal }}</span
+    >
+    <span
+      class="text-secondary"
+      :class="[isBalance ? 'font-bigger-4' : 'font-bigger-2']"
+      data-cy="transaction-amount-postDecimal1"
       >.{{ postDecimal1 }}</span
     >
-    <span class="text-secondary" :class="[isBalance ? 'font-bigger-3' : 'font-bigger-1']">{{
-      postDecimal2
-    }}</span>
+    <span
+      class="text-secondary"
+      :class="[isBalance ? 'font-bigger-3' : 'font-bigger-1']"
+      data-cy="transaction-amount-postDecimal2"
+      >{{ postDecimal2 }}</span
+    >
   </div>
 </template>
 

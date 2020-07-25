@@ -1,18 +1,32 @@
 <template>
-  <div>
+  <div data-cy="wallet-backup-prompt">
     <!-- BANNER TELLING USER THAT WALLET IS NOT BACKED UP -->
-    <q-banner class="bg-secondary text-white column q-py-md q-mb-lg" :inline-actions="false">
-      <div class="row justify-between items-center no-wrap">
-        <q-icon class="col-auto" color="white" name="warning" size="md" />
-        <div class="col q-ml-md">
+    <q-banner
+      class="bg-secondary text-white column q-py-md q-mb-lg"
+      data-cy="wallet-backup-prompt-banner"
+      :inline-actions="false"
+    >
+      <div
+        class="row justify-between items-center no-wrap"
+        data-cy="wallet-backup-prompt-banner-content"
+      >
+        <q-icon
+          class="col-auto"
+          color="white"
+          data-cy="wallet-backup-prompt-banner-content-icon"
+          name="warning"
+          size="md"
+        />
+        <div class="col q-ml-md" data-cy="wallet-backup-prompt-banner-content">
           Your wallet is only accessible from this device. Back it up, take it with you.
         </div>
       </div>
-      <div class="row justify-start q-mt-md">
+      <div class="row justify-start q-mt-md" data-cy="wallet-backup-prompt-buttons">
         <base-button
           :flat="true"
           class="col-auto q-mr-lg"
           color="white"
+          data-cy="wallet-backup-prompt-buttons-seed"
           label="Show Recovery Seed"
           @click="showSeedPhrase = true"
         />
@@ -20,6 +34,7 @@
           :flat="true"
           class="col-auto"
           color="white"
+          data-cy="wallet-backup-prompt-buttons-file"
           label="Save Wallet"
           @click="showSaveFile = true"
         />
@@ -27,8 +42,8 @@
     </q-banner>
 
     <!-- DIALOG THAT HANDLES SAVE FILE FLOW -->
-    <q-dialog v-model="showSaveFile" @hide="reset">
-      <q-card class="q-px-md">
+    <q-dialog v-model="showSaveFile" data-cy="wallet-backup-prompt-saveDialog" @hide="reset">
+      <q-card class="q-px-md" data-cy="wallet-backup-prompt-saveDialog-header">
         <!-- Header Section -->
         <q-card-section class="row items-center justify-between">
           <q-btn icon="close" flat round dense style="opacity: 0; cursor: default;" />
@@ -37,7 +52,11 @@
         </q-card-section>
 
         <!-- Prompt user for password to unlock wallet -->
-        <q-card-section v-if="!isPasswordVerified" class="q-pt-none">
+        <q-card-section
+          v-if="!isPasswordVerified"
+          class="q-pt-none"
+          data-cy="wallet-backup-prompt-saveDialog-introDiv"
+        >
           <div class="text-center q-mt-md q-mb-lg">
             Your wallet is accessible by a seed phrase. The seed phrase is an ordered 12-word secret
             phrase.
@@ -46,12 +65,17 @@
             containting the encrypted contents to your device, and it can be decrypted using the
             same password.
           </div>
-          <q-form ref="form" @submit="saveWalletFile">
+          <q-form
+            ref="form"
+            data-cy="wallet-backup-prompt-saveDialog-form"
+            @submit="saveWalletFile"
+          >
             <div class="row justify-center">
               <base-input
                 v-model="password"
                 :autofocus="true"
                 class="col"
+                data-cy="wallet-backup-prompt-saveDialog-pwInput"
                 :hint="passwordHint"
                 :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
                 label="Password"
@@ -68,6 +92,7 @@
                 v-if="!isBackupComplete"
                 label="Next"
                 color="primary"
+                data-cy="wallet-backup-prompt-saveDialog-nextBtn"
                 :loading="isLoading"
                 type="submit"
               />
@@ -75,7 +100,11 @@
           </q-form>
         </q-card-section>
 
-        <div v-else-if="isBackupComplete" class="text-center">
+        <div
+          v-else-if="isBackupComplete"
+          class="text-center"
+          data-cy="wallet-backup-prompt-saveDialog-successDiv"
+        >
           <div class="q-mt-md q-mb-lg">
             Great Success!<q-icon class="q-mx-sm" color="positive" name="check" />
           </div>
@@ -86,14 +115,20 @@
               safe!
             </div>
           </div>
-          <q-btn v-close-popup class="q-mb-lg" label="Done" color="primary" />
+          <q-btn
+            v-close-popup
+            class="q-mb-lg"
+            label="Done"
+            color="primary"
+            data-cy="wallet-backup-prompt-saveDialog-doneBtn"
+          />
         </div>
       </q-card>
     </q-dialog>
     <!-- END DIALOG THAT HANDLES SAVE FILE FLOW -->
 
     <!-- DIALOG THAT HANDLES SEED PHRASE FLOW -->
-    <q-dialog v-model="showSeedPhrase" @hide="reset">
+    <q-dialog v-model="showSeedPhrase" data-cy="wallet-backup-prompt-seedDialog" @hide="reset">
       <q-card class="q-px-md">
         <!-- Header Section -->
         <q-card-section class="row items-center justify-between">
@@ -103,7 +138,11 @@
         </q-card-section>
 
         <!-- Prompt user for password to unlock wallet -->
-        <q-card-section v-if="!isPasswordVerified" class="q-pt-none">
+        <q-card-section
+          v-if="!isPasswordVerified"
+          class="q-pt-none"
+          data-cy="wallet-backup-prompt-seedDialog-introDiv"
+        >
           <div class="text-center q-mt-md q-mb-lg">
             Your wallet is accessible by a seed phrase. The seed phrase is an ordered 12-word secret
             phrase.
@@ -117,6 +156,7 @@
                 v-model="password"
                 :autofocus="true"
                 class="col"
+                data-cy="wallet-backup-prompt-seedDialog-pwInput"
                 :hint="passwordHint"
                 :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
                 label="Password"
@@ -129,13 +169,22 @@
             </div>
 
             <q-card-actions align="right">
-              <base-button label="Next" color="primary" :loading="isLoading" type="submit" />
+              <base-button
+                label="Next"
+                color="primary"
+                :loading="isLoading"
+                type="submit"
+                data-cy="wallet-backup-prompt-seedDialog-quizUnlockBtn"
+              />
             </q-card-actions>
           </q-form>
         </q-card-section>
 
         <!-- If user verified password, show them the seed phrase -->
-        <div v-else-if="isPasswordVerified && currentTestIndex === -1">
+        <div
+          v-else-if="isPasswordVerified && currentTestIndex === -1"
+          data-cy="wallet-backup-prompt-seedDialog-quizIntroDiv"
+        >
           <q-card-section class="text-center text-no-hyphens q-pt-none">
             Below is an ordered 12-word seed phrase, representing this wallet's seed. It's like a
             secret pass phrase. Write it down and keep it safe.
@@ -147,6 +196,7 @@
                 v-for="(word, index) in seedPhraseArray"
                 :key="index"
                 class="text-center text-primary col-xs-3 q-mt-md"
+                data-cy="wallet-backup-prompt-seedDialog-quizWordGrid"
               >
                 <div>
                   {{ word }}
@@ -165,7 +215,11 @@
         </div>
 
         <!-- If user passed the seed phrase tests -->
-        <div v-else-if="isBackupComplete" class="text-center">
+        <div
+          v-else-if="isBackupComplete"
+          class="text-center"
+          data-cy="wallet-backup-prompt-seedDialog-successDiv"
+        >
           <div class="row justify-center q-mt-md">
             <q-icon class="q-mx-sm" color="positive" name="check" />
             <q-icon class="q-mx-sm" color="positive" name="check" />
@@ -178,17 +232,23 @@
               Anyone with this 12-word phrase can access your wallet your funds. Keep it safe!
             </div>
           </div>
-          <q-btn v-close-popup class="q-mb-lg" label="Done" color="primary" />
+          <q-btn
+            v-close-popup
+            class="q-mb-lg"
+            label="Done"
+            color="primary"
+            data-cy="wallet-backup-prompt-seedDialog-quizCloseBtn"
+          />
         </div>
 
         <!-- Test user on seed phrase -->
-        <div v-else class="text-center">
+        <div v-else class="text-center" data-cy="wallet-backup-prompt-seedDialog-quizDiv">
           <div class="row justify-center q-my-md">
             <q-icon class="q-mx-sm" :color="icons[0].color" :name="icons[0].name" />
             <q-icon class="q-mx-sm" :color="icons[1].color" :name="icons[1].name" />
             <q-icon class="q-mx-sm" :color="icons[2].color" :name="icons[2].name" />
           </div>
-          <div v-if="!isWrong">
+          <div v-if="!isWrong" data-cy="wallet-backup-prompt-seedDialog-quizMessageToUser">
             <div>
               {{ testWords[currentTestIndex].text }}
             </div>
@@ -196,16 +256,41 @@
               {{ testWords[currentTestIndex].caption }}
             </div>
           </div>
-          <div v-else>{{ testFailureString }}</div>
-          <h6 class="text-primary">What is the {{ currentTestNumber }} word?</h6>
-          <div class="row justify-evenly">
-            <base-button :label="currentTestWordChoices[0]" @click="checkAnswer(0)" />
-            <base-button :label="currentTestWordChoices[1]" @click="checkAnswer(1)" />
-            <base-button :label="currentTestWordChoices[2]" @click="checkAnswer(2)" />
-            <base-button :label="currentTestWordChoices[3]" @click="checkAnswer(3)" />
+          <div v-else data-cy="wallet-backup-prompt-seedDialog-quizDiv-wrongAnswer">
+            {{ testFailureString }}
+          </div>
+          <h6 class="text-primary" data-cy="wallet-backup-prompt-seedDialog-quizQuestion">
+            What is the {{ currentTestNumber }} word?
+          </h6>
+          <div class="row justify-evenly" data-cy="wallet-backup-prompt-seedDialog-quizAnswers">
+            <base-button
+              :label="currentTestWordChoices[0]"
+              data-cy="wallet-backup-prompt-seedDialog-quizAnswerBtn1"
+              @click="checkAnswer(0)"
+            />
+            <base-button
+              :label="currentTestWordChoices[1]"
+              data-cy="wallet-backup-prompt-seedDialog-quizAnswerBtn2"
+              @click="checkAnswer(1)"
+            />
+            <base-button
+              :label="currentTestWordChoices[2]"
+              data-cy="wallet-backup-prompt-seedDialog-quizAnswerBtn3"
+              @click="checkAnswer(2)"
+            />
+            <base-button
+              :label="currentTestWordChoices[3]"
+              data-cy="wallet-backup-prompt-seedDialog-quizAnswerBtn4"
+              @click="checkAnswer(3)"
+            />
           </div>
           <div class="row justify-center q-mt-md">
-            <base-button :flat="true" label="Back to the Words" @click="backToWords" />
+            <base-button
+              :flat="true"
+              label="Back to the Words"
+              data-cy="wallet-backup-prompt-seedDialog-quizBackBtn"
+              @click="backToWords"
+            />
           </div>
         </div>
 
@@ -214,6 +299,7 @@
             v-if="currentTestIndex === -1"
             label="Next"
             color="primary"
+            data-cy="wallet-backup-prompt-seedDialog-quizUnlockBtnBtn"
             :loading="isLoading"
             @click="seedPhraseHandler"
           />

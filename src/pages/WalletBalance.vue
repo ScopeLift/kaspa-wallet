@@ -1,19 +1,23 @@
 <template>
-  <q-page padding class="page-margin">
+  <q-page padding class="page-margin" data-cy="wallet-balance">
     <!-- Wallet backup prompt -->
     <wallet-backup-prompt v-if="!isBackedUp" @backupComplete="getBackupStatus" />
     <!-- Wallet balance -->
-    <div v-if="!isLoading">
+    <div v-if="!isLoading" data-cy="wallet-balance-container">
       <div class="text-primary text-center">
-        <transaction-amount :amount="formatBalanceForHuman(balance)" :is-balance="true" />
+        <transaction-amount
+          :amount="formatBalanceForHuman(balance)"
+          data-cy="wallet-balance-amount"
+          :is-balance="true"
+        />
       </div>
       <!-- Transaction history -->
-      <div class="text-primary text-left">
+      <div class="text-primary text-left" data-cy="wallet-balance-txHistory">
         <h4 class="text-left q-mb-none">Transaction History</h4>
         <wallet-balance-transactions />
       </div>
     </div>
-    <div v-else>
+    <div v-else data-cy="wallet-balance-loading">
       <div class="row justify-center">
         <q-spinner class="q-my-lg" color="primary" size="3em" />
       </div>

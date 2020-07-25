@@ -1,5 +1,5 @@
 <template>
-  <component :is="pageToShow" />
+  <component :is="pageToShow" data-cy="wallet-handler" />
 </template>
 
 <script lang="ts">

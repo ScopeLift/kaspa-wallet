@@ -1,10 +1,19 @@
 <template>
-  <q-page padding class="page-margin">
+  <q-page padding class="page-margin" data-cy="wallet-send">
     <div class="text-primary text-center">
-      <q-form ref="form" @submit="sendTransaction">
-        <base-input v-model="toAddress" label="Recipient Kaspa Address" />
-        <base-input v-model="amount" label="Amount in KAS" />
-        <base-button :disabled="!areInputsValid" label="Next" type="submit" />
+      <q-form ref="form" data-cy="wallet-send-form" @submit="sendTransaction">
+        <base-input
+          v-model="toAddress"
+          data-cy="wallet-send-form-toInput"
+          label="Recipient Kaspa Address"
+        />
+        <base-input v-model="amount" data-cy="wallet-send-form-amountInput" label="Amount in KAS" />
+        <base-button
+          :disabled="!areInputsValid"
+          data-cy="wallet-send-form-sendBtn"
+          label="Next"
+          type="submit"
+        />
       </q-form>
     </div>
   </q-page>

@@ -1,9 +1,10 @@
 <template>
-  <q-page padding class="page-margin">
-    <div class="text-accent text-center text-wrap q-mx-md">
+  <q-page padding class="page-margin" data-cy="wallet-receive">
+    <div class="text-accent text-center text-wrap q-mx-md" data-cy="wallet-receive-container">
       {{ address }}
       <base-button
         class="q-mt-lg"
+        data-cy="wallet-receive-copyBtn"
         :flat="true"
         label="Copy Receive Address"
         @click="copyAddressToClipboard"

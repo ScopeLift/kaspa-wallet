@@ -6,6 +6,7 @@
       :autogrow="autogrow"
       color="primary"
       class="q-my-sm"
+      data-cy="base-input"
       :dense="dense"
       :hide-bottom-space="hideBottomSpace"
       :hint="hintString"

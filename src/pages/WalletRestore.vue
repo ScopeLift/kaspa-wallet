@@ -1,17 +1,21 @@
 <template>
-  <q-page padding class="text-primary text-center page-margin">
+  <q-page padding class="text-primary text-center page-margin" data-cy="wallet-restore">
     <!-- Home content -->
-    <div>
-      <p class="text-center">How would you like to restore your wallet?</p>
+    <div data-cy="wallet-restore-container">
+      <p class="text-center" data-cy="wallet-restore-text">
+        How would you like to restore your wallet?
+      </p>
       <div class="row justify-evenly q-mt-xl">
         <base-button
           class="col-auto"
+          data-cy="wallet-restore-withSeedBtn"
           :flat="true"
           label="With Seed"
           @click="showSeedRestore = true"
         />
         <base-button
           class="col-auto"
+          data-cy="wallet-restore-withFileBtn"
           :flat="true"
           label="With File"
           @click="showFileRestore = true"
@@ -20,20 +24,24 @@
     </div>
 
     <!-- Restore from file -->
-    <q-dialog v-model="showFileRestore" @hide="reset">
+    <q-dialog v-model="showFileRestore" data-cy="wallet-restore-fileDialog" @hide="reset">
       <q-card class="q-px-lg">
         <!-- Header Section -->
-        <q-card-section class="row items-center justify-between">
+        <q-card-section
+          class="row items-center justify-between"
+          data-cy="wallet-restore-fileDialog-header"
+        >
           <q-btn icon="close" flat round dense style="opacity: 0; cursor: default;" />
           <h6 class="text-primary q-my-none">Restore from File</h6>
           <q-btn v-close-popup icon="close" color="primary" flat round dense />
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          <q-form ref="form" @submit="decryptFile">
+          <q-form ref="form" data-cy="wallet-restore-fileDialog-form" @submit="decryptFile">
             <q-file
               v-model="seedFile"
               accept=".dag"
+              data-cy="wallet-restore-fileDialog-form-fileInput"
               outlined
               hint="File must have a .dag extension"
               label="Select File"
@@ -49,6 +57,7 @@
               v-model="password"
               :autofocus="true"
               class="q-mt-lg"
+              data-cy="wallet-restore-fileDialog-pwInput"
               :hint="passwordHint"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Password"
@@ -62,6 +71,7 @@
               <base-button
                 class="col-auto"
                 color="primary"
+                data-cy="wallet-restore-fileDialog-form-submitBtn"
                 label="Restore Wallet"
                 :loading="isLoading"
                 type="submit"
@@ -73,10 +83,13 @@
     </q-dialog>
 
     <!-- Restore from seed -->
-    <q-dialog v-model="showSeedRestore" @hide="reset">
+    <q-dialog v-model="showSeedRestore" data-cy="wallet-restore-seedDialog" @hide="reset">
       <q-card>
         <!-- Header Section -->
-        <q-card-section class="row items-center justify-between">
+        <q-card-section
+          class="row items-center justify-between"
+          data-cy="wallet-restore-seedDialog-header"
+        >
           <q-btn icon="close" flat round dense style="opacity: 0; cursor: default;" />
           <h6 class="text-primary q-my-none">Restore from Seed</h6>
           <q-btn v-close-popup icon="close" color="primary" flat round dense />
@@ -84,8 +97,12 @@
 
         <!-- Get seed phrase -->
         <q-card-section v-if="!isReadyForPassword" class="q-pt-none">
-          <q-form ref="form" @submit="continueToPassword">
-            <p>
+          <q-form
+            ref="form"
+            data-cy="wallet-restore-seedDialog-phraseForm"
+            @submit="continueToPassword"
+          >
+            <p data-cy="wallet-restore-seedDialog-phraseForm-text">
               Enter your 12 word seed phrase, with a space between each word. Be sure you're doing
               this in a private space. Anyone with these 12 words can steal your funds.
             </p>
@@ -93,6 +110,7 @@
               v-model="seedPhrase"
               :autofocus="!isReadyForPassword"
               :autogrow="true"
+              data-cy="wallet-restore-seedDialog-phraseForm-seedInput"
               hint="Enter the your 12 word seed phrase"
               label="Seed Phrase"
               :rules="isSeedPhraseValid"
@@ -104,6 +122,7 @@
               <base-button
                 class="col-auto"
                 color="primary"
+                data-cy="wallet-restore-seedDialog-phraseForm-seedInputNextBtn"
                 label="Next"
                 :loading="isLoading"
                 type="submit"
@@ -114,8 +133,8 @@
 
         <!-- Get password -->
         <q-card-section v-else class="q-pt-none">
-          <q-form ref="form" @submit="restoreFromSeed">
-            <p>
+          <q-form ref="form" data-cy="wallet-restore-seedDialog-pwForm" @submit="restoreFromSeed">
+            <p data-cy="wallet-restore-seedDialog-pwForm-text">
               Enter a password to encrypt your seed phrase.
             </p>
 
@@ -125,6 +144,7 @@
               v-model="password"
               :autofocus="true"
               class="q-mt-lg"
+              data-cy="wallet-restore-seedDialog-pwForm-pw1Input"
               :hint="passwordHint"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Password"
@@ -138,6 +158,7 @@
             <base-input
               v-model="password2"
               class="q-mt-lg"
+              data-cy="wallet-restore-seedDialog-pwForm-pw2-input"
               :hint="passwordHint"
               :icon-append="isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"
               label="Confirm Password"
@@ -151,6 +172,7 @@
               <base-button
                 class="col-auto"
                 color="primary"
+                data-cy="wallet-restore-seedDialog-pwForm-submitBtn"
                 label="Restore Wallet"
                 :loading="isLoading"
                 type="submit"
