@@ -17,7 +17,6 @@ export const getBlock = async (
   // eslint-disable-next-line
   const response = await fetch(`${apiEndpoint}/block/${blockHash}`, {
     mode: 'cors',
-    cache: 'no-cache',
   }).catch((e) => {
     throw new ApiError(`API connection error. ${e}`); // eslint-disable-line
   });
@@ -40,7 +39,6 @@ export const getTransactions = async (
       `${apiEndpoint}/transactions/address/${address}?limit=${n}&skip=${skip}`,
       {
         mode: 'cors',
-        cache: 'no-cache',
       }
     ).catch((e) => {
       throw new ApiError(`API connection error. ${e}`); // eslint-disable-line
@@ -68,7 +66,6 @@ export const getUtxos = async (
   // eslint-disable-next-line
   const response = await fetch(`${apiEndpoint}/utxos/address/${address}`, {
     mode: 'cors',
-    cache: 'no-cache',
   }).catch((e) => {
     throw new ApiError(`API connection error. ${e}`); // eslint-disable-line
   });
@@ -91,9 +88,7 @@ export const postTx = async (
     method: 'POST',
     mode: 'cors',
     cache: 'no-cache',
-    headers: {
-      ContentType: 'application/json',
-    },
+    headers: {},
     body: JSON.stringify({ rawTransaction }),
   }).catch((e) => {
     throw new ApiError(`API connection error. ${e}`); // eslint-disable-line
