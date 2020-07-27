@@ -32,4 +32,13 @@ export const apiWallets = {
   },
 };
 
+export const moreWallets = [
+  {
+    address: 'kaspatest:qp0qs9fndnu274a98aqxhmluh9xj3w6vscnay8uqdt',
+    wallet: Wallet.fromMnemonic(
+      'describe dinosaur invest around soldier affair lake tiny sniff left coast unlock'
+    ),
+  },
+];
+
 export const discoveryWallets = {};

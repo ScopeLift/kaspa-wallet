@@ -28,7 +28,6 @@ export const getBlock = async (
   return json as Api.BlockResponse;
 };
 
-// TODO: handle pagination
 export const getTransactions = async (
   address: string,
   apiEndpoint: string = API_ENDPOINT
