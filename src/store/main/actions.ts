@@ -4,7 +4,8 @@ import { MainStateInterface } from './state';
 
 const actions: ActionTree<MainStateInterface, StoreInterface> = {
   // eslint-disable-next-line
-  getWalletInfo({ commit }, wallet: any) {
+  async getWalletInfo({ commit }, wallet: any) {
+    await wallet.addressDiscovery(); // eslint-disable-line
     commit('setWalletInfo', wallet);
   },
 };

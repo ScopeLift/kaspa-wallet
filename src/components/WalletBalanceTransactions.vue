@@ -2,7 +2,7 @@
   <div>
     <q-table
       :columns="columns"
-      :data="transactions"
+      :data="sortedTransactions"
       data-cy="wallet-balance-transactions"
       flat
       hide-header
@@ -135,6 +135,14 @@ export default Vue.extend({
       },
     }),
     /* eslint-enable */
+
+    /**
+     * @notice Returns confirmations sorted by number of confirmations, lowers first
+     */
+    sortedTransactions() {
+      // eslint-disable-next-line
+      return this.transactions.sort((a, b) => a.confirmations - b.confirmations);
+    },
   },
 
   methods: {
@@ -148,7 +156,8 @@ export default Vue.extend({
     },
 
     getConfirmationColor(numConfirmations: number) {
-      const confirmationRatio = this.getConfirmationRatio(numConfirmations);
+      // @ts-ignore
+      const confirmationRatio = Number(this.getConfirmationRatio(numConfirmations)); // eslint-disable-line @typescript-eslint/no-unsafe-call
       if (confirmationRatio >= 75) return 'positive';
       if (confirmationRatio < 75 && confirmationRatio >= 25) return 'warning';
       if (confirmationRatio < 25) return 'negative';

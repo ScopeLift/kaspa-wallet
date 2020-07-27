@@ -22,7 +22,7 @@
         <q-spinner class="q-my-lg" color="primary" size="3em" />
       </div>
       <div class="text-center text-caption text-grey text-italic">
-        Fetching wallet data...
+        Fetching latest wallet data...
       </div>
     </div>
   </q-page>
@@ -71,8 +71,7 @@ export default Vue.extend({
   async mounted() {
     this.isLoading = true;
     this.getBackupStatus();
-    /* eslint-disable-next-line */
-    await this.wallet.addressDiscovery();
+    await this.wallet.updateState(); // eslint-disable-line
     await this.$store.dispatch('main/getWalletInfo', this.wallet);
     this.isLoading = false;
   },

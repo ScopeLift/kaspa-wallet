@@ -24,16 +24,19 @@ import Vue from 'vue';
 import { mapState } from 'vuex';
 // @ts-ignore
 import formatters from 'src/utils/mixin-formatters';
+// @ts-ignore
+import helpers from 'src/utils/mixin-helpers';
 
 export default Vue.extend({
   name: 'WalletSend',
 
-  mixins: [formatters],
+  mixins: [formatters, helpers],
 
   data() {
     return {
       toAddress: '',
       amount: '',
+      isLoading: false,
     };
   },
 
@@ -54,13 +57,23 @@ export default Vue.extend({
 
   methods: {
     async sendTransaction() {
-      // eslint-disable-next-line
-      const response = await this.wallet.sendTx({
-        toAddr: this.toAddress,
+      try {
+        this.isLoading = true;
+        // eslint-disable-next-line
+        const response = await this.wallet.sendTx({
+          toAddr: this.toAddress,
+          // @ts-ignore
+          amount: this.formatBalanceForMachine(this.amount), // eslint-disable-line
+        });
         // @ts-ignore
-        amount: this.formatBalanceForMachine(this.amount), // eslint-disable-line
-      });
-      console.log('response:', response);
+        this.notifyUser('positive', 'Your transaction has been sent!'); // eslint-disable-line
+        console.log('transactionId:', response);
+        await this.$router.push({ name: 'walletBalance' });
+      } catch (err) {
+        // @ts-ignore
+        this!.showError(err); // eslint-disable-line
+        this.isLoading = false;
+      }
     },
   },
 });
