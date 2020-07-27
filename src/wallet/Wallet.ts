@@ -246,7 +246,7 @@ class Wallet {
     return id;
   }
 
-  async updateState(): void {
+  async updateState(): Promise<void> {
     await this.updateTransactions(Object.keys(this.addressManager.all));
     await this.updateUtxos(Object.keys(this.addressManager.all));
   }
