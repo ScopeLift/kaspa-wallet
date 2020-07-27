@@ -30,7 +30,7 @@ test('UTXO set keeps a balance', () => {
   const balance1 = from.wallet.balance;
   expect(balance1).toEqual(balance0 - 7e7 - 1000);
   expect(utxoBalance1).toEqual(utxoBalance0 - 1e8);
-  from.wallet.deleteTx(tx1.id);
+  from.wallet.deletePendingTx(tx1.id);
   from.wallet.utxoSet.clear();
 });
 
@@ -54,8 +54,8 @@ test(`Wallet won't double compose UTXO`, async () => {
   expect(utxoBalance0 - from.wallet.utxoSet.utxos[tx1.utxoIds[0]].satoshis).toEqual(utxoBalance1);
   expect(utxoBalance1 === utxoBalance2).toBe(false);
   expect(utxoBalance1 - from.wallet.utxoSet.utxos[tx2.utxoIds[0]].satoshis).toEqual(utxoBalance2);
-  from.wallet.deleteTx(tx1.id);
-  from.wallet.deleteTx(tx2.id);
+  from.wallet.deletePendingTx(tx1.id);
+  from.wallet.deletePendingTx(tx2.id);
   from.wallet.utxoSet.clear();
 });
 
@@ -75,7 +75,7 @@ test(`Utxo set can account for aborted transactions`, () => {
   expect(balance1).toEqual(balance0 - 7e7 - 1000);
   expect(utxoBalance0 === utxoBalance1).toBe(false);
   expect(from.wallet.utxoSet.inUse.length).toBe(1);
-  from.wallet.deleteTx(tx1.id);
+  from.wallet.deletePendingTx(tx1.id);
   expect(from.wallet.utxoSet.availableBalance).toEqual(utxoBalance0);
   expect(from.wallet.utxoSet.inUse.length).toBe(0);
 });
