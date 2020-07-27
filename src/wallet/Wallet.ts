@@ -237,16 +237,21 @@ class Wallet {
     const { id, rawTx } = this.composeTx(txParams);
     try {
       await api.postTx(rawTx);
-      await this.updateUtxos(Object.keys(this.addressManager.all));
-      this.deleteTx(id);
+      // await this.updateUtxos(Object.keys(this.addressManager.all));
+      this.deletePendingTx(id);
     } catch (e) {
-      this.deleteTx(id);
+      this.deletePendingTx(id);
       throw e;
     }
     return id;
   }
 
-  deleteTx(id: string): void {
+  async updateState(): void {
+    await this.updateTransactions(Object.keys(this.addressManager.all));
+    await this.updateUtxos(Object.keys(this.addressManager.all));
+  }
+
+  deletePendingTx(id: string): void {
     const { utxoIds } = this.pending.transactions[id];
     delete this.pending.transactions[id];
     this.utxoSet.release(utxoIds);
