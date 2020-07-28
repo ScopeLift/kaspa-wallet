@@ -17,6 +17,10 @@ export const getBlock = async (
   // eslint-disable-next-line
   const response = await fetch(`${apiEndpoint}/block/${blockHash}`, {
     mode: 'cors',
+<<<<<<< HEAD
+=======
+    cache: 'no-cache',
+>>>>>>> revert apiHelpers back; will be handled by other PR
   }).catch((e) => {
     throw new ApiError(`API connection error. ${e}`); // eslint-disable-line
   });
@@ -28,6 +32,7 @@ export const getBlock = async (
   return json as Api.BlockResponse;
 };
 
+// TODO: handle pagination
 export const getTransactions = async (
   address: string,
   apiEndpoint: string = API_ENDPOINT
@@ -38,6 +43,10 @@ export const getTransactions = async (
       `${apiEndpoint}/transactions/address/${address}?limit=${n}&skip=${skip}`,
       {
         mode: 'cors',
+<<<<<<< HEAD
+=======
+        cache: 'no-cache',
+>>>>>>> revert apiHelpers back; will be handled by other PR
       }
     ).catch((e) => {
       throw new ApiError(`API connection error. ${e}`); // eslint-disable-line
@@ -65,6 +74,7 @@ export const getUtxos = async (
   // eslint-disable-next-line
   const response = await fetch(`${apiEndpoint}/utxos/address/${address}`, {
     mode: 'cors',
+    cache: 'no-cache',
   }).catch((e) => {
     throw new ApiError(`API connection error. ${e}`); // eslint-disable-line
   });
@@ -87,7 +97,9 @@ export const postTx = async (
     method: 'POST',
     mode: 'cors',
     cache: 'no-cache',
-    headers: {},
+    headers: {
+      ContentType: 'application/json',
+    },
     body: JSON.stringify({ rawTransaction }),
   }).catch((e) => {
     throw new ApiError(`API connection error. ${e}`); // eslint-disable-line
