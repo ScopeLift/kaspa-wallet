@@ -39,6 +39,12 @@ export const moreWallets = [
       'describe dinosaur invest around soldier affair lake tiny sniff left coast unlock'
     ),
   },
+  {
+    address: 'kaspatest:qzc499sep89mzy4ntftrl2yvw6ndluk0ju273mhsld',
+    wallet: Wallet.fromMnemonic(
+      'hire brass benefit quiz album cheese divert retire process boss discover horror'
+    ),
+  },
 ];
 
 export const discoveryWallets = {};
