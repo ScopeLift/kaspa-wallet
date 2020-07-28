@@ -41,6 +41,13 @@
             name="walletReceive"
             :to="{ name: 'walletReceive' }"
           />
+          <q-route-tab
+            data-cy="base-layout-wallet-navTabs-settings"
+            exact
+            label="Settings"
+            name="settings"
+            :to="{ name: 'settings' }"
+          />
         </q-tabs>
       </q-toolbar>
     </q-header>

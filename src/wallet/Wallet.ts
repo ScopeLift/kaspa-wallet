@@ -8,7 +8,7 @@ import { AddressManager } from './AddressManager';
 import { UtxoSet } from './UtxoSet';
 import * as api from './apiHelpers';
 import { txParser } from './txParser';
-import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
+import { DEFAULT_FEE, DEFAULT_NETWORK, NETWORK_OPTIONS } from '../../config.json';
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
@@ -87,7 +87,9 @@ class Wallet {
    */
   async updateUtxos(addresses: string[]): Promise<void> {
     logger.log('info', `Getting utxos for ${addresses.length} addresses.`);
-    const utxoResults = await Promise.all(addresses.map((address) => api.getUtxos(address)));
+    const utxoResults = await Promise.all(
+      addresses.map((address) => api.getUtxos(address, this.apiEndpoint))
+    );
     addresses.forEach((address, i) => {
       const { utxos } = utxoResults[i];
       logger.log('info', `${address}: ${utxos.length} total UTXOs found.`);
@@ -102,7 +104,9 @@ class Wallet {
   async updateTransactions(addresses: string[]): Promise<string[]> {
     logger.log('info', `Getting transactions for ${addresses.length} addresses.`);
     const addressesWithTx: string[] = [];
-    const txResults = await Promise.all(addresses.map((address) => api.getTransactions(address)));
+    const txResults = await Promise.all(
+      addresses.map((address) => api.getTransactions(address, this.apiEndpoint))
+    );
     addresses.forEach((address, i) => {
       const { transactions } = txResults[i];
       logger.log('info', `${address}: ${transactions.length} transactions found.`);
@@ -134,6 +138,15 @@ class Wallet {
    */
   updateBalance(): void {
     this.balance = this.utxoSet.totalBalance - this.pending.amount;
+  }
+
+  /**
+   * Updates the selected network
+   * @param network name of the network
+   */
+  async updateNetwork(network: Network): Promise<void> {
+    this.network = network;
+    await this.addressDiscovery();
   }
 
   /**
@@ -244,7 +257,8 @@ class Wallet {
   async sendTx(txParams: TxSend): Promise<string> {
     const { id, rawTx } = this.composeTx(txParams);
     try {
-      await api.postTx(rawTx);
+      await api.postTx(rawTx, this.apiEndpoint);
+      this.deletePendingTx(id);
     } catch (e) {
       this.undoPendingTx(id);
       throw e;
@@ -317,6 +331,13 @@ class Wallet {
       seedPhrase: this.mnemonic,
     };
     return passworder.encrypt(password, Buffer.from(JSON.stringify(savedWallet), 'utf8'));
+  }
+
+  /**
+   * Returns the API base url for the currently selected network
+   */
+  get apiEndpoint(): string {
+    return NETWORK_OPTIONS.filter((network) => network.name === this.network)[0].apiBaseUrl;
   }
 }
 
