@@ -265,21 +265,25 @@
           <div class="row justify-evenly" data-cy="wallet-backup-prompt-seedDialog-quizAnswers">
             <base-button
               :label="currentTestWordChoices[0]"
+              class="q-mx-md"
               data-cy="wallet-backup-prompt-seedDialog-quizAnswerBtn1"
               @click="checkAnswer(0)"
             />
             <base-button
               :label="currentTestWordChoices[1]"
+              class="q-mx-md"
               data-cy="wallet-backup-prompt-seedDialog-quizAnswerBtn2"
               @click="checkAnswer(1)"
             />
             <base-button
               :label="currentTestWordChoices[2]"
+              class="q-mx-md"
               data-cy="wallet-backup-prompt-seedDialog-quizAnswerBtn3"
               @click="checkAnswer(2)"
             />
             <base-button
               :label="currentTestWordChoices[3]"
+              class="q-mx-md"
               data-cy="wallet-backup-prompt-seedDialog-quizAnswerBtn4"
               @click="checkAnswer(3)"
             />
