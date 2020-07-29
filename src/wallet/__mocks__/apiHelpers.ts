@@ -1,9 +1,8 @@
+// @ts-nocheck
 /* eslint-disable */
 
 module.exports = {
-  getBlock: jest.fn((blockHash) =>
-    Promise.resolve({ utxos: require('../../../test/jest/data/blocks')[blockHash] || [] })
-  ),
+  getBlock: jest.fn((blockHash) => Promise.resolve(undefined)),
   getTransactions: jest.fn((address) =>
     Promise.resolve({
       transactions: require('../../../test/jest/data/transactions')[address] || [],

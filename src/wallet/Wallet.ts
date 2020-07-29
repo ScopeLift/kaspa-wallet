@@ -88,7 +88,7 @@ class Wallet {
     const utxoResults = await Promise.all(addresses.map((address) => api.getUtxos(address)));
     addresses.forEach((address, i) => {
       const { utxos } = utxoResults[i];
-      logger.log('info', `${address}: ${utxos.length} UTXOs found.`);
+      logger.log('info', `${address}: ${utxos.length} total UTXOs found.`);
       this.utxoSet.add(utxos, address);
     });
     this.updateBalance();
@@ -102,28 +102,16 @@ class Wallet {
     logger.log('info', `Getting transactions for ${addresses.length} addresses.`);
     const addressesWithTx: string[] = [];
     const txResults = await Promise.all(addresses.map((address) => api.getTransactions(address)));
-
-    const blockHashes: Set<string> = new Set();
     addresses.forEach((address, i) => {
       const { transactions } = txResults[i];
       logger.log('info', `${address}: ${transactions.length} transactions found.`);
       if (transactions.length !== 0) {
         const confirmedTx = transactions.filter((tx) => tx.confirmations > 0);
-        confirmedTx.forEach((tx) => blockHashes.add(tx.acceptingBlockHash));
         this.transactionsStorage[address] = confirmedTx;
         addressesWithTx.push(address);
       }
     });
-    let blockRes = await Promise.all(Array.from(blockHashes).map((hash) => api.getBlock(hash)));
-    let blockTimestamps = blockRes.flat().reduce((map: Record<string, number>, val) => {
-      map[val.blockHash] = val.timestamp;
-      return map;
-    }, {});
-    this.transactions = txParser(
-      this.transactionsStorage,
-      Object.keys(this.addressManager.all),
-      blockTimestamps
-    );
+    this.transactions = txParser(this.transactionsStorage, Object.keys(this.addressManager.all));
     return addressesWithTx;
   }
 
@@ -144,30 +132,32 @@ class Wallet {
       deriveType: 'receive' | 'change',
       offset: number
     ): Promise<number> => {
-      const derivedObjs = this.addressManager.getAddresses(n, deriveType, offset);
-      const addresses = derivedObjs.map((obj) => obj.address);
+      const derivedAddresses = this.addressManager.getAddresses(n, deriveType, offset);
+      const addresses = derivedAddresses.map((obj) => obj.address);
       logger.log(
         'info',
         `Fetching ${deriveType} address data for derived indices ${JSON.stringify(
-          derivedObjs.map((obj) => obj.index)
+          derivedAddresses.map((obj) => obj.index)
         )}`
       );
       const addressesWithTx = await this.updateTransactions(addresses);
       if (addressesWithTx.length === 0) {
-        const lastIndexWithTx = offset - (threshold - n) - 1;
+        // address discovery complete
+        const lastAddressIndexWithTx = offset - (threshold - n) - 1;
         logger.log(
           'info',
-          `${deriveType}Address discovery complete. Last activity on address #${lastIndexWithTx}. No activity from ${deriveType}#${
-            lastIndexWithTx + 1
-          }~${lastIndexWithTx + threshold + 1}.`
+          `${deriveType}Address discovery complete. Last activity on address #${lastAddressIndexWithTx}. No activity from ${deriveType}#${
+            lastAddressIndexWithTx + 1
+          }~${lastAddressIndexWithTx + threshold}.`
         );
-        return lastIndexWithTx;
+        return lastAddressIndexWithTx;
       }
-      const newN =
-        derivedObjs
+      // else keep doing discovery
+      const nAddressesLeft =
+        derivedAddresses
           .filter((obj) => addressesWithTx.indexOf(obj.address) !== -1)
           .reduce((prev, cur) => Math.max(prev, cur.index), 0) + 1;
-      return doDiscovery(newN, deriveType, offset + n);
+      return doDiscovery(nAddressesLeft, deriveType, offset + n);
     };
     const highestReceiveIndex = await doDiscovery(threshold, 'receive', 0);
     const highestChangeIndex = await doDiscovery(threshold, 'change', 0);
@@ -237,8 +227,6 @@ class Wallet {
     const { id, rawTx } = this.composeTx(txParams);
     try {
       await api.postTx(rawTx);
-      // await this.updateUtxos(Object.keys(this.addressManager.all));
-      this.deletePendingTx(id);
     } catch (e) {
       this.deletePendingTx(id);
       throw e;
@@ -247,8 +235,8 @@ class Wallet {
   }
 
   async updateState(): Promise<void> {
-    await this.updateTransactions(Object.keys(this.addressManager.all));
-    await this.updateUtxos(Object.keys(this.addressManager.all));
+    const activeAddrs = await this.updateTransactions(this.addressManager.shouldFetch);
+    await this.updateUtxos(activeAddrs);
   }
 
   deletePendingTx(id: string): void {

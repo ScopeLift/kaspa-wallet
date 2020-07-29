@@ -15,6 +15,18 @@ export class AddressManager {
     return { ...this.receiveAddress.keypairs, ...this.changeAddress.keypairs };
   }
 
+  get shouldFetch(): string[] {
+    const receive = Object.entries(this.receiveAddress.atIndex)
+      .filter(
+        (record: [string, string]) => parseInt(record[0], 10) <= this.receiveAddress.counter - 1
+      )
+      .map((record: [string, string]) => record[1]);
+    const change = Object.entries(this.changeAddress.atIndex)
+      .filter((record: [string, string]) => parseInt(record[0], 10) <= this.changeAddress.counter)
+      .map((record: [string, string]) => record[1]);
+    return [...receive, ...change];
+  }
+
   /**
    * Derives a new receive address. Sets related instance properties.
    */
@@ -22,6 +34,7 @@ export class AddressManager {
     counter: number;
     current: { address: string; privateKey: bitcore.PrivateKey };
     keypairs: Record<string, bitcore.PrivateKey>;
+    atIndex: Record<string, string>;
     next: () => string;
     advance: (n: number) => void;
   } = {
@@ -29,10 +42,12 @@ export class AddressManager {
     // @ts-ignore
     current: {},
     keypairs: {},
+    atIndex: {},
     next: (): string => {
       const { address, privateKey } = this.deriveAddress('receive', this.receiveAddress.counter);
       this.receiveAddress.current = { address, privateKey };
       this.receiveAddress.keypairs[address] = privateKey;
+      this.receiveAddress.atIndex[this.receiveAddress.counter] = address;
       this.receiveAddress.counter += 1;
       return address;
     },
@@ -49,6 +64,7 @@ export class AddressManager {
     counter: number;
     current: { address: string; privateKey: bitcore.PrivateKey };
     keypairs: Record<string, bitcore.PrivateKey>;
+    atIndex: Record<string, string>;
     next: () => string;
     advance: (n: number) => void;
   } = {
@@ -56,10 +72,12 @@ export class AddressManager {
     // @ts-ignore
     current: {},
     keypairs: {},
+    atIndex: {},
     next: (): string => {
       const { address, privateKey } = this.deriveAddress('change', this.changeAddress.counter);
       this.changeAddress.keypairs[address] = privateKey;
       this.changeAddress.current = { address, privateKey };
+      this.changeAddress.atIndex[this.changeAddress.counter] = address;
       this.changeAddress.counter += 1;
       return address;
     },
@@ -92,8 +110,10 @@ export class AddressManager {
       const index = i + offset;
       const { address, privateKey } = this.deriveAddress(deriveType, index);
       if (deriveType === 'receive') {
+        this.receiveAddress.atIndex[index] = address;
         this.receiveAddress.keypairs[address] = privateKey;
       } else {
+        this.changeAddress.atIndex[index] = address;
         this.changeAddress.keypairs[address] = privateKey;
       }
       return {

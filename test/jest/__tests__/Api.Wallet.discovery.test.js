@@ -10,6 +10,5 @@ test('Wallet: discovers things in your wallet', async () => {
   await from.wallet.addressDiscovery();
   expect(from.wallet.transactions.length > 0).toBe(true);
   expect([...from.wallet.transactionStorage].length).toBe(api.getUtxos.mock.calls.length);
-  console.log(from.wallet.transactions);
   expect(from.wallet.utxoSet.availableBalance).toEqual(6e8);
 }, 5e6);

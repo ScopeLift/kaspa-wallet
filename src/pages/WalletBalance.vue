@@ -2,8 +2,17 @@
   <q-page padding class="page-margin" data-cy="wallet-balance">
     <!-- Wallet backup prompt -->
     <wallet-backup-prompt v-if="!isBackedUp" @backupComplete="getBackupStatus" />
+    <!-- Is loading -->
+    <!-- <div v-if="isLoading" data-cy="wallet-balance-loading">
+      <div class="row justify-center">
+        <q-spinner class="q-my-lg" color="primary" size="3em" />
+      </div>
+      <div class="text-center text-caption text-grey text-italic">
+        Fetching latest wallet data...
+      </div>
+    </div> -->
     <!-- Wallet balance -->
-    <div v-if="!isLoading" data-cy="wallet-balance-container">
+    <div data-cy="wallet-balance-container">
       <div class="text-primary text-center">
         <transaction-amount
           :amount="formatBalanceForHuman(balance)"
@@ -12,17 +21,18 @@
         />
       </div>
       <!-- Transaction history -->
-      <div class="text-primary text-left" data-cy="wallet-balance-txHistory">
-        <h4 class="text-left q-mb-none">Transaction History</h4>
+      <div class="text-primary text-left row" data-cy="wallet-balance-txHistory">
+        <h4 class="text-left q-mb-none inline">Transaction History</h4>
+        <base-button
+          class="text-accent"
+          :flat="true"
+          :dense="true"
+          data-cy="wallet-refresh-data"
+          label="Refresh data"
+          :loading="isLoading"
+          @click="refreshState"
+        />
         <wallet-balance-transactions />
-      </div>
-    </div>
-    <div v-else data-cy="wallet-balance-loading">
-      <div class="row justify-center">
-        <q-spinner class="q-my-lg" color="primary" size="3em" />
-      </div>
-      <div class="text-center text-caption text-grey text-italic">
-        Fetching latest wallet data...
       </div>
     </div>
   </q-page>
@@ -68,15 +78,20 @@ export default Vue.extend({
     /* eslint-enable */
   },
 
-  async mounted() {
+  mounted() {
     this.isLoading = true;
     this.getBackupStatus();
-    await this.wallet.updateState(); // eslint-disable-line
-    await this.$store.dispatch('main/getWalletInfo', this.wallet);
+    // await this.wallet.updateState(); // eslint-disable-line
+    // await this.$store.dispatch('main/getWalletInfo', this.wallet);
     this.isLoading = false;
   },
 
   methods: {
+    async refreshState() {
+      this.isLoading = true;
+      await this.wallet.updateState();
+      this.isLoading = false;
+    },
     getBackupStatus() {
       this.isBackedUp = Boolean(this.$q.localStorage.getItem('is-backed-up'));
     },

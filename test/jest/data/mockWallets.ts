@@ -32,7 +32,7 @@ export const apiWallets = {
   },
 };
 
-export const moreWallets = [
+export const e2eWallets = [
   {
     address: 'kaspatest:qp0qs9fndnu274a98aqxhmluh9xj3w6vscnay8uqdt',
     wallet: Wallet.fromMnemonic(

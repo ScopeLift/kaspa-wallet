@@ -1,4 +1,18 @@
 module.exports = {
+  'kaspatest:qp2zggljkdlsp5lcdeq45dnvyzdy4pr6wysdeffkzx': [
+    {
+      transactionId: '9a4ab5896b16ed89968d8b441e0dde1add9fe019379f8cc5886647723c60377c',
+      value: 199998000,
+      scriptPubKey: '76a914542423f2b37f00d3f86e415a366c209a4a847a7188ac',
+      acceptingBlockHash: '0000174d07548af18e2fee83720f4274e45af083c9f10d29db5e32121c552d31',
+      acceptingBlockBlueScore: 38596,
+      index: 1,
+      isSpent: false,
+      isCoinbase: false,
+      isSpendable: true,
+      confirmations: 171,
+    },
+  ],
   'kaspatest:qq0d6h0prjm5mpdld5pncst3adu0yam6xch4tr69k2': [
     {
       transactionId: '4558fd428cbac8f3237ef30a055ef32deb588541c43c828a709cde2d3da93eb1',
