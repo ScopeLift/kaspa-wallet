@@ -4,25 +4,46 @@ import { e2eWallets } from '../data/mockWallets';
 const [w1, w2] = e2eWallets;
 import * as api from '../../../src/wallet/apiHelpers';
 
-let state = 'state1';
-
-jest.mock('../../../src/wallet/apiHelpers', () => {
-  return {
-    getBlock: jest.fn((blockHash) => Promise.resolve(undefined)),
-    getTransactions: jest.fn((address) =>
-      Promise.resolve({
-        transactions:
-          require(`../../../test/jest/data/comprehensive/${state}`)['transactions'][address] || [],
-      })
-    ),
-    getUtxos: jest.fn((address) => {
-      return Promise.resolve({
-        utxos: require(`../../../test/jest/data/comprehensive/${state}`)['utxos'][address] || [],
-      });
-    }),
-    postTx: jest.fn((rawTx) => Promise.resolve(true)),
-  };
+beforeEach(() => {
+  jest.mock('../../../src/wallet/apiHelpers', () => {
+    return {
+      getBlock: jest.fn((blockHash) => Promise.resolve(undefined)),
+      getTransactions: jest.fn((address) =>
+        Promise.resolve({
+          transactions:
+            require(`../../../test/jest/data/comprehensive/state1`)['transactions'][address] || [],
+        })
+      ),
+      getUtxos: jest.fn((address) => {
+        return Promise.resolve({
+          utxos: require(`../../../test/jest/data/comprehensive/state1`)['utxos'][address] || [],
+        });
+      }),
+      postTx: jest.fn((rawTx) => Promise.resolve(true)),
+    };
+  });
 });
+
+const mockStateChange = (state) => {
+  return () => {
+    return {
+      getBlock: jest.fn((blockHash) => Promise.resolve(undefined)),
+      getTransactions: jest.fn((address) =>
+        Promise.resolve({
+          transactions:
+            require(`../../../test/jest/data/comprehensive/${state}`)['transactions'][address] ||
+            [],
+        })
+      ),
+      getUtxos: jest.fn((address) => {
+        return Promise.resolve({
+          utxos: require(`../../../test/jest/data/comprehensive/${state}`)['utxos'][address] || [],
+        });
+      }),
+      postTx: jest.fn((rawTx) => Promise.resolve(true)),
+    };
+  };
+};
 
 test('Wallet: acts intelligently', async () => {
   await w1.wallet.addressDiscovery();
