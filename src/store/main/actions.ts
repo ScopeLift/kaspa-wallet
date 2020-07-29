@@ -12,9 +12,7 @@ const actions: ActionTree<MainStateInterface, StoreInterface> = {
     const network = LocalStorage.getItem(localSavedNetworkVar);
     if (network) {
       // Use saved network
-      const networkName = (network as SelectedNetwork).name;
-      wallet.network = networkName; // eslint-disable-line
-      await wallet.updateNetwork(networkName); // eslint-disable-line
+      await wallet.updateNetwork(network); // eslint-disable-line
       commit('setWalletInfo', wallet);
     } else {
       // Use default network
@@ -26,8 +24,7 @@ const actions: ActionTree<MainStateInterface, StoreInterface> = {
   async setNetwork({ commit, state }, network: SelectedNetwork) {
     LocalStorage.set(localSavedNetworkVar, network);
     const { wallet } = state; // eslint-disable-line
-    wallet.network = network.name; // eslint-disable-line
-    await wallet.updateNetwork(network.name); // eslint-disable-line
+    await wallet.updateNetwork(network); // eslint-disable-line
     commit('setWalletInfo', wallet);
   },
 };

@@ -2,21 +2,54 @@
   <q-page padding class="page-margin" data-cy="settings">
     <!-- SETTINGS LAYOUT -->
     <div class="row justify-between q-mx-md" data-cy="settings-container">
-      <!-- Change network -->
+      <!-- CHANGE NETWORK -->
       <div class="col-xs-12" data-cy="settings-changeNetwork">
+        <div class="text-caption text-uppercase text-grey">Connection</div>
         <div class="text-h6" data-cy="settings-changeNetwork-text">Change Network</div>
-        <q-select
-          v-model="selectedNetwork"
-          data-cy="settings-changeNetwork-select"
-          label="Network"
-          :options="networkOptions"
-          option-label="description"
-          @input="updateNetwork"
-        />
+        <p>Choose how to connect to the network</p>
+        <q-list>
+          <!--
+            Rendering a <label> tag (notice tag="label") so QRadios will respond to clicks 
+            on QItems to change Toggle state.
+          -->
+          <q-item tag="label">
+            <q-item-section avatar>
+              <q-radio v-model="networkSelectionMethod" val="automatic" @input="updateNetwork" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Automatic</q-item-label>
+              <q-item-label caption>
+                The wallet will connect via one of the community managed Kasparov API servers
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item tag="label">
+            <q-item-section avatar top>
+              <q-radio v-model="networkSelectionMethod" val="manual" @input="updateNetwork" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Manual</q-item-label>
+              <q-item-label caption>Specify your own Kasparov API server </q-item-label>
+              <q-item-label>
+                <base-input
+                  v-model="apiEndpoint"
+                  :disabled="networkSelectionMethod !== 'manual'"
+                  hint="Enter address:port"
+                  style="min-width: 275px;"
+                  @input="updateNetwork"
+                />
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
       </div>
-      <!-- Backup wallet -->
+
+      <!-- WALLET BACKUP -->
       <div class="col-xs-12 q-mt-xl" data-cy="settings-walletBackup">
+        <div class="text-caption text-uppercase text-grey">Recovery</div>
         <div class="text-h6" data-cy="settings-walletBackup-text">Wallet Backup</div>
+        <p>Backup your wallet using your preferred method</p>
         <base-button
           label="Export Wallet File"
           data-cy="settings-walletBackup-file"
@@ -307,11 +340,12 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { LocalStorage } from 'quasar';
 import WalletBackupPrompt from 'components/WalletBackupPrompt.vue';
 // @ts-ignore
 import helpers from 'src/utils/mixin-helpers';
-import { NETWORK_OPTIONS } from '../../config.json';
-import { NetworkArray } from '../../types/custom-types';
+import { SelectedNetwork } from 'custom-types';
+import { DEFAULT_NETWORK } from '../../config.json';
 
 export default Vue.extend({
   name: 'Settings',
@@ -323,18 +357,34 @@ export default Vue.extend({
 
   data() {
     return {
-      /* eslint-disable */
-      selectedNetwork: NETWORK_OPTIONS.filter(
-        (network) => network.name === this.$store.state.main.wallet.network
-      )[0],
-      networkOptions: NETWORK_OPTIONS as NetworkArray,
-      /* eslint-disable */
+      // Defaul values
+      networkSelectionMethod: 'automatic',
+      apiEndpoint: 'http://localhost:11224',
     };
   },
 
+  mounted() {
+    const network = LocalStorage.getItem('kaspa-network');
+    if (network && (network as SelectedNetwork).description === 'Manual Network') {
+      this.networkSelectionMethod = 'manual';
+    }
+  },
+
   methods: {
-    updateNetwork() {
-      this.$store.dispatch('main/setNetwork', this.selectedNetwork);
+    async updateNetwork() {
+      if (this.networkSelectionMethod === 'automatic') {
+        // Default network
+        const network = DEFAULT_NETWORK;
+        await this.$store.dispatch('main/setNetwork', network);
+      } else {
+        // Custom network
+        const network = {
+          name: 'kaspatest',
+          description: 'Manual Network',
+          apiBaseUrl: this.apiEndpoint,
+        };
+        await this.$store.dispatch('main/setNetwork', network);
+      }
     },
 
     showFileBackup() {

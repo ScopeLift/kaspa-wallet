@@ -1,14 +1,8 @@
 {
   "DEFAULT_FEE": 1000,
-  "DEFAULT_NETWORK": "kaspatest",
-  "NETWORK_OPTIONS": [
+  "DEFAULT_NETWORK": [
     {
       "name": "kaspatest",
-      "description": "Local KDX",
-      "apiBaseUrl": "http://localhost:11224"
-    },
-    {
-      "name": "kaspadev",
       "description": "Testnet",
       "apiBaseUrl": "https://testnet-kasparovd.kas.pa"
     }

@@ -2,13 +2,20 @@ import Mnemonic from 'bitcore-mnemonic';
 import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
-import { Network, WalletSave, Api, TxSend, PendingTransactions } from 'custom-types';
+import {
+  Network,
+  SelectedNetwork,
+  WalletSave,
+  Api,
+  TxSend,
+  PendingTransactions,
+} from 'custom-types';
 import { logger } from '../utils/logger';
 import { AddressManager } from './AddressManager';
 import { UtxoSet } from './UtxoSet';
 import * as api from './apiHelpers';
 import { txParser } from './txParser';
-import { DEFAULT_FEE, DEFAULT_NETWORK, NETWORK_OPTIONS } from '../../config.json';
+import { DEFAULT_FEE, DEFAULT_NETWORK } from '../../config.json';
 
 /** Class representing an HDWallet with derivable child addresses */
 class Wallet {
@@ -30,7 +37,12 @@ class Wallet {
    * Current network.
    */
   // @ts-ignore
-  network: Network = DEFAULT_NETWORK;
+  network: Network = DEFAULT_NETWORK.name as Network;
+
+  /**
+   * Current API endpoint for selected network
+   */
+  apiEndpoint: string = ((DEFAULT_NETWORK as unknown) as SelectedNetwork).apiBaseUrl;
 
   /**
    * A 12 word mnemonic.
@@ -144,8 +156,9 @@ class Wallet {
    * Updates the selected network
    * @param network name of the network
    */
-  async updateNetwork(network: Network): Promise<void> {
-    this.network = network;
+  async updateNetwork(network: SelectedNetwork): Promise<void> {
+    this.network = network.name;
+    this.apiEndpoint = network.apiBaseUrl;
     await this.addressDiscovery();
   }
 
@@ -331,13 +344,6 @@ class Wallet {
       seedPhrase: this.mnemonic,
     };
     return passworder.encrypt(password, Buffer.from(JSON.stringify(savedWallet), 'utf8'));
-  }
-
-  /**
-   * Returns the API base url for the currently selected network
-   */
-  get apiEndpoint(): string {
-    return NETWORK_OPTIONS.filter((network) => network.name === this.network)[0].apiBaseUrl;
   }
 }
 
