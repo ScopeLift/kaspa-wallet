@@ -48,7 +48,14 @@ describe('Multiple states wallet test. Must be in describe block for serial proc
         amount: 12345678,
       });
     await expect(throws()).rejects.toThrowError('Transaction compose error');
+    expect(w1.wallet.balance).toEqual(199998000 - 100000000 - 1000);
+    expect(w1.wallet.utxoSet.availableBalance).toEqual(0);
+    expect(w1.wallet.utxoSet.totalBalance).toEqual(199998000);
     await w1.wallet.updateState(); // nothing different
+    expect(w1.wallet.balance).toEqual(199998000 - 100000000 - 1000);
+    expect(w1.wallet.utxoSet.availableBalance).toEqual(0);
+    expect(w1.wallet.utxoSet.totalBalance).toEqual(199998000);
+    expect(Object.keys(w1.wallet.pending.transactions).length).toBe(1);
   }, 5e6);
 
   test('Wallet: acts intelligently during state 2 (after tx "acknowledged")', async () => {
@@ -72,6 +79,9 @@ describe('Multiple states wallet test. Must be in describe block for serial proc
     expect(
       w1.wallet.transactionsStorage['kaspatest:qrvn9pq9eujfhy6nkr5mvncdg395tlvdagc2z64n6q'].length
     ).toBe(1);
-    //   expect(w1.wallet.utxoSet.availableBalance).toBe(199998000 - 100000000 - 1000);
+    expect(w1.wallet.utxoSet.length).toBe(1);
+    expect(Object.keys(w1.wallet.pending.transactions).length).toBe(0);
+    expect(w1.wallet.utxoSet.availableBalance).toBe(199998000 - 100000000 - 1000);
+    expect(w1.wallet.utxoSet.totalBalance).toBe(199998000 - 100000000 - 1000);
   }, 5e6);
 });

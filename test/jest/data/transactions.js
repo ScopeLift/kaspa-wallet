@@ -1,4 +1,30 @@
 module.exports = {
+  'kaspatest:qq0d6h0prjm5mpdld5pncst3adu0yam6xch4tr69k2': [
+    {
+      transactionHash: '11c4b823da44e514254427f14d9b6e5560ec21f7ea07508813fde589eb8a461b',
+      transactionId: 'd78017405d686caefb61724a1950ae7d6a583ede21a28137f9349379e43d4649',
+      subnetworkId: '0000000000000000000000000000000000000001',
+      lockTime: 0,
+      payloadHash: '504ff5860bc37d4ce7a24bf9cd7728a7993cab6f3f6ec4ad5309bcf21941efc8',
+      payload:
+        '1976a9141edd5de11cb74d85bf6d033c4171eb78f2777a3688ac6ef1b7d5b1d12e182f6b61737061642f',
+      inputs: [],
+      outputs: [
+        {
+          value: 5000000000,
+          scriptPubKey: '76a9141edd5de11cb74d85bf6d033c4171eb78f2777a3688ac',
+          address: 'kaspatest:qq0d6h0prjm5mpdld5pncst3adu0yam6xch4tr69k2',
+          index: 0,
+          isSpent: false,
+        },
+      ],
+      mass: 196,
+      version: 1,
+      raw:
+        '0100000001c9246169a1788f961b55db6203fb0056928deaa5fe488bf5d0a8619144200000ffffffff00ffffffffffffffff0100f2052a010000001976a9141edd5de11cb74d85bf6d033c4171eb78f2777a3688ac000000000000000001000000000000000000000000000000000000000000000000000000c8ef4119f2bc0953adc46e3f6fab3c99a72877cdf94ba2e74c7dc30b86f54f502a1976a9141edd5de11cb74d85bf6d033c4171eb78f2777a3688ac6ef1b7d5b1d12e182f6b61737061642f',
+      confirmations: 0,
+    },
+  ],
   'kaspatest:qp0qs9fndnu274a98aqxhmluh9xj3w6vscnay8uqdt': [
     {
       transactionHash: '17a51178354d57b79fe377ee31adc914f8c9098b9a170560133d049415e1b8b7',

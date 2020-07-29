@@ -34,6 +34,6 @@ test(`Wallet: will not let me use the same UTXO`, async () => {
     fee: 1000,
   });
   expect(tx1id !== tx2id).toBe(true);
-  expect([...from.wallet.pending.transactions].length).toBe(2);
+  expect(Object.keys(from.wallet.pending.transactions).length).toBe(2);
   expect(from.wallet.utxoSet.inUse.length).toBe(2);
 });

@@ -91,7 +91,6 @@ class Wallet {
       logger.log('info', `${address}: ${utxos.length} total UTXOs found.`);
       this.utxoSet.add(utxos, address);
     });
-    this.updateBalance();
   }
 
   /**
@@ -112,6 +111,14 @@ class Wallet {
       }
     });
     this.transactions = txParser(this.transactionsStorage, Object.keys(this.addressManager.all));
+    const pendingTxHashes = Object.keys(this.pending.transactions);
+    if (pendingTxHashes.length) {
+      pendingTxHashes.forEach((hash) => {
+        if (this.transactions.map((tx) => tx.transactionHash).includes(hash)) {
+          this.deletePendingTx(hash);
+        }
+      });
+    }
     return addressesWithTx;
   }
 
@@ -167,7 +174,8 @@ class Wallet {
       'info',
       `receive address index: ${highestReceiveIndex}; change address index: ${highestChangeIndex}`
     );
-    return this.updateUtxos(Object.keys(this.transactionsStorage));
+    await this.updateUtxos(Object.keys(this.transactionsStorage));
+    this.runStateChangeHooks();
   }
 
   // TODO: convert amount to sompis aka satoshis
@@ -209,9 +217,8 @@ class Wallet {
       .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
     this.utxoSet.inUse.push(...utxoIds);
     this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount: amount + fee });
-    this.utxoSet.updateUtxoBalance();
-    this.updateBalance();
     this.receiveAddress = this.addressManager.receiveAddress.next();
+    this.runStateChangeHooks();
     return { id: tx.id, rawTx: tx.toString(), utxoIds, amount: amount + fee };
   }
 
@@ -228,7 +235,7 @@ class Wallet {
     try {
       await api.postTx(rawTx);
     } catch (e) {
-      this.deletePendingTx(id);
+      this.undoPendingTx(id);
       throw e;
     }
     return id;
@@ -237,12 +244,24 @@ class Wallet {
   async updateState(): Promise<void> {
     const activeAddrs = await this.updateTransactions(this.addressManager.shouldFetch);
     await this.updateUtxos(activeAddrs);
+    this.runStateChangeHooks();
   }
 
-  deletePendingTx(id: string): void {
+  undoPendingTx(id: string): void {
     const { utxoIds } = this.pending.transactions[id];
     delete this.pending.transactions[id];
     this.utxoSet.release(utxoIds);
+    this.runStateChangeHooks();
+  }
+
+  deletePendingTx(id: string): void {
+    // undo + delete old utxos
+    const { utxoIds } = this.pending.transactions[id];
+    delete this.pending.transactions[id];
+    this.utxoSet.remove(utxoIds);
+  }
+
+  runStateChangeHooks(): void {
     this.utxoSet.updateUtxoBalance();
     this.updateBalance();
   }

@@ -12,13 +12,13 @@ test('UTXO set can count', () => {
 
 test('UTXO set keeps a balance', () => {
   from.wallet.utxoSet.add(mockUtxos, from.address);
-  from.wallet.updateBalance();
+  from.wallet.runStateChangeHooks();
   const utxoBalance0 = from.wallet.utxoSet.availableBalance;
   const balance0 = from.wallet.balance;
   expect(utxoBalance0).toEqual(600000000);
   expect(balance0).toEqual(6e8);
   from.wallet.utxoSet.add(mockUtxos, from.address);
-  from.wallet.updateBalance();
+  from.wallet.runStateChangeHooks();
   expect(from.wallet.utxoSet.availableBalance).toEqual(600000000); // no dups
   expect(balance0).toEqual(6e8); // no dups
   const tx1 = from.wallet.composeTx({
@@ -36,6 +36,7 @@ test('UTXO set keeps a balance', () => {
 
 test(`Wallet won't double compose UTXO`, async () => {
   from.wallet.utxoSet.add(mockUtxos, from.address);
+  from.wallet.runStateChangeHooks();
   const utxoBalance0 = from.wallet.utxoSet.availableBalance;
   const tx1 = from.wallet.composeTx({
     toAddr: to.address,
@@ -61,7 +62,7 @@ test(`Wallet won't double compose UTXO`, async () => {
 
 test(`Utxo set can account for aborted transactions`, () => {
   from.wallet.utxoSet.add(mockUtxos, from.address);
-  from.wallet.updateBalance();
+  from.wallet.runStateChangeHooks();
   const utxoBalance0 = from.wallet.utxoSet.availableBalance;
   const balance0 = from.wallet.balance;
   expect(utxoBalance0).toEqual(balance0);
@@ -75,7 +76,8 @@ test(`Utxo set can account for aborted transactions`, () => {
   expect(balance1).toEqual(balance0 - 7e7 - 1000);
   expect(utxoBalance0 === utxoBalance1).toBe(false);
   expect(from.wallet.utxoSet.inUse.length).toBe(1);
-  from.wallet.deletePendingTx(tx1.id);
+  from.wallet.undoPendingTx(tx1.id);
+  from.wallet.runStateChangeHooks();
   expect(from.wallet.utxoSet.availableBalance).toEqual(utxoBalance0);
   expect(from.wallet.utxoSet.inUse.length).toBe(0);
 });
