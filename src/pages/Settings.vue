@@ -8,7 +8,7 @@
         <q-select
           v-model="selectedNetwork"
           data-cy="settings-changeNetwork-select"
-          label="Standard"
+          label="Network"
           :options="networkOptions"
           option-label="description"
           @input="updateNetwork"
@@ -334,7 +334,6 @@ export default Vue.extend({
 
   methods: {
     updateNetwork() {
-      console.log('new network', this.selectedNetwork);
       this.$store.dispatch('main/setNetwork', this.selectedNetwork);
     },
 
@@ -347,10 +346,6 @@ export default Vue.extend({
       // @ts-ignore
       this.showSeedPhrase = true;
     },
-  },
-
-  mounted() {
-    console.log(this);
   },
 });
 </script>
