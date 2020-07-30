@@ -15,6 +15,7 @@ type PendingTransactions = {
       utxoIds: string[];
       rawTx: string;
       amount: number;
+      to: string;
     }
   >;
   add(id: string, tx: { utxoIds: string[]; rawTx: string; amount: number }): void;

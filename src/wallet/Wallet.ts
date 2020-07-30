@@ -224,7 +224,7 @@ class Wallet {
         // @ts-ignore
         .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
       this.utxoSet.inUse.push(...utxoIds);
-      this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount: amount + fee });
+      this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount: amount + fee, to: toAddr });
       this.runStateChangeHooks();
       return { id: tx.id, rawTx: tx.toString(), utxoIds, amount: amount + fee };
     } catch (e) {
