@@ -49,7 +49,7 @@ class Wallet {
       if (transactions.length === 0) return 0;
       return transactions.reduce((prev, cur) => prev + cur.amount, 0);
     },
-    add(id: string, tx: { utxoIds: string[]; rawTx: string; amount: number }) {
+    add(id: string, tx: { to: string; utxoIds: string[]; rawTx: string; amount: number }) {
       this.transactions[id] = tx;
     },
   };
