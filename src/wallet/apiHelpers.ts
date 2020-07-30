@@ -1,5 +1,4 @@
 import { Api } from 'custom-types';
-import { API_ENDPOINT } from '../../config.json';
 
 class ApiError extends Error {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -12,7 +11,7 @@ class ApiError extends Error {
 
 export const getBlock = async (
   blockHash: string,
-  apiEndpoint: string = API_ENDPOINT
+  apiEndpoint: string
 ): Promise<Api.BlockResponse> => {
   // eslint-disable-next-line
   const response = await fetch(`${apiEndpoint}/block/${blockHash}`, {
@@ -31,7 +30,7 @@ export const getBlock = async (
 // TODO: handle pagination
 export const getTransactions = async (
   address: string,
-  apiEndpoint: string = API_ENDPOINT
+  apiEndpoint: string
 ): Promise<Api.TransactionsResponse> => {
   const getTx = async (n: number, skip: number): Promise<Api.Transaction[]> => {
     // eslint-disable-next-line
@@ -59,10 +58,7 @@ export const getTransactions = async (
   return { transactions: json } as Api.TransactionsResponse;
 };
 
-export const getUtxos = async (
-  address: string,
-  apiEndpoint: string = API_ENDPOINT
-): Promise<Api.UtxoResponse> => {
+export const getUtxos = async (address: string, apiEndpoint: string): Promise<Api.UtxoResponse> => {
   const getRecursively = async (n: number, skip: number) => {
     // eslint-disable-next-line
     const response = await fetch(
@@ -93,7 +89,7 @@ export const getUtxos = async (
 
 export const postTx = async (
   rawTransaction: string,
-  apiEndpoint: string = API_ENDPOINT
+  apiEndpoint: string
 ): Promise<Api.SendTxResponse> => {
   // eslint-disable-next-line
   const response = await fetch(`${apiEndpoint}/transaction`, {

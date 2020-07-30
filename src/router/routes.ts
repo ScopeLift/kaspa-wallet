@@ -34,6 +34,11 @@ const routes: RouteConfig[] = [
         path: '/balance',
         component: () => import('pages/WalletBalance.vue'),
       },
+      {
+        name: 'settings',
+        path: '/settings',
+        component: () => import('pages/Settings.vue'),
+      },
     ],
   },
 

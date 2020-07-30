@@ -1,45 +1,69 @@
 <template>
-  <div data-cy="wallet-backup-prompt">
-    <!-- BANNER TELLING USER THAT WALLET IS NOT BACKED UP -->
-    <q-banner
-      class="bg-secondary text-white column q-py-md q-mb-lg"
-      data-cy="wallet-backup-prompt-banner"
-      :inline-actions="false"
-    >
-      <div
-        class="row justify-between items-center no-wrap"
-        data-cy="wallet-backup-prompt-banner-content"
-      >
-        <q-icon
-          class="col-auto"
-          color="white"
-          data-cy="wallet-backup-prompt-banner-content-icon"
-          name="warning"
-          size="md"
-        />
-        <div class="col q-ml-md" data-cy="wallet-backup-prompt-banner-content">
-          Your wallet is only accessible from this device. Back it up, take it with you.
-        </div>
+  <q-page padding class="page-margin" data-cy="settings">
+    <!-- SETTINGS LAYOUT -->
+    <div class="row justify-between q-mx-md" data-cy="settings-container">
+      <!-- CHANGE NETWORK -->
+      <div class="col-xs-12" data-cy="settings-changeNetwork">
+        <div class="text-caption text-uppercase text-grey">Connection</div>
+        <div class="text-h6" data-cy="settings-changeNetwork-text">Change Network</div>
+        <p>Choose how to connect to the network</p>
+        <q-list>
+          <!--
+            Rendering a <label> tag (notice tag="label") so QRadios will respond to clicks 
+            on QItems to change Toggle state.
+          -->
+          <q-item tag="label">
+            <q-item-section avatar>
+              <q-radio v-model="networkSelectionMethod" val="automatic" @input="updateNetwork" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Automatic</q-item-label>
+              <q-item-label caption>
+                The wallet will connect via one of the community managed Kasparov API servers
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item tag="label">
+            <q-item-section avatar top>
+              <q-radio v-model="networkSelectionMethod" val="manual" @input="updateNetwork" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Manual</q-item-label>
+              <q-item-label caption>Specify your own Kasparov API server </q-item-label>
+              <q-item-label>
+                <base-input
+                  v-model="apiEndpoint"
+                  :disabled="networkSelectionMethod !== 'manual'"
+                  hint="Enter address:port"
+                  style="min-width: 275px;"
+                  @input="updateNetwork"
+                />
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
       </div>
-      <div class="row justify-start q-mt-md" data-cy="wallet-backup-prompt-buttons">
+
+      <!-- WALLET BACKUP -->
+      <div class="col-xs-12 q-mt-xl" data-cy="settings-walletBackup">
+        <div class="text-caption text-uppercase text-grey">Recovery</div>
+        <div class="text-h6" data-cy="settings-walletBackup-text">Wallet Backup</div>
+        <p>Backup your wallet using your preferred method</p>
         <base-button
+          label="Export Wallet File"
+          data-cy="settings-walletBackup-file"
           :flat="true"
-          class="col-auto q-mr-lg"
-          color="white"
-          data-cy="wallet-backup-prompt-buttons-seed"
-          label="Show Recovery Seed"
-          @click="showSeedPhrase = true"
+          @click="showFileBackup"
         />
         <base-button
+          label="Show Wallet Seed"
+          data-cy="settings-walletBackup-seed"
           :flat="true"
-          class="col-auto"
-          color="white"
-          data-cy="wallet-backup-prompt-buttons-file"
-          label="Save Wallet"
-          @click="showSaveFile = true"
+          @click="showSeedBackup"
         />
       </div>
-    </q-banner>
+    </div>
 
     <!-- DIALOG THAT HANDLES SAVE FILE FLOW -->
     <q-dialog v-model="showSaveFile" data-cy="wallet-backup-prompt-saveDialog" @hide="reset">
@@ -311,199 +335,66 @@
       </q-card>
     </q-dialog>
     <!-- END DIALOG THAT HANDLES SEED PHRASE FLOW -->
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapState } from 'vuex';
-import { exportFile, LocalStorage } from 'quasar';
-// @ts-ignore
-import Wallet from 'src/wallet/Wallet';
+import { LocalStorage } from 'quasar';
+import WalletBackupPrompt from 'components/WalletBackupPrompt.vue';
 // @ts-ignore
 import helpers from 'src/utils/mixin-helpers';
-
-interface TestWord {
-  index: number;
-  word: string;
-  text: string;
-  caption: string;
-  choices: number[];
-}
-
-interface IconStatus {
-  name: string;
-  color: string;
-}
+import { SelectedNetwork } from 'custom-types';
+import { DEFAULT_NETWORK } from '../../config.json';
 
 export default Vue.extend({
-  name: 'WalletBackupPrompt',
+  name: 'Settings',
+
+  // Import the JS portion of WalletBackupPrompt, HTML is duplicated above for now
+  extends: WalletBackupPrompt,
 
   mixins: [helpers],
 
   data() {
     return {
-      showSeedPhrase: false, // shows seed phrase dialog if true
-      showSaveFile: false, // shows save file dialog if true
-      password: '',
-      isPasswordVisible: '',
-      isPasswordVerified: false,
-      isBackupComplete: false, // true once user completes either process
-      isLoading: false,
-      isWrong: false, // true if user incorrectly chooses a word from the seed phrase
-      testWords: [
-        // the words the user will be quizzed on, currently this is hardcoded
-        {
-          index: 9, // correct answer
-          word: '9th',
-          text: 'Make sure you wrote the phrase down correctly by answering this quick checkup.',
-          caption: '',
-          choices: [1, 9, 12, 5],
-        },
-        {
-          index: 2,
-          word: '2nd',
-          text: 'Good job! Two more checks to go',
-          caption: 'Be wary and cautious of your secret phrase. Never reveal it to anyone.',
-          choices: [7, 8, 4, 2],
-        },
-        {
-          index: 6,
-          word: '6th',
-          text: 'Awesome, one more to go!',
-          caption:
-            'It is recommended to keep several copies of your secret seed hidden away in different places.',
-          choices: [6, 3, 10, 11],
-        },
-      ],
-      testFailureString: 'Wrong. Retry or go back', // what to tell user when they choose wrong
-      currentTestIndex: -1, // -1 indicates word quiz has not started, otherwise this indexes testWords
+      // Defaul values
+      networkSelectionMethod: 'automatic',
+      apiEndpoint: 'http://localhost:11224',
     };
   },
 
-  computed: {
-    ...mapState({
-      seedPhrase(state): string {
-        // @ts-ignore
-        return String(state.main.wallet.mnemonic); // eslint-disable-line
-      },
-    }),
-
-    seedPhraseArray(): string[] {
-      return this.seedPhrase.split(' ');
-    },
-
-    currentTestNumber(): string {
-      return this.currentTestIndex === -1 ? '' : this.testWords[this.currentTestIndex].word;
-    },
-
-    currentTestWordInfo(): TestWord {
-      const dummy = { index: -1, word: '', text: '', caption: '', choices: [] };
-      return this.currentTestIndex === -1 ? dummy : this.testWords[this.currentTestIndex];
-    },
-
-    currentTestWordChoices(): string[] {
-      return this.currentTestIndex === -1
-        ? []
-        : [
-            this.seedPhraseArray[this.testWords[this.currentTestIndex].choices[0] - 1],
-            this.seedPhraseArray[this.testWords[this.currentTestIndex].choices[1] - 1],
-            this.seedPhraseArray[this.testWords[this.currentTestIndex].choices[2] - 1],
-            this.seedPhraseArray[this.testWords[this.currentTestIndex].choices[3] - 1],
-          ];
-    },
-
-    icons(): IconStatus[] {
-      const icons = [
-        { name: 'brightness_1', color: 'grey' },
-        { name: 'brightness_1', color: 'grey' },
-        { name: 'brightness_1', color: 'grey' },
-      ];
-      icons.forEach((icon, index) => {
-        if (this.currentTestIndex > index) {
-          icons[index].color = 'green';
-          icons[index].name = 'check';
-        }
-      });
-      if (this.isWrong) {
-        icons[this.currentTestIndex].name = 'close';
-        icons[this.currentTestIndex].color = 'negative';
-      }
-      return icons;
-    },
+  mounted() {
+    const network = LocalStorage.getItem('kaspa-network');
+    if (network && (network as SelectedNetwork).description === 'Manual Network') {
+      this.networkSelectionMethod = 'manual';
+    }
   },
 
   methods: {
-    reset() {
-      if (this.isBackupComplete) {
-        this.$emit('backupComplete');
-      }
-      this.showSeedPhrase = false;
-      this.password = '';
-      this.isPasswordVisible = '';
-      this.isPasswordVerified = false;
-      this.isBackupComplete = false;
-      this.currentTestIndex = -1;
-      this.isLoading = false;
-      this.isWrong = false;
-    },
-
-    backToWords() {
-      this.currentTestIndex = -1;
-    },
-
-    async seedPhraseHandler() {
-      if (this.isPasswordVerified) {
-        this.nextTest();
+    async updateNetwork() {
+      if (this.networkSelectionMethod === 'automatic') {
+        // Default network
+        const network = DEFAULT_NETWORK;
+        await this.$store.dispatch('main/setNetwork', network);
       } else {
-        await this.checkPassword();
+        // Custom network
+        const network = {
+          prefix: 'kaspatest',
+          description: 'Manual Network',
+          apiBaseUrl: this.apiEndpoint,
+        };
+        await this.$store.dispatch('main/setNetwork', network);
       }
     },
 
-    async checkPassword() {
-      try {
-        const encryptedMnemonic = LocalStorage.getItem('kaspa-wallet-data');
-        // @ts-ignore
-        await Wallet.import(this.password, encryptedMnemonic); // eslint-disable-line
-        this.isPasswordVerified = true;
-      } catch (err) {
-        // @ts-ignore
-        this.showError(err); // eslint-disable-line
-        throw new Error(err); // to exit the top function
-      }
+    showFileBackup() {
+      // @ts-ignore
+      this.showSaveFile = true;
     },
 
-    checkAnswer(index: number) {
-      if (this.currentTestWordInfo.choices[index] !== this.currentTestWordInfo.index) {
-        this.isWrong = true;
-      } else {
-        this.isWrong = false;
-        this.nextTest();
-      }
-    },
-
-    nextTest() {
-      this.currentTestIndex += 1;
-      if (this.currentTestIndex === this.testWords.length) {
-        this.onVerificationComplete();
-      }
-    },
-
-    async saveWalletFile() {
-      await this.checkPassword();
-      const encryptedMnemonic = String(LocalStorage.getItem('kaspa-wallet-data'));
-      const status = exportFile('kaspa-wallet-data.dag', encryptedMnemonic);
-      if (!status) {
-        // @ts-ignore
-        this.showError('Browser denied file download'); // eslint-disable-line
-      } else {
-        this.onVerificationComplete();
-      }
-    },
-
-    onVerificationComplete() {
-      this.isBackupComplete = true;
-      LocalStorage.set('is-backed-up', true);
+    showSeedBackup() {
+      // @ts-ignore
+      this.showSeedPhrase = true;
     },
   },
 });

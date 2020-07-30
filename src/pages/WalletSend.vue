@@ -11,7 +11,7 @@
         <base-button
           :disabled="!areInputsValid"
           data-cy="wallet-send-form-sendBtn"
-          label="Next"
+          label="Send"
           type="submit"
         />
       </q-form>

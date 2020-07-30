@@ -2,7 +2,14 @@ import Mnemonic from 'bitcore-mnemonic';
 import bitcore from 'bitcore-lib-cash';
 import passworder from 'browser-passworder';
 import { Buffer } from 'safe-buffer';
-import { Network, WalletSave, Api, TxSend, PendingTransactions } from 'custom-types';
+import {
+  Network,
+  SelectedNetwork,
+  WalletSave,
+  Api,
+  TxSend,
+  PendingTransactions,
+} from 'custom-types';
 import { logger } from '../utils/logger';
 import { AddressManager } from './AddressManager';
 import { UtxoSet } from './UtxoSet';
@@ -30,7 +37,12 @@ class Wallet {
    * Current network.
    */
   // @ts-ignore
-  network: Network = DEFAULT_NETWORK;
+  network: Network = DEFAULT_NETWORK.prefix as Network;
+
+  /**
+   * Current API endpoint for selected network
+   */
+  apiEndpoint = DEFAULT_NETWORK.apiBaseUrl;
 
   /**
    * A 12 word mnemonic.
@@ -87,7 +99,9 @@ class Wallet {
    */
   async updateUtxos(addresses: string[]): Promise<void> {
     logger.log('info', `Getting utxos for ${addresses.length} addresses.`);
-    const utxoResults = await Promise.all(addresses.map((address) => api.getUtxos(address)));
+    const utxoResults = await Promise.all(
+      addresses.map((address) => api.getUtxos(address, this.apiEndpoint))
+    );
     addresses.forEach((address, i) => {
       const { utxos } = utxoResults[i];
       logger.log('info', `${address}: ${utxos.length} total UTXOs found.`);
@@ -102,7 +116,9 @@ class Wallet {
   async updateTransactions(addresses: string[]): Promise<string[]> {
     logger.log('info', `Getting transactions for ${addresses.length} addresses.`);
     const addressesWithTx: string[] = [];
-    const txResults = await Promise.all(addresses.map((address) => api.getTransactions(address)));
+    const txResults = await Promise.all(
+      addresses.map((address) => api.getTransactions(address, this.apiEndpoint))
+    );
     addresses.forEach((address, i) => {
       const { transactions } = txResults[i];
       logger.log('info', `${address}: ${transactions.length} transactions found.`);
@@ -134,6 +150,25 @@ class Wallet {
    */
   updateBalance(): void {
     this.balance = this.utxoSet.totalBalance - this.pending.amount;
+  }
+
+  /**
+   * Updates the selected network
+   * @param network name of the network
+   */
+  async updateNetwork(network: SelectedNetwork): Promise<void> {
+    this.demolishWalletState(network.prefix);
+    this.network = network.prefix;
+    this.apiEndpoint = network.apiBaseUrl;
+    await this.addressDiscovery();
+  }
+
+  demolishWalletState(networkPrefix: Network = this.network): void {
+    this.utxoSet.clear();
+    this.addressManager = new AddressManager(this.HDWallet, networkPrefix);
+    this.pending.transactions = {};
+    this.transactions = [];
+    this.transactionsStorage = {};
   }
 
   /**
@@ -244,7 +279,7 @@ class Wallet {
   async sendTx(txParams: TxSend): Promise<string> {
     const { id, rawTx } = this.composeTx(txParams);
     try {
-      await api.postTx(rawTx);
+      await api.postTx(rawTx, this.apiEndpoint);
     } catch (e) {
       this.undoPendingTx(id);
       throw e;

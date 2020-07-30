@@ -70,8 +70,8 @@ export default Vue.extend({
     },
 
     label: {
-      type: String,
-      required: true,
+      type: undefined,
+      required: false,
       default: undefined,
     },
 

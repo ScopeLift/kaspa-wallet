@@ -12,7 +12,7 @@
       </div>
     </div> -->
     <!-- Wallet balance -->
-    <base-button
+    <!-- <base-button
       class="text-center"
       :flat="true"
       :dense="true"
@@ -20,7 +20,7 @@
       label="Refresh data"
       :loading="isLoading"
       @click="refreshState"
-    />
+    /> -->
     <div data-cy="wallet-balance-container">
       <div class="text-primary text-center">
         <transaction-amount
@@ -31,7 +31,17 @@
       </div>
       <!-- Transaction history -->
       <div class="text-primary text-left" data-cy="wallet-balance-txHistory">
-        <h4 class="text-left q-mb-none">Transaction History</h4>
+        <div class="row justify-between items-center">
+          <h4 class="col-auto text-left q-mb-none q-mt-lg">Transaction History</h4>
+          <q-icon
+            v-if="!isLoading"
+            class="col-auto q-mt-lg cursor-pointer"
+            name="refresh"
+            size="1.5em"
+            @click="refreshState"
+          />
+          <q-spinner v-else size="1.5em" class="col-auto q-mt-lg" />
+        </div>
         <wallet-balance-transactions />
       </div>
     </div>
@@ -45,6 +55,8 @@ import TransactionAmount from 'components/TransactionAmount.vue';
 import WalletBalanceTransactions from 'components/WalletBalanceTransactions.vue';
 // @ts-ignore
 import formatters from 'src/utils/mixin-formatters';
+// @ts-ignore
+import helpers from 'src/utils/mixin-helpers';
 
 export default Vue.extend({
   name: 'WalletBalance',
@@ -54,7 +66,7 @@ export default Vue.extend({
     WalletBalanceTransactions,
   },
 
-  mixins: [formatters],
+  mixins: [formatters, helpers],
 
   data() {
     return {
@@ -79,11 +91,7 @@ export default Vue.extend({
   },
 
   mounted() {
-    this.isLoading = true;
     this.getBackupStatus();
-    // await this.wallet.updateState(); // eslint-disable-line
-    // await this.$store.dispatch('main/getWalletInfo', this.wallet);
-    this.isLoading = false;
   },
 
   methods: {

@@ -2,6 +2,12 @@ import bitcore from 'bitcore-lib-cash';
 
 export type Network = 'kaspa' | 'kaspadev' | 'kaspareg' | 'kaspatest' | 'kaspasim';
 
+export interface SelectedNetwork {
+  prefix: Network;
+  description: string;
+  apiBaseUrl: string;
+}
+
 export type WalletSave = {
   seedPhrase: string;
   privKey: string;
