@@ -163,7 +163,7 @@ class Wallet {
     await this.addressDiscovery();
   }
 
-  demolishWalletState(networkPrefix: string = this.network): void {
+  demolishWalletState(networkPrefix: Network = this.network): void {
     this.utxoSet.clear();
     this.addressManager = new AddressManager(this.HDWallet, networkPrefix);
     this.pending.transactions = {};
