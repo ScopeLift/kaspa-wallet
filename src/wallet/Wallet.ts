@@ -79,6 +79,7 @@ class Wallet {
    */
   transactionsStorage: Record<string, Api.Transaction[]> = {};
 
+  // @ts-ignore
   cache: WalletCache = {};
 
   /** Create a wallet.
@@ -333,7 +334,7 @@ class Wallet {
         // availableBalance: this.utxoSet.availableBalance,
         // totalBalance: this.utxoSet.totalBalance,
       },
-      transactionStorage: this.transactionsStorage,
+      transactionsStorage: this.transactionsStorage,
       addresses: {
         receiveCounter: this.addressManager.receiveAddress.counter,
         changeCounter: this.addressManager.changeAddress.counter,
@@ -346,11 +347,11 @@ class Wallet {
     this.utxoSet.utxos = cache.utxos.utxoSet;
     this.utxoSet.inUse = cache.utxos.inUse;
     this.transactionsStorage = cache.transactionsStorage;
-    this.addressManager.getAddresses(cache.addresses.receiveAddress.counter, 'receive');
-    this.addressManager.getAddresses(cache.addresses.changeAddress.counter, 'change');
-    this.addressManager.receiveAddress.counter = cache.addresses.receiveAddress.counter;
-    this.addressManager.changeAddress.counter = cache.addresses.changeAddress.counter;
-    this.transactions = txParser(this.transactionsStorage, Object.keys(...this.addressManager.all));
+    this.addressManager.getAddresses(cache.addresses.receiveCounter, 'receive');
+    this.addressManager.getAddresses(cache.addresses.changeCounter, 'change');
+    this.addressManager.receiveAddress.counter.advance(cache.addresses.receiveCounter);
+    this.addressManager.changeAddress.counter.advance(cache.addresses.changeCounter);
+    this.transactions = txParser(this.transactionsStorage, Object.keys(this.addressManager.all));
     this.runStateChangeHooks();
   }
 
