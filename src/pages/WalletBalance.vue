@@ -89,7 +89,7 @@ export default Vue.extend({
   methods: {
     async refreshState() {
       this.isLoading = true;
-      await this.wallet.updateState();
+      await this.wallet.updateState(); /* eslint-disable-line */
       this.isLoading = false;
     },
     getBackupStatus() {
