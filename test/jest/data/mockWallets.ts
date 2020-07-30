@@ -32,4 +32,19 @@ export const apiWallets = {
   },
 };
 
+export const e2eWallets = [
+  {
+    address: 'kaspatest:qp0qs9fndnu274a98aqxhmluh9xj3w6vscnay8uqdt',
+    wallet: Wallet.fromMnemonic(
+      'describe dinosaur invest around soldier affair lake tiny sniff left coast unlock'
+    ),
+  },
+  {
+    address: 'kaspatest:qzc499sep89mzy4ntftrl2yvw6ndluk0ju273mhsld',
+    wallet: Wallet.fromMnemonic(
+      'hire brass benefit quiz album cheese divert retire process boss discover horror'
+    ),
+  },
+];
+
 export const discoveryWallets = {};

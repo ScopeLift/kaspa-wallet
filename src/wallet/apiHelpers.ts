@@ -63,17 +63,29 @@ export const getUtxos = async (
   address: string,
   apiEndpoint: string = API_ENDPOINT
 ): Promise<Api.UtxoResponse> => {
-  // eslint-disable-next-line
-  const response = await fetch(`${apiEndpoint}/utxos/address/${address}`, {
-    mode: 'cors',
-  }).catch((e) => {
-    throw new ApiError(`API connection error. ${e}`); // eslint-disable-line
-  });
-  const json = (await response.json()) as Api.ErrorResponse & Api.Utxo[]; // eslint-disable-line
-  if (json.errorMessage) {
-    const err = json as Api.ErrorResponse;
-    throw new ApiError(`API error ${err.errorCode}: ${err.errorMessage}`);
-  }
+  const getRecursively = async (n: number, skip: number) => {
+    // eslint-disable-next-line
+    const response = await fetch(
+      `${apiEndpoint}/utxos/address/${address}?limit=${n}&skip=${skip}`,
+      {
+        mode: 'cors',
+      }
+    ).catch((e) => {
+      throw new ApiError(`API connection error. ${e}`); // eslint-disable-line
+    });
+    const json = (await response.json()) as Api.ErrorResponse & Api.Utxo[]; // eslint-disable-line
+    if (json.errorMessage) {
+      const err = json as Api.ErrorResponse;
+      throw new ApiError(`API error ${err.errorCode}: ${err.errorMessage}`);
+    }
+    let result: Api.Utxo[] = json;
+    if (result.length === 1000) {
+      const utxos = await getRecursively(n, skip + 1000);
+      result = [...utxos, ...result];
+    }
+    return result;
+  };
+  const json = await getRecursively(1000, 0);
   return {
     utxos: json,
   } as Api.UtxoResponse;

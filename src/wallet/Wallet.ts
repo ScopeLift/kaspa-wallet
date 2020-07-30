@@ -22,7 +22,9 @@ class Wallet {
   /**
    * Set by addressManager
    */
-  receiveAddress: string;
+  get receiveAddress() {
+    return this.addressManager.receiveAddress.current.address;
+  }
 
   /**
    * Current network.
@@ -47,7 +49,7 @@ class Wallet {
       if (transactions.length === 0) return 0;
       return transactions.reduce((prev, cur) => prev + cur.amount, 0);
     },
-    add(id: string, tx: { utxoIds: string[]; rawTx: string; amount: number }) {
+    add(id: string, tx: { to: string; utxoIds: string[]; rawTx: string; amount: number }) {
       this.transactions[id] = tx;
     },
   };
@@ -76,7 +78,7 @@ class Wallet {
       this.HDWallet = new bitcore.HDPrivateKey(temp.toHDPrivateKey().toString());
     }
     this.addressManager = new AddressManager(this.HDWallet, this.network);
-    this.receiveAddress = this.addressManager.receiveAddress.next();
+    this.addressManager.receiveAddress.next();
   }
 
   /**
@@ -88,10 +90,9 @@ class Wallet {
     const utxoResults = await Promise.all(addresses.map((address) => api.getUtxos(address)));
     addresses.forEach((address, i) => {
       const { utxos } = utxoResults[i];
-      logger.log('info', `${address}: ${utxos.length} UTXOs found.`);
+      logger.log('info', `${address}: ${utxos.length} total UTXOs found.`);
       this.utxoSet.add(utxos, address);
     });
-    this.updateBalance();
   }
 
   /**
@@ -102,28 +103,29 @@ class Wallet {
     logger.log('info', `Getting transactions for ${addresses.length} addresses.`);
     const addressesWithTx: string[] = [];
     const txResults = await Promise.all(addresses.map((address) => api.getTransactions(address)));
-
-    const blockHashes: Set<string> = new Set();
     addresses.forEach((address, i) => {
       const { transactions } = txResults[i];
       logger.log('info', `${address}: ${transactions.length} transactions found.`);
       if (transactions.length !== 0) {
         const confirmedTx = transactions.filter((tx) => tx.confirmations > 0);
-        confirmedTx.forEach((tx) => blockHashes.add(tx.acceptingBlockHash));
         this.transactionsStorage[address] = confirmedTx;
         addressesWithTx.push(address);
       }
     });
-    let blockRes = await Promise.all(Array.from(blockHashes).map((hash) => api.getBlock(hash)));
-    let blockTimestamps = blockRes.flat().reduce((map: Record<string, number>, val) => {
-      map[val.blockHash] = val.timestamp;
-      return map;
-    }, {});
-    this.transactions = txParser(
-      this.transactionsStorage,
-      Object.keys(this.addressManager.all),
-      blockTimestamps
-    );
+    this.transactions = txParser(this.transactionsStorage, Object.keys(this.addressManager.all));
+    const pendingTxHashes = Object.keys(this.pending.transactions);
+    if (pendingTxHashes.length > 0) {
+      pendingTxHashes.forEach((hash) => {
+        if (this.transactions.map((tx) => tx.transactionHash).includes(hash)) {
+          this.deletePendingTx(hash);
+        }
+      });
+    }
+    const isActivityOnReceiveAddr =
+      this.transactionsStorage[this.addressManager.receiveAddress.current.address] !== undefined;
+    if (isActivityOnReceiveAddr) {
+      this.addressManager.receiveAddress.next();
+    }
     return addressesWithTx;
   }
 
@@ -144,30 +146,32 @@ class Wallet {
       deriveType: 'receive' | 'change',
       offset: number
     ): Promise<number> => {
-      const derivedObjs = this.addressManager.getAddresses(n, deriveType, offset);
-      const addresses = derivedObjs.map((obj) => obj.address);
+      const derivedAddresses = this.addressManager.getAddresses(n, deriveType, offset);
+      const addresses = derivedAddresses.map((obj) => obj.address);
       logger.log(
         'info',
         `Fetching ${deriveType} address data for derived indices ${JSON.stringify(
-          derivedObjs.map((obj) => obj.index)
+          derivedAddresses.map((obj) => obj.index)
         )}`
       );
       const addressesWithTx = await this.updateTransactions(addresses);
       if (addressesWithTx.length === 0) {
-        const lastIndexWithTx = offset - (threshold - n) - 1;
+        // address discovery complete
+        const lastAddressIndexWithTx = offset - (threshold - n) - 1;
         logger.log(
           'info',
-          `${deriveType}Address discovery complete. Last activity on address #${lastIndexWithTx}. No activity from ${deriveType}#${
-            lastIndexWithTx + 1
-          }~${lastIndexWithTx + threshold + 1}.`
+          `${deriveType}Address discovery complete. Last activity on address #${lastAddressIndexWithTx}. No activity from ${deriveType}#${
+            lastAddressIndexWithTx + 1
+          }~${lastAddressIndexWithTx + threshold}.`
         );
-        return lastIndexWithTx;
+        return lastAddressIndexWithTx;
       }
-      const newN =
-        derivedObjs
+      // else keep doing discovery
+      const nAddressesLeft =
+        derivedAddresses
           .filter((obj) => addressesWithTx.indexOf(obj.address) !== -1)
           .reduce((prev, cur) => Math.max(prev, cur.index), 0) + 1;
-      return doDiscovery(newN, deriveType, offset + n);
+      return doDiscovery(nAddressesLeft, deriveType, offset + n);
     };
     const highestReceiveIndex = await doDiscovery(threshold, 'receive', 0);
     const highestChangeIndex = await doDiscovery(threshold, 'change', 0);
@@ -177,7 +181,8 @@ class Wallet {
       'info',
       `receive address index: ${highestReceiveIndex}; change address index: ${highestChangeIndex}`
     );
-    return this.updateUtxos(Object.keys(this.transactionsStorage));
+    await this.updateUtxos(Object.keys(this.transactionsStorage));
+    this.runStateChangeHooks();
   }
 
   // TODO: convert amount to sompis aka satoshis
@@ -209,20 +214,23 @@ class Wallet {
       return [this.addressManager.all[String(cur.address)], ...prev];
     }, []);
     const changeAddr = changeAddrOverride || this.addressManager.changeAddress.next();
-    const tx: bitcore.Transaction = new bitcore.Transaction()
-      .from(utxos)
-      .to(toAddr, amount)
-      .setVersion(1)
-      .fee(fee)
-      .change(changeAddr)
-      // @ts-ignore
-      .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
-    this.utxoSet.inUse.push(...utxoIds);
-    this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount: amount + fee });
-    this.utxoSet.updateUtxoBalance();
-    this.updateBalance();
-    this.receiveAddress = this.addressManager.receiveAddress.next();
-    return { id: tx.id, rawTx: tx.toString(), utxoIds, amount: amount + fee };
+    try {
+      const tx: bitcore.Transaction = new bitcore.Transaction()
+        .from(utxos)
+        .to(toAddr, amount)
+        .setVersion(1)
+        .fee(fee)
+        .change(changeAddr)
+        // @ts-ignore
+        .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
+      this.utxoSet.inUse.push(...utxoIds);
+      this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount: amount + fee, to: toAddr });
+      this.runStateChangeHooks();
+      return { id: tx.id, rawTx: tx.toString(), utxoIds, amount: amount + fee };
+    } catch (e) {
+      this.addressManager.changeAddress.reverse();
+      throw e;
+    }
   }
 
   /**
@@ -237,24 +245,39 @@ class Wallet {
     const { id, rawTx } = this.composeTx(txParams);
     try {
       await api.postTx(rawTx);
-      // await this.updateUtxos(Object.keys(this.addressManager.all));
-      this.deletePendingTx(id);
     } catch (e) {
-      this.deletePendingTx(id);
+      this.undoPendingTx(id);
       throw e;
     }
     return id;
   }
 
   async updateState(): Promise<void> {
-    await this.updateTransactions(Object.keys(this.addressManager.all));
-    await this.updateUtxos(Object.keys(this.addressManager.all));
+    const activeAddrs = await this.updateTransactions(this.addressManager.shouldFetch);
+    await this.updateUtxos(activeAddrs);
+    this.runStateChangeHooks();
   }
 
-  deletePendingTx(id: string): void {
+  undoPendingTx(id: string): void {
     const { utxoIds } = this.pending.transactions[id];
     delete this.pending.transactions[id];
     this.utxoSet.release(utxoIds);
+    this.addressManager.changeAddress.reverse();
+    this.runStateChangeHooks();
+  }
+
+  /**
+   * After we see the transaction in the API results, delete it from our pending list.
+   * @param id The tx hash
+   */
+  deletePendingTx(id: string): void {
+    // undo + delete old utxos
+    const { utxoIds } = this.pending.transactions[id];
+    delete this.pending.transactions[id];
+    this.utxoSet.remove(utxoIds);
+  }
+
+  runStateChangeHooks(): void {
     this.utxoSet.updateUtxoBalance();
     this.updateBalance();
   }

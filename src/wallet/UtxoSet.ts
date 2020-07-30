@@ -39,15 +39,20 @@ export class UtxoSet {
     });
     if (utxoIds.length) {
       logger.log('info', `Added ${utxoIds.length} UTXOs to UtxoSet.`);
-      this.updateUtxoBalance();
+      // this.updateUtxoBalance();
     }
     return utxoIds;
+  }
+
+  remove(utxoIds: string[]): void {
+    this.release(utxoIds);
+    utxoIds.forEach((id) => delete this.utxos[id]);
   }
 
   release(utxoIdsToEnable: string[]): void {
     // assigns new array without any utxoIdsToEnable
     this.inUse = this.inUse.filter((utxoId) => utxoIdsToEnable.indexOf(utxoId) === -1);
-    this.updateUtxoBalance();
+    // this.updateUtxoBalance();
   }
 
   updateUtxoBalance(): void {
