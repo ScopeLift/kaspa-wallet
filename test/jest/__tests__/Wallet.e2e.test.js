@@ -45,11 +45,8 @@ describe('Multiple states wallet test. Must be in describe block for serial proc
       toAddr: w2.address,
       amount: 100000000,
     });
-    console.log(w1.wallet.addressManager.shouldFetch);
+    const changeAddressBeforeFalseTx = w1.wallet.addressManager.changeAddress.address;
     expect(Object.keys(w1.wallet.pending.transactions).length).toBe(1);
-    //   expect(w1.wallet.addressManager.shouldFetch.length).toBe(
-    //     Object.keys(w1.wallet.transactionsStorage).length + 3
-    //   );
     let throws = async () =>
       // we already used our UTXO!
       await w1.wallet.sendTx({
@@ -57,6 +54,8 @@ describe('Multiple states wallet test. Must be in describe block for serial proc
         amount: 12345678,
       });
     await expect(throws()).rejects.toThrowError('Transaction compose error');
+    const changeAddressAfterFalseTx = w1.wallet.addressManager.changeAddress.address;
+    expect(changeAddressAfterFalseTx).toBe(changeAddressBeforeFalseTx);
     expect(w1.wallet.balance).toEqual(199998000 - 100000000 - 1000);
     expect(w1.wallet.utxoSet.availableBalance).toEqual(0);
     expect(w1.wallet.utxoSet.totalBalance).toEqual(199998000);

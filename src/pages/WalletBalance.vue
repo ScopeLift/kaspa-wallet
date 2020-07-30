@@ -12,6 +12,15 @@
       </div>
     </div> -->
     <!-- Wallet balance -->
+    <base-button
+      class="text-center"
+      :flat="true"
+      :dense="true"
+      data-cy="wallet-refresh-data"
+      label="Refresh data"
+      :loading="isLoading"
+      @click="refreshState"
+    />
     <div data-cy="wallet-balance-container">
       <div class="text-primary text-center">
         <transaction-amount
@@ -21,17 +30,8 @@
         />
       </div>
       <!-- Transaction history -->
-      <div class="text-primary text-left row" data-cy="wallet-balance-txHistory">
-        <h4 class="text-left q-mb-none inline">Transaction History</h4>
-        <base-button
-          class="text-accent"
-          :flat="true"
-          :dense="true"
-          data-cy="wallet-refresh-data"
-          label="Refresh data"
-          :loading="isLoading"
-          @click="refreshState"
-        />
+      <div class="text-primary text-left" data-cy="wallet-balance-txHistory">
+        <h4 class="text-left q-mb-none">Transaction History</h4>
         <wallet-balance-transactions />
       </div>
     </div>

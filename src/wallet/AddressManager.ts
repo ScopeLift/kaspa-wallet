@@ -67,6 +67,7 @@ export class AddressManager {
     atIndex: Record<string, string>;
     next: () => string;
     advance: (n: number) => void;
+    reverse: () => void;
   } = {
     counter: 0,
     // @ts-ignore
@@ -84,6 +85,9 @@ export class AddressManager {
     advance(n: number): void {
       this.counter = n;
       // no call to next() here; composeTx calls it on demand.
+    },
+    reverse(): void {
+      this.counter -= 1;
     },
   };
 

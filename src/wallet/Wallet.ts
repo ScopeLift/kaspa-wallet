@@ -214,18 +214,23 @@ class Wallet {
       return [this.addressManager.all[String(cur.address)], ...prev];
     }, []);
     const changeAddr = changeAddrOverride || this.addressManager.changeAddress.next();
-    const tx: bitcore.Transaction = new bitcore.Transaction()
-      .from(utxos)
-      .to(toAddr, amount)
-      .setVersion(1)
-      .fee(fee)
-      .change(changeAddr)
-      // @ts-ignore
-      .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
-    this.utxoSet.inUse.push(...utxoIds);
-    this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount: amount + fee });
-    this.runStateChangeHooks();
-    return { id: tx.id, rawTx: tx.toString(), utxoIds, amount: amount + fee };
+    try {
+      const tx: bitcore.Transaction = new bitcore.Transaction()
+        .from(utxos)
+        .to(toAddr, amount)
+        .setVersion(1)
+        .fee(fee)
+        .change(changeAddr)
+        // @ts-ignore
+        .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
+      this.utxoSet.inUse.push(...utxoIds);
+      this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount: amount + fee });
+      this.runStateChangeHooks();
+      return { id: tx.id, rawTx: tx.toString(), utxoIds, amount: amount + fee };
+    } catch (e) {
+      this.addressManager.changeAddress.reverse();
+      throw e;
+    }
   }
 
   /**
@@ -257,9 +262,14 @@ class Wallet {
     const { utxoIds } = this.pending.transactions[id];
     delete this.pending.transactions[id];
     this.utxoSet.release(utxoIds);
+    this.addressManager.changeAddress.reverse();
     this.runStateChangeHooks();
   }
 
+  /**
+   * After we see the transaction in the API results, delete it from our pending list.
+   * @param id The tx hash
+   */
   deletePendingTx(id: string): void {
     // undo + delete old utxos
     const { utxoIds } = this.pending.transactions[id];
