@@ -9,6 +9,7 @@ import {
   Api,
   TxSend,
   PendingTransactions,
+  WalletCache,
 } from 'custom-types';
 import { logger } from '../utils/logger';
 import { AddressManager } from './AddressManager';
@@ -77,6 +78,8 @@ class Wallet {
    * Transaction arrays keyed by address.
    */
   transactionsStorage: Record<string, Api.Transaction[]> = {};
+
+  cache: WalletCache = {};
 
   /** Create a wallet.
    * @param walletSave (optional)
@@ -318,6 +321,37 @@ class Wallet {
   runStateChangeHooks(): void {
     this.utxoSet.updateUtxoBalance();
     this.updateBalance();
+    this.setCache();
+  }
+
+  setCache(): void {
+    this.cache = {
+      pendingTx: this.pending.transactions,
+      utxos: {
+        utxoSet: this.utxoSet.utxos,
+        inUse: this.utxoSet.inUse,
+        // availableBalance: this.utxoSet.availableBalance,
+        // totalBalance: this.utxoSet.totalBalance,
+      },
+      transactionStorage: this.transactionsStorage,
+      addresses: {
+        receiveCounter: this.addressManager.receiveAddress.counter,
+        changeCounter: this.addressManager.changeAddress.counter,
+      },
+    };
+  }
+
+  restoreCache(cache: WalletCache): void {
+    this.pending.transactions = cache.pendingTx;
+    this.utxoSet.utxos = cache.utxos.utxoSet;
+    this.utxoSet.inUse = cache.utxos.inUse;
+    this.transactionsStorage = cache.transactionsStorage;
+    this.addressManager.getAddresses(cache.addresses.receiveAddress.counter, 'receive');
+    this.addressManager.getAddresses(cache.addresses.changeAddress.counter, 'change');
+    this.addressManager.receiveAddress.counter = cache.addresses.receiveAddress.counter;
+    this.addressManager.changeAddress.counter = cache.addresses.changeAddress.counter;
+    this.transactions = txParser(this.transactionsStorage, Object.keys(...this.addressManager.all));
+    this.runStateChangeHooks();
   }
 
   /**
