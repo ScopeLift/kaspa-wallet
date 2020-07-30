@@ -157,6 +157,13 @@ class Wallet {
    * @param network name of the network
    */
   async updateNetwork(network: SelectedNetwork): Promise<void> {
+    // CLear existing state
+    this.utxoSet.clear();
+    this.addressManager = new AddressManager(this.HDWallet, network.name);
+    this.pending.transactions = {};
+    this.transactions = [];
+    this.transactionsStorage = {};
+    // Update settings and state
     this.network = network.name;
     this.apiEndpoint = network.apiBaseUrl;
     await this.addressDiscovery();
