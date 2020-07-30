@@ -79,9 +79,6 @@ class Wallet {
    */
   transactionsStorage: Record<string, Api.Transaction[]> = {};
 
-  // @ts-ignore
-  cache: WalletCache = {};
-
   /** Create a wallet.
    * @param walletSave (optional)
    * @param walletSave.privKey Saved wallet's private key.
@@ -167,7 +164,6 @@ class Wallet {
     this.demolishWalletState(network.prefix);
     this.network = network.prefix;
     this.apiEndpoint = network.apiBaseUrl;
-    await this.addressDiscovery();
   }
 
   demolishWalletState(networkPrefix: Network = this.network): void {
@@ -322,11 +318,10 @@ class Wallet {
   runStateChangeHooks(): void {
     this.utxoSet.updateUtxoBalance();
     this.updateBalance();
-    this.setCache();
   }
 
-  setCache(): void {
-    this.cache = {
+  get cache() {
+    return {
       pendingTx: this.pending.transactions,
       utxos: {
         utxoSet: this.utxoSet.utxos,
@@ -347,10 +342,10 @@ class Wallet {
     this.utxoSet.utxos = cache.utxos.utxoSet;
     this.utxoSet.inUse = cache.utxos.inUse;
     this.transactionsStorage = cache.transactionsStorage;
-    this.addressManager.getAddresses(cache.addresses.receiveCounter, 'receive');
-    this.addressManager.getAddresses(cache.addresses.changeCounter, 'change');
-    this.addressManager.receiveAddress.counter.advance(cache.addresses.receiveCounter);
-    this.addressManager.changeAddress.counter.advance(cache.addresses.changeCounter);
+    this.addressManager.getAddresses(cache.addresses.receiveCounter + 1, 'receive');
+    this.addressManager.getAddresses(cache.addresses.changeCounter + 1, 'change');
+    this.addressManager.receiveAddress.advance(cache.addresses.receiveCounter - 1);
+    this.addressManager.changeAddress.advance(cache.addresses.changeCounter);
     this.transactions = txParser(this.transactionsStorage, Object.keys(this.addressManager.all));
     this.runStateChangeHooks();
   }
