@@ -32,35 +32,30 @@ export const getTransactions = async (
   address: string,
   apiEndpoint: string
 ): Promise<Api.TransactionsResponse> => {
-  try {
-    const getTx = async (n: number, skip: number): Promise<Api.Transaction[]> => {
-      // eslint-disable-next-line
-      const response = await fetch(
-        `${apiEndpoint}/transactions/address/${address}?limit=${n}&skip=${skip}`,
-        {
-          mode: 'cors',
-        }
-      ).catch((e) => {
-        throw new ApiError(`API connection error. ${e}`); // eslint-disable-line
-      });
-      let json = (await response.json()) as Api.ErrorResponse & Api.Transaction[]; // eslint-disable-line
-      if (json.errorMessage) {
-        const err = json as Api.ErrorResponse;
-        throw new ApiError(`API error ${err.errorCode}: ${err.errorMessage}`);
+  const getTx = async (n: number, skip: number): Promise<Api.Transaction[]> => {
+    // eslint-disable-next-line
+    const response = await fetch(
+      `${apiEndpoint}/transactions/address/${address}?limit=${n}&skip=${skip}`,
+      {
+        mode: 'cors',
       }
-      let result: Api.Transaction[] = json;
-      if (result.length === 1000) {
-        const tx = await getTx(n, skip + 1000);
-        result = [...tx, ...result];
-      }
-      return result;
-    };
-    const json = await getTx(1000, 0);
-    return { transactions: json } as Api.TransactionsResponse;
-  } catch (err) {
-    console.log('API Error. Returning an empty transactions array');
-    return { transactions: [] } as Api.TransactionsResponse;
-  }
+    ).catch((e) => {
+      throw new ApiError(`API connection error. ${e}`); // eslint-disable-line
+    });
+    let json = (await response.json()) as Api.ErrorResponse & Api.Transaction[]; // eslint-disable-line
+    if (json.errorMessage) {
+      const err = json as Api.ErrorResponse;
+      throw new ApiError(`API error ${err.errorCode}: ${err.errorMessage}`);
+    }
+    let result: Api.Transaction[] = json;
+    if (result.length === 1000) {
+      const tx = await getTx(n, skip + 1000);
+      result = [...tx, ...result];
+    }
+    return result;
+  };
+  const json = await getTx(1000, 0);
+  return { transactions: json } as Api.TransactionsResponse;
 };
 
 export const getUtxos = async (address: string, apiEndpoint: string): Promise<Api.UtxoResponse> => {

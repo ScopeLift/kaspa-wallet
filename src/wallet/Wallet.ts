@@ -42,7 +42,7 @@ class Wallet {
   /**
    * Current API endpoint for selected network
    */
-  apiEndpoint: string = ((DEFAULT_NETWORK as unknown) as SelectedNetwork).apiBaseUrl;
+  apiEndpoint = DEFAULT_NETWORK.apiBaseUrl;
 
   /**
    * A 12 word mnemonic.
@@ -157,16 +157,18 @@ class Wallet {
    * @param network name of the network
    */
   async updateNetwork(network: SelectedNetwork): Promise<void> {
-    // CLear existing state
+    this.demolishWalletState(network);
+    this.network = network.name;
+    this.apiEndpoint = network.apiBaseUrl;
+    await this.addressDiscovery();
+  }
+
+  demolishWalletState(network: SelectedNetwork): void {
     this.utxoSet.clear();
     this.addressManager = new AddressManager(this.HDWallet, network.name);
     this.pending.transactions = {};
     this.transactions = [];
     this.transactionsStorage = {};
-    // Update settings and state
-    this.network = network.name;
-    this.apiEndpoint = network.apiBaseUrl;
-    await this.addressDiscovery();
   }
 
   /**
@@ -278,7 +280,6 @@ class Wallet {
     const { id, rawTx } = this.composeTx(txParams);
     try {
       await api.postTx(rawTx, this.apiEndpoint);
-      this.deletePendingTx(id);
     } catch (e) {
       this.undoPendingTx(id);
       throw e;

@@ -3,6 +3,6 @@
   "DEFAULT_NETWORK": {
     "name": "kaspatest",
     "description": "Testnet",
-    "apiBaseUrl": "https://testnet-kasparovd.kas.pa"
+    "apiBaseUrl": "http://localhost:11224"
   }
 }
