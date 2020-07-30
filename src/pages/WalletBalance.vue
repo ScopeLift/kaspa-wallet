@@ -45,6 +45,8 @@ import TransactionAmount from 'components/TransactionAmount.vue';
 import WalletBalanceTransactions from 'components/WalletBalanceTransactions.vue';
 // @ts-ignore
 import formatters from 'src/utils/mixin-formatters';
+// @ts-ignore
+import helpers from 'src/utils/mixin-helpers';
 
 export default Vue.extend({
   name: 'WalletBalance',
@@ -54,7 +56,7 @@ export default Vue.extend({
     WalletBalanceTransactions,
   },
 
-  mixins: [formatters],
+  mixins: [formatters, helpers],
 
   data() {
     return {
@@ -79,11 +81,7 @@ export default Vue.extend({
   },
 
   mounted() {
-    this.isLoading = true;
     this.getBackupStatus();
-    // await this.wallet.updateState(); // eslint-disable-line
-    // await this.$store.dispatch('main/getWalletInfo', this.wallet);
-    this.isLoading = false;
   },
 
   methods: {
