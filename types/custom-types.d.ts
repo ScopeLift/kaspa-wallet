@@ -21,10 +21,14 @@ type PendingTransactions = {
       utxoIds: string[];
       rawTx: string;
       amount: number;
+      fee: number;
       to: string;
     }
   >;
-  add(id: string, tx: { utxoIds: string[]; rawTx: string; amount: number; to: string }): void;
+  add(
+    id: string,
+    tx: { utxoIds: string[]; rawTx: string; amount: number; fee: number; to: string }
+  ): void;
 };
 
 export interface TxSend {

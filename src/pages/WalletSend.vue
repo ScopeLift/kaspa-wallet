@@ -65,6 +65,8 @@ export default Vue.extend({
           // @ts-ignore
           amount: this.formatBalanceForMachine(this.amount), // eslint-disable-line
         });
+        // Update store with new instance of the wallet containing the pending transaction
+        this.$store.commit('main/setWalletInfo', this.wallet);
         // @ts-ignore
         this.notifyUser('positive', 'Your transaction has been sent!'); // eslint-disable-line
         console.log('transactionId:', response);

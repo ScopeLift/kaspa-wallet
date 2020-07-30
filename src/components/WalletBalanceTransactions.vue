@@ -133,15 +133,33 @@ export default Vue.extend({
         // @ts-ignore
         return state.main.wallet.transactions;
       },
+      pendingTransactions(
+        state
+      ): Record<string, { utxoIds: string[]; rawTx: string; amount: number; to: string }> {
+        // @ts-ignore
+        return state.main.wallet.pending.transactions;
+      },
     }),
     /* eslint-enable */
+
+    /**
+     * @returns All transactions, both confirmed and pending
+     */
+    allTransactions(): Array<any> {
+      /* eslint-disable */
+      // @ts-ignore
+      return [...this.transactions, ...this.formattedPendingTransactions()];
+      /* eslint-enable */
+    },
 
     /**
      * @notice Returns confirmations sorted by number of confirmations, lowers first
      */
     sortedTransactions() {
-      // eslint-disable-next-line
-      return this.transactions.sort((a, b) => a.confirmations - b.confirmations);
+      /* eslint-disable */
+      // @ts-ignore
+      return this.allTransactions.sort((a, b) => a.confirmations - b.confirmations);
+      /* eslint-enable */
     },
   },
 
@@ -168,6 +186,23 @@ export default Vue.extend({
       const amount = summary.value / 1e8;
       const scale = summary.direction === 'in' ? 1 : -1;
       return String(amount * scale);
+    },
+
+    /**
+     * @returns Pending transactions, formatted for display
+     */
+    formattedPendingTransactions() {
+      return Object.values(this.pendingTransactions).map((tx) => {
+        return {
+          ...tx,
+          confirmations: 0,
+          summary: {
+            address: tx.to,
+            direction: 'out',
+            value: tx.amount,
+          },
+        };
+      });
     },
   },
 });

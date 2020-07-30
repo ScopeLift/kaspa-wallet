@@ -59,9 +59,12 @@ class Wallet {
     get amount() {
       const transactions = Object.values(this.transactions);
       if (transactions.length === 0) return 0;
-      return transactions.reduce((prev, cur) => prev + cur.amount, 0);
+      return transactions.reduce((prev, cur) => prev + cur.amount + cur.fee, 0);
     },
-    add(id: string, tx: { to: string; utxoIds: string[]; rawTx: string; amount: number }) {
+    add(
+      id: string,
+      tx: { to: string; utxoIds: string[]; rawTx: string; amount: number; fee: number }
+    ) {
       this.transactions[id] = tx;
     },
   };
@@ -259,7 +262,7 @@ class Wallet {
         // @ts-ignore
         .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
       this.utxoSet.inUse.push(...utxoIds);
-      this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount: amount + fee, to: toAddr });
+      this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount, to: toAddr, fee });
       this.runStateChangeHooks();
       return { id: tx.id, rawTx: tx.toString(), utxoIds, amount: amount + fee };
     } catch (e) {

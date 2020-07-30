@@ -98,6 +98,7 @@ export default Vue.extend({
     async refreshState() {
       this.isLoading = true;
       await this.wallet.updateState(); /* eslint-disable-line */
+      this.$store.commit('main/setWalletInfo', this.wallet);
       this.isLoading = false;
     },
     getBackupStatus() {
