@@ -22,7 +22,9 @@ class Wallet {
   /**
    * Set by addressManager
    */
-  receiveAddress: string;
+  get receiveAddress() {
+    return this.addressManager.receiveAddress.current.address;
+  }
 
   /**
    * Current network.
@@ -76,7 +78,7 @@ class Wallet {
       this.HDWallet = new bitcore.HDPrivateKey(temp.toHDPrivateKey().toString());
     }
     this.addressManager = new AddressManager(this.HDWallet, this.network);
-    this.receiveAddress = this.addressManager.receiveAddress.next();
+    this.addressManager.receiveAddress.next();
   }
 
   /**
@@ -118,6 +120,11 @@ class Wallet {
           this.deletePendingTx(hash);
         }
       });
+    }
+    if (
+      this.transactionsStorage[this.addressManager.receiveAddress.current.address] !== undefined
+    ) {
+      this.addressManager.receiveAddress.next();
     }
     return addressesWithTx;
   }
@@ -217,7 +224,6 @@ class Wallet {
       .sign(privKeys, bitcore.crypto.Signature.SIGHASH_ALL, 'schnorr');
     this.utxoSet.inUse.push(...utxoIds);
     this.pending.add(tx.id, { rawTx: tx.toString(), utxoIds, amount: amount + fee });
-    this.receiveAddress = this.addressManager.receiveAddress.next();
     this.runStateChangeHooks();
     return { id: tx.id, rawTx: tx.toString(), utxoIds, amount: amount + fee };
   }

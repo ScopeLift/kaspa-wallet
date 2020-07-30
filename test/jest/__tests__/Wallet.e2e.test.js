@@ -23,7 +23,16 @@ api.getUtxos.mockImplementation((address) => {
 
 describe('Multiple states wallet test. Must be in describe block for serial processing', () => {
   test('Wallet: acts intelligently during state 1', async () => {
+    expect(w1.wallet.addressManager.receiveAddress.current.address).toBe(
+      'kaspatest:qp0qs9fndnu274a98aqxhmluh9xj3w6vscnay8uqdt'
+    );
+    expect(w1.wallet.receiveAddress).toBe('kaspatest:qp0qs9fndnu274a98aqxhmluh9xj3w6vscnay8uqdt');
     await w1.wallet.addressDiscovery();
+
+    expect(w1.wallet.addressManager.receiveAddress.current.address).toBe(
+      'kaspatest:qqllllyrca4ejyrzz7xt40uprvhfh9lkxyaphyd4s4'
+    );
+    expect(w1.wallet.receiveAddress).toBe('kaspatest:qqllllyrca4ejyrzz7xt40uprvhfh9lkxyaphyd4s4');
     expect(w1.wallet.transactions.length > 0).toBe(true);
     expect(api.getTransactions.mock.calls.length >= 40).toBe(true);
     expect(Object.keys(w1.wallet.transactionsStorage).length).toBe(api.getUtxos.mock.calls.length);
@@ -84,4 +93,26 @@ describe('Multiple states wallet test. Must be in describe block for serial proc
     expect(w1.wallet.utxoSet.availableBalance).toBe(199998000 - 100000000 - 1000);
     expect(w1.wallet.utxoSet.totalBalance).toBe(199998000 - 100000000 - 1000);
   }, 5e6);
+
+  test('Wallet will move the receive address cursor when a new tx comes in', async () => {
+    api.getTransactions.mockImplementation((address) =>
+      Promise.resolve({
+        transactions:
+          require(`../../../test/jest/data/comprehensive/state3`)['transactions'][address] || [],
+      })
+    );
+    api.getUtxos.mockImplementation((address) => {
+      return Promise.resolve({
+        utxos: require(`../../../test/jest/data/comprehensive/state3`)['utxos'][address] || [],
+      });
+    });
+    await w1.wallet.updateState();
+    expect(w1.wallet.addressManager.receiveAddress.current.address).toBe(
+      'kaspatest:qrkx7ylxetdm8emsxh9006plfxxl5803scx8a404r9'
+    );
+    expect(w1.wallet.receiveAddress).toBe('kaspatest:qrkx7ylxetdm8emsxh9006plfxxl5803scx8a404r9');
+    expect(
+      w1.wallet.transactionsStorage['kaspatest:qqllllyrca4ejyrzz7xt40uprvhfh9lkxyaphyd4s4'].length
+    ).toBe(1);
+  });
 });
