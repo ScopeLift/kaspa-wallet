@@ -58,7 +58,7 @@ export const getTransactions = async (
     const json = await getTx(1000, 0);
     return { transactions: json } as Api.TransactionsResponse;
   } catch (err) {
-    console.log('No transactions found');
+    console.log('API Error. Returning an empty transactions array');
     return { transactions: [] } as Api.TransactionsResponse;
   }
 };

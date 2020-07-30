@@ -1,10 +1,8 @@
 {
   "DEFAULT_FEE": 1000,
-  "DEFAULT_NETWORK": [
-    {
-      "name": "kaspatest",
-      "description": "Testnet",
-      "apiBaseUrl": "https://testnet-kasparovd.kas.pa"
-    }
-  ]
+  "DEFAULT_NETWORK": {
+    "name": "kaspatest",
+    "description": "Testnet",
+    "apiBaseUrl": "https://testnet-kasparovd.kas.pa"
+  }
 }

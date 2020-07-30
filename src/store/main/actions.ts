@@ -3,6 +3,7 @@ import { LocalStorage } from 'quasar';
 import { StoreInterface } from '../index';
 import { MainStateInterface } from './state';
 import { SelectedNetwork } from '../../../types/custom-types';
+import { DEFAULT_NETWORK } from '../../../config.json';
 
 const localSavedNetworkVar = 'kaspa-network'; // name of key for saving network in local storage
 
@@ -16,7 +17,7 @@ const actions: ActionTree<MainStateInterface, StoreInterface> = {
       commit('setWalletInfo', wallet);
     } else {
       // Use default network
-      await wallet.addressDiscovery(); // eslint-disable-line
+      await wallet.updateNetwork(DEFAULT_NETWORK); // eslint-disable-line
       commit('setWalletInfo', wallet);
     }
   },
