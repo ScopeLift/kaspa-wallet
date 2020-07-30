@@ -1,7 +1,7 @@
 {
   "DEFAULT_FEE": 1000,
   "DEFAULT_NETWORK": {
-    "name": "kaspatest",
+    "prefix": "kaspatest",
     "description": "Testnet",
     "apiBaseUrl": "http://localhost:11224"
   }

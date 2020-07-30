@@ -37,7 +37,7 @@ class Wallet {
    * Current network.
    */
   // @ts-ignore
-  network: Network = DEFAULT_NETWORK.name as Network;
+  network: Network = DEFAULT_NETWORK.prefix as Network;
 
   /**
    * Current API endpoint for selected network
@@ -157,15 +157,15 @@ class Wallet {
    * @param network name of the network
    */
   async updateNetwork(network: SelectedNetwork): Promise<void> {
-    this.demolishWalletState(network);
-    this.network = network.name;
+    this.demolishWalletState(network.prefix);
+    this.network = network.prefix;
     this.apiEndpoint = network.apiBaseUrl;
     await this.addressDiscovery();
   }
 
-  demolishWalletState(network: SelectedNetwork): void {
+  demolishWalletState(networkPrefix: string = this.network): void {
     this.utxoSet.clear();
-    this.addressManager = new AddressManager(this.HDWallet, network.name);
+    this.addressManager = new AddressManager(this.HDWallet, networkPrefix);
     this.pending.transactions = {};
     this.transactions = [];
     this.transactionsStorage = {};

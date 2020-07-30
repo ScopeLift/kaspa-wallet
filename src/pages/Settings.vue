@@ -379,7 +379,7 @@ export default Vue.extend({
       } else {
         // Custom network
         const network = {
-          name: 'kaspatest',
+          prefix: 'kaspatest',
           description: 'Manual Network',
           apiBaseUrl: this.apiEndpoint,
         };
