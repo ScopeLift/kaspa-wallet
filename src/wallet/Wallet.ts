@@ -114,16 +114,16 @@ class Wallet {
     });
     this.transactions = txParser(this.transactionsStorage, Object.keys(this.addressManager.all));
     const pendingTxHashes = Object.keys(this.pending.transactions);
-    if (pendingTxHashes.length) {
+    if (pendingTxHashes.length > 0) {
       pendingTxHashes.forEach((hash) => {
         if (this.transactions.map((tx) => tx.transactionHash).includes(hash)) {
           this.deletePendingTx(hash);
         }
       });
     }
-    if (
-      this.transactionsStorage[this.addressManager.receiveAddress.current.address] !== undefined
-    ) {
+    const isActivityOnReceiveAddr =
+      this.transactionsStorage[this.addressManager.receiveAddress.current.address] !== undefined;
+    if (isActivityOnReceiveAddr) {
       this.addressManager.receiveAddress.next();
     }
     return addressesWithTx;
