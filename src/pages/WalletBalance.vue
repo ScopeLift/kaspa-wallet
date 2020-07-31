@@ -87,6 +87,10 @@ export default Vue.extend({
         // @ts-ignore
         return state.main.wallet;
       },
+      uniqueId(state) {
+        // @ts-ignore
+        return state.main.uniqueId;
+      },
     }),
     /* eslint-enable */
   },
@@ -100,7 +104,7 @@ export default Vue.extend({
     async loadData() {
       try {
         this.isLoading = true;
-        const cache = LocalStorage.getItem(`kaspa-cache-${this.wallet.uniqueId}`); // eslint-disable-line
+        const cache = LocalStorage.getItem(`kaspa-cache-${this.uniqueId}`); // eslint-disable-line
         if (
           cache &&
           // @ts-ignore
@@ -121,10 +125,22 @@ export default Vue.extend({
     },
 
     async refreshState() {
-      this.isLoading = true;
-      await this.wallet.updateState(); /* eslint-disable-line */
-      this.$store.commit('main/setWalletInfo', this.wallet);
-      this.isLoading = false;
+      try {
+        this.isLoading = true;
+        /* eslint-disable */
+        if (this.wallet.addressManager.shouldFetch.length === 0) {
+          await this.wallet.addressDiscovery();
+        } else {
+          await this.wallet.updateState();
+        }
+        /* eslint-enable */
+        this.$store.commit('main/setWalletInfo', this.wallet);
+        this.isLoading = false;
+      } catch (err) {
+        this.isLoading = false;
+        // @ts-ignore
+        this.showError(err); // eslint-disable-line
+      }
     },
 
     getBackupStatus() {

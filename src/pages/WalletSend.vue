@@ -69,7 +69,7 @@ export default Vue.extend({
         this.$store.commit('main/setWalletInfo', this.wallet);
         // @ts-ignore
         this.notifyUser('positive', 'Your transaction has been sent!'); // eslint-disable-line
-        console.log('transactionId:', response);
+        console.log('transactionHash:', response);
         await this.$router.push({ name: 'walletBalance' });
       } catch (err) {
         // @ts-ignore
