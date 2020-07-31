@@ -10,7 +10,7 @@ const mutation: MutationTree<MainStateInterface> = {
   },
 
   setWalletInfo(state: MainStateInterface, wallet: Wallet) {
-    LocalStorage.set(`kaspa-cache-${state.uniqueId}`, wallet.cache);
+    LocalStorage.set(`kaspa-cache-${String(state.uniqueId)}`, wallet.cache);
     state.wallet = wallet;
   },
 

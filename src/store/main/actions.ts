@@ -11,9 +11,9 @@ const localSavedNetworkVar = 'kaspa-network'; // name of key for saving network 
  * Returns the SHA-256 hash of the mnemonic
  * Source: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
  */
-async function getUniqueId(wallet) {
+async function getUniqueId(mnemonic: string) {
   /* eslint-disable */
-  const msgUint8 = new TextEncoder().encode(wallet.mnemonic); // encode as (utf-8) Uint8Array
+  const msgUint8 = new TextEncoder().encode(mnemonic); // encode as (utf-8) Uint8Array
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8); // hash the message
   /* eslint-disable */
   const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
@@ -22,23 +22,23 @@ async function getUniqueId(wallet) {
 }
 
 const actions: ActionTree<MainStateInterface, StoreInterface> = {
-  // eslint-disable-next-line
   async getWalletInfo({ commit }, wallet: any) {
     // Get network
     const network = LocalStorage.getItem(localSavedNetworkVar);
     const selectedNetwork = network || DEFAULT_NETWORK;
 
     // Get cache
-    const uniqueId = await getUniqueId(wallet);
+    const uniqueId = await getUniqueId(wallet.mnemonic);
     commit('setUniqueId', uniqueId);
     const cache = LocalStorage.getItem(`kaspa-cache-${uniqueId}`);
 
     // Restore wallet and set store
-    await wallet.updateNetwork(network);
-    if (cache) {
+    await wallet.updateNetwork(selectedNetwork);
+    // @ts-ignore
+    if (cache && (cache.addresses.receiveCounter !== 0 || cache.addresses.changeCounter !== 0)) {
       wallet.restoreCache(cache);
     }
-    commit('setWalletInfo', wallet);
+    commit('setWalletInfo', wallet); // what about setting the cache after we get data
   },
 
   async setNetwork({ commit, state }, network: SelectedNetwork) {

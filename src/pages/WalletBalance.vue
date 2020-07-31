@@ -51,6 +51,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapState } from 'vuex';
+import { LocalStorage } from 'quasar';
 import TransactionAmount from 'components/TransactionAmount.vue';
 import WalletBalanceTransactions from 'components/WalletBalanceTransactions.vue';
 // @ts-ignore
@@ -90,17 +91,42 @@ export default Vue.extend({
     /* eslint-enable */
   },
 
-  mounted() {
+  async mounted() {
     this.getBackupStatus();
+    await this.loadData();
   },
 
   methods: {
+    async loadData() {
+      try {
+        this.isLoading = true;
+        const cache = LocalStorage.getItem(`kaspa-cache-${this.wallet.uniqueId}`); // eslint-disable-line
+        if (
+          cache &&
+          // @ts-ignore
+          (cache.addresses.receiveCounter !== 0 || cache.addresses.changeCounter !== 0) // eslint-disable-line
+        ) {
+          await this.refreshState();
+          this.isLoading = false;
+        } else {
+          await this.wallet.addressDiscovery(); // eslint-disable-line
+          this.$store.commit('main/setWalletInfo', this.wallet);
+          this.isLoading = false;
+        }
+      } catch (err) {
+        this.isLoading = false;
+        // @ts-ignore
+        this.showError(err); // eslint-disable-line
+      }
+    },
+
     async refreshState() {
       this.isLoading = true;
       await this.wallet.updateState(); /* eslint-disable-line */
       this.$store.commit('main/setWalletInfo', this.wallet);
       this.isLoading = false;
     },
+
     getBackupStatus() {
       this.isBackedUp = Boolean(this.$q.localStorage.getItem('is-backed-up'));
     },
