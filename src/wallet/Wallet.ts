@@ -109,6 +109,7 @@ class Wallet {
     addresses.forEach((address, i) => {
       const { utxos } = utxoResults[i];
       logger.log('info', `${address}: ${utxos.length} total UTXOs found.`);
+      this.utxoSet.utxoStorage[address] = utxos;
       this.utxoSet.add(utxos, address);
     });
   }
@@ -324,10 +325,8 @@ class Wallet {
     return {
       pendingTx: this.pending.transactions,
       utxos: {
-        utxoSet: this.utxoSet.utxos,
+        utxoStorage: this.utxoSet.utxoStorage,
         inUse: this.utxoSet.inUse,
-        // availableBalance: this.utxoSet.availableBalance,
-        // totalBalance: this.utxoSet.totalBalance,
       },
       transactionsStorage: this.transactionsStorage,
       addresses: {
@@ -339,8 +338,11 @@ class Wallet {
 
   restoreCache(cache: WalletCache): void {
     this.pending.transactions = cache.pendingTx;
-    this.utxoSet.utxos = cache.utxos.utxoSet;
+    this.utxoSet.utxoStorage = cache.utxos.utxoStorage;
     this.utxoSet.inUse = cache.utxos.inUse;
+    Object.entries(this.utxoSet.utxoStorage).forEach(([addr, utxos]: [string, Api.Utxo[]]) => {
+      this.utxoSet.add(utxos, addr);
+    });
     this.transactionsStorage = cache.transactionsStorage;
     this.addressManager.getAddresses(cache.addresses.receiveCounter + 1, 'receive');
     this.addressManager.getAddresses(cache.addresses.changeCounter + 1, 'change');

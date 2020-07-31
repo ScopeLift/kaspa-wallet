@@ -14,9 +14,12 @@ export type WalletSave = {
 };
 
 type WalletCache = {
-  pendingTx: Record<string, { to: string; utxoIds: string[]; rawTx: string; amount: number }>;
+  pendingTx: Record<
+    string,
+    { to: string; utxoIds: string[]; rawTx: string; amount: number; fee: number }
+  >;
   utxos: {
-    utxoSet: Record<string, bitcore.Transaction.UnspentOutput>;
+    utxoStorage: Record<string, Api.Utxo[]>;
     inUse: string[];
   };
   transactionsStorage: Record<string, Api.Transaction[]>;

@@ -15,6 +15,8 @@ export class UtxoSet {
     return Object.keys(this.utxos).length;
   }
 
+  utxoStorage: Record<string, Api.Utxo[]> = {};
+
   /**
    * Add UTXOs to UTXO set.
    * @param utxos Array of UTXOs from kaspa API.
