@@ -12,8 +12,8 @@ func newRouter(handlers *requestHandlers) *mux.Router {
 	router.Use(mux.CORSMethodMiddleware(router))
 	router.Use(handlePanicWrapper)
 
-	router.HandleFunc("getUtxosByAddresses", handlers.getUTXOsByAddress).Methods("POST")
-	router.HandleFunc("submitTransaction", handlers.submitTransaction).Methods("POST")
+	router.HandleFunc("/getUtxosByAddresses", handlers.getUTXOsByAddress).Methods("POST")
+	router.HandleFunc("/submitTransaction", handlers.submitTransaction).Methods("POST")
 
 	return router
 }
